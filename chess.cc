@@ -165,7 +165,6 @@ void doMove(const std::string& move, ChessBoard& board, int moveNumber) {//rn on
     for (const auto& row : b) {
         for (auto& piece : row) {
             if(piece && piece->getSymbol() == toupper(m) && piece->getColor() == moveNumber%2){
-                //board.setPiece(horizontalCoord, verticalCoord-1, std::move(piece));
                 moved = piece;
                 break;
             }
