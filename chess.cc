@@ -28,36 +28,23 @@ public:
 
 
     Piece() {}
-    Piece(char symbol) : symbol(symbol){}
-    Piece(char color, int symbol) : symbol(symbol), color(color){}
-    Piece(char color, int symbol, int x, int y) : symbol(symbol), color(color), x(x), y(y){}
+    Piece(int symbol) : symbol(symbol){}
+    Piece(int color, char symbol) : symbol(symbol), color(color){}
+    Piece(int color, char symbol, int x, int y) : symbol(symbol), color(color), x(x), y(y){}
 
+    virtual bool legalMove(std::string move, int color){return false;}
+    virtual ~Piece() {}
+    
+    int getColor() const {return color;}
+    char getSymbol() const {return symbol;}
+    int getX() const {return x+1;}
+    int getY() const {return 8-y;}
+    
 
-    int getColor() const {
-        return color;
-    }
-    char getSymbol() const {
-        return symbol;
-    }
-    int getX() const {
-        return x;
-    }
-    int getY() const {
-        return y;
-    }
-
-    void setColor(int color) {
-        this->color = color;
-    }
-    void setSymbol(char symbol) {
-        this->symbol = symbol;
-    }
-    void setX(int x){
-        this->x = x;
-    }
-    void setY(int y){
-        this->y = y;
-    }
+    void setColor(int color) {this->color = color;}
+    void setSymbol(char symbol) {this->symbol = symbol;}
+    void setX(int x){this->x = x+1;}
+    void setY(int y){this->y = y;}
 
 private:
     int color;
@@ -69,11 +56,30 @@ private:
 class Pawn: public Piece{
     public:
     Pawn(char color, int symbol, int x, int y) : Piece(color, 'P', x, y){}
-        //bool legalMove(string move){
-            
-        //}
+    bool legalMove(std::string move, int color) override{
+        std::cout<<"("<<getX()<<", "<<(move[0]-97)<<", "<<getY()<<", "<<(move[1] - '0')<<")"<<std::endl;
+        if(color == White){
+            if(getX() == (move[0]-97) && getY()+1 == (move[1] - '0')){
+                return true;
+            }
+            else if(firstMove == true && getX() == (move[0]-97) && getY()+2 == (move[1] - '0')){
+                firstMove = false;
+                return true;
+            }
+        }
+        else if(color == Black){
+            if(getX() == (move[0]-97) && getY()-1 == (move[1] - '0')){
+                return true;
+            }
+            else if(firstMove == true && getX() == (move[0]-97) && getY()-2 == (move[1] - '0')){
+                return true;
+            }
+        }
+        return false;
+
+    }
     private:
-        bool firstMove = false;
+        bool firstMove = true;
         bool enPassantable = false;
 };
 
@@ -111,19 +117,19 @@ public:
         }
 
         for(int x = 0; x<SIZE; x++){
-            SEVENTH_RANK.emplace_back(std::make_shared<Pawn>(White, 'P',x,1));
+            SEVENTH_RANK.emplace_back(std::make_shared<Pawn>(White, 'P',x,6));
         }
 
         board.emplace_back(SEVENTH_RANK);
 
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'R',0,0));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'N',1,0));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'B',2,0));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'Q',3,0));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'K',4,0));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'B',5,0)); 
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'N',6,0));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'R',7,0));  
+        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'R',0,7));
+        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'N',1,7));
+        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'B',2,7));
+        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'Q',3,7));
+        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'K',4,7));
+        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'B',5,7)); 
+        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'N',6,7));
+        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'R',7,7));  
 
         board.emplace_back(EIGHTH_RANK);
     }
@@ -157,8 +163,8 @@ void doMove(const std::string& move, ChessBoard& board, int moveNumber) {//rn on
     //cout<<move[2]<<endl;
 
     char m = move[0];
-    int horizontalCoord = move[1] - 97;
-    int verticalCoord = move[2] - '0';
+    char horizontalCoord = move[1];
+    int verticalCoord = 8-(move[2] - '0');
 
     std::shared_ptr<Piece> moved;
     const auto& b = board.getBoard();
@@ -176,7 +182,8 @@ void doMove(const std::string& move, ChessBoard& board, int moveNumber) {//rn on
         if(x == verticalCoord){
             for (std::vector<char>::iterator t = coords.begin(); t != coords.end(); ++t) {
                 if(*t == horizontalCoord){
-                    board.setPiece(horizontalInt, verticalCoord-1, std::move(moved));
+                    std::cout<<horizontalInt<<", "<<verticalCoord<<std::endl;
+                    board.setPiece(horizontalInt, verticalCoord, std::move(moved));
                     break;
                 }
                 horizontalInt++;            
@@ -206,16 +213,17 @@ int main() {
             continue;
         } else if(move.length() == 2){
             for (const auto& row : b){
-                if(move[1] == incRow){
-                    for (const auto& piece : row) {
-                        if(move[0]-'0' == incCol && piece->getSymbol() == 'P'){
-                            possiblePiece.insert(possiblePiece.end(), piece);
-                        }
-                        incCol++;
+                std::cout<<std::endl;
+                for (const auto& piece : row) {
+                    std::cout<<piece->legalMove(move,moveNumber%2)<<" ";
+                
+                    if(piece->legalMove(move, moveNumber%2) == 1){
+                        std::cout<<"here! "<<std::endl;
+                        possiblePiece.emplace_back(piece);
                     }
                 }
-                incRow++;
             }
+            incRow++;
         }
 
         //if(possiblePiece.empty()){
@@ -225,6 +233,7 @@ int main() {
         
         for(const auto& piece : possiblePiece){
             std::cout<<piece->getSymbol()<<", "<<piece->getColor()<<std::endl;
+            std::cout<<(char)(piece->getX()+97)<<", "<<piece->getY()<<std::endl;
             /*
             if(piece.legalMove()){
                 //movingPiece = &piece;
@@ -236,6 +245,7 @@ int main() {
 
         doMove(move, board, moveNumber);
         //else continue;
+        std::cout<<std::endl;;
         printBoard(board);
         moveNumber++;
     }
