@@ -68,7 +68,11 @@ class Pawn: public Piece{
                 this->firstMove = false;
                 return true;
             }
+<<<<<<< HEAD
             else if(firstMove == true && getX() == (move[0]-96) && getY()+2 == (move[1] - '0')){
+=======
+            else if(firstMove == true && getX()-1 == (move[0]-97) && getY()+2 == (move[1] - '0')){
+>>>>>>> 3a43213 (fixed minor pawn bug with initialization equaling 0)
                 this->firstMove = false;
                 return true;
             }
@@ -78,7 +82,11 @@ class Pawn: public Piece{
                 this->firstMove = false;
                 return true;
             }
+<<<<<<< HEAD
             else if(firstMove == true && getX() == (move[0]-96) && getY()-2 == (move[1] - '0')){
+=======
+            else if(firstMove == true && getX()-1 == (move[0]-97) && getY()-2 == (move[1] - '0')){
+>>>>>>> 3a43213 (fixed minor pawn bug with initialization equaling 0)
                 this->firstMove = false;
                 return true;
             }
@@ -91,6 +99,53 @@ class Pawn: public Piece{
         bool enPassantable = false;
 };
 
+<<<<<<< HEAD
+=======
+class Rook: public Piece{
+    public:
+    Rook(char color, int symbol, int x, int y) : Piece(color, 'R', x, y){}
+
+    bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
+        int moveSize = move.length()-2;
+        if(getX() == (move[moveSize]-96)){//if the rook is travelling vertically
+            movingY = move[moveSize+1]-'0';
+            if(getY()<movingY){
+                for(int i = getY(); i<movingY; i++){
+                    if(Board[8-i][getX()-1]->getSymbol() != '.') return false;
+                }
+                return true;
+            }
+            else if(getY()>movingY){
+                for(int i = movingY; i<getX(); i++){
+                    if(Board[8-i][getX()-1]->getSymbol() != '.') return false;
+                }
+                return true;
+            }
+        }
+        else if(getY() == (move[moveSize+1]- '0')){//if the rook is travelling horizontally
+            movingX = move[moveSize+1]-'0';
+            if(getX()<movingX){
+                for(int i = getX(); i<movingX; i++){
+                    if(Board[8-getY()][i-1]->getSymbol() != '.') return false;
+                }
+                return true;                
+            }
+            else if(getX()>movingX){
+                for(int i = movingX; i<getX(); i++){
+                    if(Board[8-getY()][i-1]->getSymbol() != '.') return false;
+                }
+                return true;                
+            }
+        }
+        return false;
+    }
+
+    private:
+        int movingX;
+        int movingY;
+};
+
+>>>>>>> 3a43213 (fixed minor pawn bug with initialization equaling 0)
 class ChessBoard {
 public:
     ChessBoard() {
@@ -231,19 +286,32 @@ int main() {
                     //std::cout<<piece->legalMove(move,moveNumber%2)<<" ";
                 
                     if(piece->legalMove(move, moveNumber%2, b) == 1 && piece->getSymbol() == 'P'){
+<<<<<<< HEAD
                         //std::cout<<"here! "<<std::endl;
+=======
+                        std::cout<<"here! "<<std::endl;
+>>>>>>> 3a43213 (fixed minor pawn bug with initialization equaling 0)
                         possiblePiece.emplace_back(piece);
                     }
                 }
             }
+<<<<<<< HEAD
+=======
+            incRow++;
+>>>>>>> 3a43213 (fixed minor pawn bug with initialization equaling 0)
         } else if(move.length()>=3){
             for (const auto& row : b){
                 //std::cout<<std::endl;
                 for (const auto& piece : row) {
                     //std::cout<<piece->legalMove(move,moveNumber%2)<<" ";
                 
+<<<<<<< HEAD
                     if(piece->getSymbol() == toupper(move[0]) && piece->legalMove(move, moveNumber%2, b) == 1 && piece->getColor() == moveNumber%2){
                         //std::cout<<"here! "<<std::endl;
+=======
+                    if(piece->legalMove(move, moveNumber%2, b) == 1 && piece->getSymbol() == toupper(move[0])){
+                        std::cout<<"here! "<<std::endl;
+>>>>>>> 3a43213 (fixed minor pawn bug with initialization equaling 0)
                         possiblePiece.emplace_back(piece);
                     }
                 }
