@@ -91,69 +91,6 @@ class Pawn: public Piece{
         bool enPassantable = false;
 };
 
-class Rook: public Piece{
-    public:
-    Rook(char color, int symbol, int x, int y) : Piece(color, 'R', x, y){}
-
-    bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
-        int moveSize = move.length()-2;
-        std::shared_ptr<Piece> specificRook;
-        //if(move.length() == 4){
-        //    if(getX() == move[moveSize]-96){
-        //        vert = 1;
-        //        
-        //    }
-        //}
-        std::cout<<"("<<getX()<<", "<<(move[moveSize]-96)<<", "<<getY()<<", "<<(move[moveSize+1] - '0')<<")"<<std::endl;
-        if(getX() == (move[moveSize]-96) && getY() == (move[moveSize+1]- '0')){//checking if moving to same square
-            return false;
-        }
-        else if(getX() == (move[moveSize]-96)){//if the rook is travelling vertically
-            movingY = move[moveSize+1]-'0';
-            if(getY()<movingY){
-                for(int i = getY()+1; i<movingY; i++){
-                    //std::cout<<"here? "<<std::endl;
-                    std::cout<<"    ["<<8-i<<", "<<getX()-1<<"]"<<std::endl;
-                    if(Board[8-i][getX()-1]->getSymbol() != '.') return false;
-                }
-                return true;
-            }
-            else if(getY()>movingY){
-                for(int i = movingY+1; i<getY(); i++){
-                    //std::cout<<"here? 1"<<std::endl;
-                    if(Board[8-i][getX()-1]->getSymbol() != '.') return false;
-                }
-                return true;
-            }
-        }
-        else if(getY() == (move[moveSize+1]- '0')){//if the rook is travelling horizontally
-            movingX = move[moveSize]-96;
-            if(getX()<movingX){
-                for(int i = getX()+1; i<movingX; i++){
-                    if(Board[8-getY()][i-1]->getSymbol() != '.') return false;
-                    //std::cout<<"here? 2"<<std::endl;
-                }
-                return true;                
-            }
-            else if(getX()>movingX){
-                for(int i = movingX; i<getX()+1; i++){
-                    //std::cout<<"here? 3"<<std::endl;
-                    if(Board[8-getY()][i-1]->getSymbol() != '.'){
-                        return 0;
-                    }
-                }
-                return true;                
-            }
-        }
-        return false;
-    }
-
-    private:
-        int movingX;
-        int movingY;
-        int vert = 0;
-};
-
 class ChessBoard {
 public:
     ChessBoard() {
