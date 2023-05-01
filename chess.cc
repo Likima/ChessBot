@@ -8,11 +8,8 @@
 
 //make polymorphism (look into it later) [virtual keyword]
 
-//using namespace std;
 class Piece;
 
-
-//std::vector<char> coords = {'h','g','f','e','d','c','b','a'};
 std::vector<char> coords = {'a','b','c','d','e','f','g','h'};
 
 using RowType = std::vector<std::shared_ptr<Piece>>;
@@ -40,6 +37,7 @@ public:
     char getSymbol() const {return symbol;}
     int getX() const {return x;}
     int getY() const {return y;}
+
     void printInfo(){
         std::cout<<"x: "<<x<<", "<<"y: "<<y<<", "
         "COLOR: "<<color<<", "<<"SYMBOL: "<<symbol;
@@ -58,6 +56,7 @@ private:
     char symbol;
     bool onEdge;
 };
+
 class Pawn: public Piece{
     public:
     Pawn(char color, int symbol, int x, int y) : Piece(color, 'P', x, y){}
@@ -83,11 +82,27 @@ class Pawn: public Piece{
         return false;
 
     }
-
-
     private:
         bool firstMove = true;
         bool enPassantable = false;
+};
+
+class Rook: public Piece{
+    public:
+    Rook(char color, int symbol, int x, int y) : Piece(color, 'P', x, y){}
+    bool legalMove(std::string move, int color) override{
+        int moveSize = move.length()-2;
+        if(getX()-1 == (move[moveSize]-97)){//check horizontally legal
+            
+        }
+        else if(getY()-2 == (move[moveSize+1]- '0')){//check vertically legal
+
+        }
+    }
+
+    private:
+        int maxX;
+        int maxY;
 };
 
 class ChessBoard {
