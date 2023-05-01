@@ -26,7 +26,6 @@ public:
 
     Piece(const Piece& other) : color(other.color), symbol(other.symbol), x(other.x), y(other.y), onEdge(other.onEdge) {}
 
-
     Piece() {}
     Piece(int symbol) : symbol(symbol){}
     Piece(int color, char symbol) : symbol(symbol), color(color){}
