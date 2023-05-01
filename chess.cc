@@ -37,13 +37,13 @@ public:
     
     int getColor() const {return color;}
     char getSymbol() const {return symbol;}
-    int getX() const {return x+1;}
-    int getY() const {return 8-y;}
+    int getX() const {return x;}
+    int getY() const {return y;}
     
 
     void setColor(int color) {this->color = color;}
     void setSymbol(char symbol) {this->symbol = symbol;}
-    void setX(int x){this->x = x+1;}
+    void setX(int x){this->x = x;}
     void setY(int y){this->y = y;}
 
 private:
@@ -57,7 +57,7 @@ class Pawn: public Piece{
     public:
     Pawn(char color, int symbol, int x, int y) : Piece(color, 'P', x, y){}
     bool legalMove(std::string move, int color) override{
-        std::cout<<"("<<getX()<<", "<<(move[0]-97)<<", "<<getY()<<", "<<(move[1] - '0')<<")"<<std::endl;
+        //std::cout<<"("<<getX()<<", "<<(move[0]-97)<<", "<<getY()<<", "<<(move[1] - '0')<<")"<<std::endl;
         if(color == White){
             if(getX() == (move[0]-97) && getY()+1 == (move[1] - '0')){
                 return true;
@@ -92,17 +92,17 @@ public:
         RowType EIGHTH_RANK;
 
         RowType FIRST_RANK{
-            std::make_shared<Piece>(Black, 'R',0,0),
-            std::make_shared<Piece>(Black, 'N',1,0),
-            std::make_shared<Piece>(Black, 'B',2,0),
-            std::make_shared<Piece>(Black, 'Q',3,0),
-            std::make_shared<Piece>(Black, 'K',4,0),
-            std::make_shared<Piece>(Black, 'B',5,0),
-            std::make_shared<Piece>(Black, 'N',6,0),
-            std::make_shared<Piece>(Black, 'R',7,0)};
+            std::make_shared<Piece>(Black, 'R',1,8),
+            std::make_shared<Piece>(Black, 'N',2,8),
+            std::make_shared<Piece>(Black, 'B',3,8),
+            std::make_shared<Piece>(Black, 'Q',4,8),
+            std::make_shared<Piece>(Black, 'K',5,8),
+            std::make_shared<Piece>(Black, 'B',6,8),
+            std::make_shared<Piece>(Black, 'N',7,8),
+            std::make_shared<Piece>(Black, 'R',8,8)};
         
         for(int x = 0; x<SIZE; x++){
-            SECOND_RANK.emplace_back(std::make_shared<Pawn>(Black, 'P',x,1));
+            SECOND_RANK.emplace_back(std::make_shared<Pawn>(Black, 'P',x,7));
         }
         
         board.emplace_back(std::move(FIRST_RANK));
@@ -117,19 +117,19 @@ public:
         }
 
         for(int x = 0; x<SIZE; x++){
-            SEVENTH_RANK.emplace_back(std::make_shared<Pawn>(White, 'P',x,6));
+            SEVENTH_RANK.emplace_back(std::make_shared<Pawn>(White, 'P',x,2));
         }
 
         board.emplace_back(SEVENTH_RANK);
 
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'R',0,7));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'N',1,7));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'B',2,7));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'Q',3,7));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'K',4,7));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'B',5,7)); 
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'N',6,7));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'R',7,7));  
+        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'R',1,1));
+        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'N',2,1));
+        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'B',3,1));
+        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'Q',4,1));
+        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'K',5,1));
+        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'B',6,1)); 
+        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'N',7,1));
+        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'R',8,1));  
 
         board.emplace_back(EIGHTH_RANK);
     }
@@ -139,10 +139,10 @@ public:
     }
 
     void setPiece(int x, int y, std::shared_ptr<Piece> piece) {
-        board[piece->getY()][piece->getX()] = std::make_shared<Piece>('.'); // set old position to empty
+        board[9-piece->getY()][9-piece->getX()] = std::make_shared<Piece>('.'); // set old position to empty
         piece->setX(x); // set new position for the piece
         piece->setY(y);
-        board[y][x] = std::move(piece); // move the piece to the new position
+        board[y-1][x-1] = std::move(piece); // move the piece to the new position
     }
 private:
     std::vector<RowType> board;
@@ -164,7 +164,7 @@ void doMove(const std::string& move, ChessBoard& board, int moveNumber) {//rn on
 
     char m = move[0];
     char horizontalCoord = move[1];
-    int verticalCoord = 8-(move[2] - '0');
+    int verticalCoord = (move[2] - '0');
 
     std::shared_ptr<Piece> moved;
     const auto& b = board.getBoard();
@@ -178,7 +178,7 @@ void doMove(const std::string& move, ChessBoard& board, int moveNumber) {//rn on
     }
     int horizontalInt = 0;
 
-    for(int x = 8; x>1; x--){
+    for(int x = 1; x<8; x++){
         if(x == verticalCoord){
             for (std::vector<char>::iterator t = coords.begin(); t != coords.end(); ++t) {
                 if(*t == horizontalCoord){
