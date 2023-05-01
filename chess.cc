@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <memory>
 
-//make polymorphism (look into it later)
+//make polymorphism (look into it later) [virtual keyword]
 
 //using namespace std;
 class Piece;
@@ -24,7 +24,7 @@ public:
     const static int BLACK = 0;
     const static int WHITE = 1;
 
-    Piece(const Piece& other) : color(other.color), x(other.x), y(other.y), symbol(other.symbol), onEdge(other.onEdge) {}
+    Piece(const Piece& other) : color(other.color), symbol(other.symbol), x(other.x), y(other.y), onEdge(other.onEdge) {}
 
 
     Piece() {}
@@ -40,6 +40,10 @@ public:
     char getSymbol() const {return symbol;}
     int getX() const {return x;}
     int getY() const {return y;}
+    void printInfo(){
+        std::cout<<"x: "<<x<<", "<<"y: "<<y<<", "
+        "COLOR: "<<color<<", "<<"SYMBOL: "<<symbol;
+    }
     
 
     void setColor(int color) {this->color = color;}
@@ -60,19 +64,19 @@ class Pawn: public Piece{
     bool legalMove(std::string move, int color) override{
         //std::cout<<"("<<getX()<<", "<<(move[0]-97)<<", "<<getY()<<", "<<(move[1] - '0')<<")"<<std::endl;
         if(color == White){
-            if(getX() == (move[0]-97) && getY()+1 == (move[1] - '0')){
+            if(getX()-1 == (move[0]-97) && getY()+1 == (move[1] - '0')){
                 return true;
             }
-            else if(firstMove == true && getX() == (move[0]-97) && getY()+2 == (move[1] - '0')){
+            else if(firstMove == true && getX()-1 == (move[0]-97) && getY()+2 == (move[1] - '0')){
                 firstMove = false;
                 return true;
             }
         }
         else if(color == Black){
-            if(getX() == (move[0]-97) && getY()-1 == (move[1] - '0')){
+            if(getX()-1 == (move[0]-97) && getY()-1 == (move[1] - '0')){
                 return true;
             }
-            else if(firstMove == true && getX() == (move[0]-97) && getY()-2 == (move[1] - '0')){
+            else if(firstMove == true && getX()-1 == (move[0]-97) && getY()-2 == (move[1] - '0')){
                 return true;
             }
         }
@@ -162,7 +166,7 @@ void printBoard(const ChessBoard& board) {
     }
 }
 
-void doMove(const std::string& move, ChessBoard& board, int moveNumber) {//rn only works for three letter things like ke5...
+void doMove(const std::string& move, ChessBoard& board, int moveNumber, std::shared_ptr<Piece> passedPiece = NULL) {//rn only works for three letter things like ke5...
     //cout<<move[2]<<endl;
 
     char m = move[0];
@@ -172,13 +176,20 @@ void doMove(const std::string& move, ChessBoard& board, int moveNumber) {//rn on
 
     std::shared_ptr<Piece> moved;
     const auto& b = board.getBoard();
-    for (const auto& row : b) {
-        for (auto& piece : row) {
-            if(piece && piece->getSymbol() == toupper(m) && piece->getColor() == moveNumber%2){
-                moved = piece;
-                break;
+
+    if(passedPiece == NULL){
+        for (const auto& row : b) {
+            for (auto& piece : row) {
+                if(piece && piece->getSymbol() == toupper(m) && piece->getColor() == moveNumber%2){
+                    moved = piece;
+                    break;
+                }
             }
         }
+    }else{
+        moved = passedPiece;
+        horizontalCoord = move[0];
+        verticalCoord = move[1] - '0';
     }
     
 
@@ -213,9 +224,9 @@ int main() {
             continue;
         } else if(move.length() == 2){
             for (const auto& row : b){
-                std::cout<<std::endl;
+                //std::cout<<std::endl;
                 for (const auto& piece : row) {
-                    std::cout<<piece->legalMove(move,moveNumber%2)<<" ";
+                    //std::cout<<piece->legalMove(move,moveNumber%2)<<" ";
                 
                     if(piece->legalMove(move, moveNumber%2) == 1){
                         std::cout<<"here! "<<std::endl;
@@ -226,20 +237,20 @@ int main() {
             incRow++;
         }
 
-        //if(possiblePiece.empty()){
-        //    cout<<"Move is not possible!"<<endl;
-        //    continue;
-       // }
+        if(possiblePiece.empty()){
+            std::cout<<"Move is not possible!"<<std::endl;
+            continue;
+        }
         
         for(const auto& piece : possiblePiece){
             std::cout<<piece->getSymbol()<<", "<<piece->getColor()<<std::endl;
             std::cout<<(char)(piece->getX()+97)<<", "<<piece->getY()<<std::endl;
-
+            doMove(move, board, moveNumber, piece);
         }
+
         possiblePiece.clear();
 
         doMove(move, board, moveNumber);
-        //else continue;
         std::cout<<std::endl;;
         printBoard(board);
         moveNumber++;
