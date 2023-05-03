@@ -7,7 +7,7 @@
 #include <memory>
 
 //make polymorphism (look into it later) [virtual keyword]
-//testing
+//this is the actual code
 
 class Piece;
 
