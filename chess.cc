@@ -68,11 +68,7 @@ class Pawn: public Piece{
                 this->firstMove = false;
                 return true;
             }
-<<<<<<< HEAD
-            else if(firstMove == true && getX() == (move[0]-96) && getY()+2 == (move[1] - '0')){
-=======
             else if(firstMove == true && getX()-1 == (move[0]-97) && getY()+2 == (move[1] - '0')){
->>>>>>> 3a43213 (fixed minor pawn bug with initialization equaling 0)
                 this->firstMove = false;
                 return true;
             }
@@ -82,11 +78,7 @@ class Pawn: public Piece{
                 this->firstMove = false;
                 return true;
             }
-<<<<<<< HEAD
-            else if(firstMove == true && getX() == (move[0]-96) && getY()-2 == (move[1] - '0')){
-=======
             else if(firstMove == true && getX()-1 == (move[0]-97) && getY()-2 == (move[1] - '0')){
->>>>>>> 3a43213 (fixed minor pawn bug with initialization equaling 0)
                 this->firstMove = false;
                 return true;
             }
@@ -107,32 +99,50 @@ class Rook: public Piece{
 
     bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
         int moveSize = move.length()-2;
-        if(getX() == (move[moveSize]-96)){//if the rook is travelling vertically
+        std::shared_ptr<Piece> specificRook;
+        //if(move.length() == 4){
+        //    if(getX() == move[moveSize]-96){
+        //        vert = 1;
+        //        
+        //    }
+        //}
+        std::cout<<"("<<getX()<<", "<<(move[moveSize]-96)<<", "<<getY()<<", "<<(move[moveSize+1] - '0')<<")"<<std::endl;
+        if(getX() == (move[moveSize]-96) && getY() == (move[moveSize+1]- '0')){//checking if moving to same square
+            return false;
+        }
+        else if(getX() == (move[moveSize]-96)){//if the rook is travelling vertically
             movingY = move[moveSize+1]-'0';
             if(getY()<movingY){
-                for(int i = getY(); i<movingY; i++){
+                for(int i = getY()+1; i<movingY; i++){
+                    //std::cout<<"here? "<<std::endl;
+                    std::cout<<"    ["<<8-i<<", "<<getX()-1<<"]"<<std::endl;
                     if(Board[8-i][getX()-1]->getSymbol() != '.') return false;
                 }
                 return true;
             }
             else if(getY()>movingY){
-                for(int i = movingY; i<getX(); i++){
+                for(int i = movingY+1; i<getY(); i++){
+                    //std::cout<<"here? 1"<<std::endl;
                     if(Board[8-i][getX()-1]->getSymbol() != '.') return false;
                 }
                 return true;
             }
         }
         else if(getY() == (move[moveSize+1]- '0')){//if the rook is travelling horizontally
-            movingX = move[moveSize+1]-'0';
+            movingX = move[moveSize]-96;
             if(getX()<movingX){
-                for(int i = getX(); i<movingX; i++){
+                for(int i = getX()+1; i<movingX; i++){
                     if(Board[8-getY()][i-1]->getSymbol() != '.') return false;
+                    //std::cout<<"here? 2"<<std::endl;
                 }
                 return true;                
             }
             else if(getX()>movingX){
-                for(int i = movingX; i<getX(); i++){
-                    if(Board[8-getY()][i-1]->getSymbol() != '.') return false;
+                for(int i = movingX; i<getX()+1; i++){
+                    //std::cout<<"here? 3"<<std::endl;
+                    if(Board[8-getY()][i-1]->getSymbol() != '.'){
+                        return 0;
+                    }
                 }
                 return true;                
             }
@@ -143,6 +153,7 @@ class Rook: public Piece{
     private:
         int movingX;
         int movingY;
+        int vert = 0;
 };
 
 >>>>>>> 3a43213 (fixed minor pawn bug with initialization equaling 0)
@@ -286,32 +297,20 @@ int main() {
                     //std::cout<<piece->legalMove(move,moveNumber%2)<<" ";
                 
                     if(piece->legalMove(move, moveNumber%2, b) == 1 && piece->getSymbol() == 'P'){
-<<<<<<< HEAD
-                        //std::cout<<"here! "<<std::endl;
-=======
                         std::cout<<"here! "<<std::endl;
->>>>>>> 3a43213 (fixed minor pawn bug with initialization equaling 0)
                         possiblePiece.emplace_back(piece);
                     }
                 }
             }
-<<<<<<< HEAD
-=======
             incRow++;
->>>>>>> 3a43213 (fixed minor pawn bug with initialization equaling 0)
         } else if(move.length()>=3){
             for (const auto& row : b){
                 //std::cout<<std::endl;
                 for (const auto& piece : row) {
                     //std::cout<<piece->legalMove(move,moveNumber%2)<<" ";
                 
-<<<<<<< HEAD
-                    if(piece->getSymbol() == toupper(move[0]) && piece->legalMove(move, moveNumber%2, b) == 1 && piece->getColor() == moveNumber%2){
-                        //std::cout<<"here! "<<std::endl;
-=======
                     if(piece->legalMove(move, moveNumber%2, b) == 1 && piece->getSymbol() == toupper(move[0])){
                         std::cout<<"here! "<<std::endl;
->>>>>>> 3a43213 (fixed minor pawn bug with initialization equaling 0)
                         possiblePiece.emplace_back(piece);
                     }
                 }
