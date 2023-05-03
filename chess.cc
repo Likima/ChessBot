@@ -91,8 +91,6 @@ class Pawn: public Piece{
         bool enPassantable = false;
 };
 
-<<<<<<< HEAD
-=======
 class Rook: public Piece{
     public:
     Rook(char color, int symbol, int x, int y) : Piece(color, 'R', x, y){}
@@ -156,7 +154,6 @@ class Rook: public Piece{
         int vert = 0;
 };
 
->>>>>>> 3a43213 (fixed minor pawn bug with initialization equaling 0)
 class ChessBoard {
 public:
     ChessBoard() {
@@ -302,7 +299,6 @@ int main() {
                     }
                 }
             }
-            incRow++;
         } else if(move.length()>=3){
             for (const auto& row : b){
                 //std::cout<<std::endl;
