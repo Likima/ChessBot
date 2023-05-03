@@ -7,6 +7,7 @@
 #include <memory>
 
 //make polymorphism (look into it later) [virtual keyword]
+//testing
 
 class Piece;
 
