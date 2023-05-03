@@ -68,7 +68,7 @@ class Pawn: public Piece{
                 this->firstMove = false;
                 return true;
             }
-            else if(firstMove == true && getX() == (move[0]-96) && getY()+2 == (move[1] - '0')){
+            else if(firstMove == true && getX()-1 == (move[0]-97) && getY()+2 == (move[1] - '0')){
                 this->firstMove = false;
                 return true;
             }
@@ -78,7 +78,7 @@ class Pawn: public Piece{
                 this->firstMove = false;
                 return true;
             }
-            else if(firstMove == true && getX() == (move[0]-96) && getY()-2 == (move[1] - '0')){
+            else if(firstMove == true && getX()-1 == (move[0]-97) && getY()-2 == (move[1] - '0')){
                 this->firstMove = false;
                 return true;
             }
@@ -91,6 +91,8 @@ class Pawn: public Piece{
         bool enPassantable = false;
 };
 
+<<<<<<< HEAD
+=======
 class Rook: public Piece{
     public:
     Rook(char color, int symbol, int x, int y) : Piece(color, 'R', x, y){}
@@ -154,6 +156,7 @@ class Rook: public Piece{
         int vert = 0;
 };
 
+>>>>>>> 3a43213 (fixed minor pawn bug with initialization equaling 0)
 class ChessBoard {
 public:
     ChessBoard() {
@@ -294,19 +297,20 @@ int main() {
                     //std::cout<<piece->legalMove(move,moveNumber%2)<<" ";
                 
                     if(piece->legalMove(move, moveNumber%2, b) == 1 && piece->getSymbol() == 'P'){
-                        //std::cout<<"here! "<<std::endl;
+                        std::cout<<"here! "<<std::endl;
                         possiblePiece.emplace_back(piece);
                     }
                 }
             }
+            incRow++;
         } else if(move.length()>=3){
             for (const auto& row : b){
                 //std::cout<<std::endl;
                 for (const auto& piece : row) {
                     //std::cout<<piece->legalMove(move,moveNumber%2)<<" ";
                 
-                    if(piece->getSymbol() == toupper(move[0]) && piece->legalMove(move, moveNumber%2, b) == 1 && piece->getColor() == moveNumber%2){
-                        //std::cout<<"here! "<<std::endl;
+                    if(piece->legalMove(move, moveNumber%2, b) == 1 && piece->getSymbol() == toupper(move[0])){
+                        std::cout<<"here! "<<std::endl;
                         possiblePiece.emplace_back(piece);
                     }
                 }
