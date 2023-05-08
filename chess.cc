@@ -9,6 +9,7 @@
 
 //make polymorphism (look into it later) [virtual keyword]
 //this is the actual code
+// hello 2 on purpose merge error
 
 class Piece;
 
