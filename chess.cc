@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdio>
 #include <cstring>
+#include <ctype.h>
 #include <algorithm>
 #include <memory>
 
@@ -97,13 +98,7 @@ class Rook: public Piece{
 
     bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
         int moveSize = move.length()-2;
-        std::shared_ptr<Piece> specificRook;
-        //if(move.length() == 4){
-        //    if(getX() == move[moveSize]-96){
-        //        vert = 1;
-        //        
-        //    }
-        //}
+
         std::cout<<"("<<getX()<<", "<<(move[moveSize]-96)<<", "<<getY()<<", "<<(move[moveSize+1] - '0')<<")"<<std::endl;
         if(getX() == (move[moveSize]-96) && getY() == (move[moveSize+1]- '0')){//checking if moving to same square
             return false;
@@ -112,7 +107,6 @@ class Rook: public Piece{
             movingY = move[moveSize+1]-'0';
             if(getY()<movingY){
                 for(int i = getY()+1; i<movingY; i++){
-                    //std::cout<<"here? "<<std::endl;
                     std::cout<<"    ["<<8-i<<", "<<getX()-1<<"]"<<std::endl;
                     if(Board[8-i][getX()-1]->getSymbol() != '.') return false;
                 }
@@ -120,13 +114,13 @@ class Rook: public Piece{
             }
             else if(getY()>movingY){
                 for(int i = movingY+1; i<getY(); i++){
-                    //std::cout<<"here? 1"<<std::endl;
                     if(Board[8-i][getX()-1]->getSymbol() != '.') return false;
                 }
                 return true;
             }
         }
         else if(getY() == (move[moveSize+1]- '0')){//if the rook is travelling horizontally
+            std::cout<<"HORIZONTAL"<<std::endl;
             movingX = move[moveSize]-96;
             if(getX()<movingX){
                 for(int i = getX()+1; i<movingX; i++){
@@ -232,10 +226,10 @@ void printBoard(const ChessBoard& board) {
 
 void doMove(const std::string& move, ChessBoard& board, int moveNumber, std::shared_ptr<Piece> passedPiece = NULL) {//rn only works for three letter things like ke5...
     //cout<<move[2]<<endl;
-
+    int moveSize = move.length()-2;
     char m = move[0];
-    char horizontalCoord = move[1];
-    int verticalCoord = (move[2] - '0');
+    char horizontalCoord = move[moveSize];
+    int verticalCoord = (move[moveSize+1] - '0');
     int horizontalInt = 0;
 
     std::shared_ptr<Piece> moved;
@@ -313,13 +307,26 @@ int main() {
             }            
         }
 
+        if(possiblePiece.size() > 1 && move.size() == 4){
+            for(int x = 1; x<possiblePiece.size()+1; x++){
+                if(isdigit(move[1])){
+                    if(possiblePiece[x-1]->getY() == move[1]) continue;
+                    possiblePiece.erase(possiblePiece.begin()+x);
+                }
+                else{
+                    if(possiblePiece[x-1]->getX() == move[1] - 96) continue;
+                    possiblePiece.erase(possiblePiece.begin()+x);                
+                }
+            }
+        }
+
         for(const auto& piece : possiblePiece){
             //std::cout<<"AHHHHHHHHHHHHHH"<<std::endl;
             std::cout<<piece->getSymbol()<<", "<<piece->getColor()<<", ";
             std::cout<<(char)(piece->getX()+96)<<", "<<piece->getY()<<std::endl;
             
             doMove(move, board, moveNumber, piece);
-        }
+        }    
 
         if(possiblePiece.empty() || possiblePiece.size()>1){
             std::cout<<"Move is not possible!"<<std::endl;
