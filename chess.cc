@@ -9,7 +9,6 @@
 
 //make polymorphism (look into it later) [virtual keyword]
 //this is the actual code
-// hello 2 on purpose merge error
 
 class Piece;
 
@@ -98,7 +97,7 @@ class Rook: public Piece{
     Rook(char color, int symbol, int x, int y) : Piece(color, 'R', x, y){}
 
     bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
-        int moveSize = move.length()-2;
+        int moveSize = move.length()-2;//rah3 move.length()-2 is 2
 
         std::cout<<"("<<getX()<<", "<<(move[moveSize]-96)<<", "<<getY()<<", "<<(move[moveSize+1] - '0')<<")"<<std::endl;
         if(getX() == (move[moveSize]-96) && getY() == (move[moveSize+1]- '0')){//checking if moving to same square
@@ -131,12 +130,15 @@ class Rook: public Piece{
                 return true;                
             }
             else if(getX()>movingX){
-                for(int i = movingX; i<getX()+1; i++){
-                    //std::cout<<"here? 3"<<std::endl;
+                for(int i = movingX; i<getX(); i++){
+                    //std::cout<<movingX<<", "<<i<<std::endl;
+                    //std::cout<<"["<<8-getY()<<", "<<i-1<<"]"<<std::endl;
                     if(Board[8-getY()][i-1]->getSymbol() != '.'){
-                        return 0;
+                        //std::cout<<"[>>"<<8-getY()<<", "<<i-1<<"<<]"<<std::endl;
+                        return false;
                     }
                 }
+                std::cout<<"HERE"<<std::endl;
                 return true;                
             }
         }
@@ -299,7 +301,6 @@ int main() {
                 //std::cout<<std::endl;
                 for (const auto& piece : row) {
                     //std::cout<<piece->legalMove(move,moveNumber%2)<<" ";
-                
                     if(piece->legalMove(move, moveNumber%2, b) == 1 && piece->getSymbol() == toupper(move[0])){
                         std::cout<<"here! "<<std::endl;
                         possiblePiece.emplace_back(piece);
@@ -309,31 +310,34 @@ int main() {
         }
 
         if(possiblePiece.size() > 1 && move.size() == 4){
-            for(int x = 1; x<possiblePiece.size()+1; x++){
+            for(int x = possiblePiece.size()-1; x>-1; x--){
                 if(isdigit(move[1])){
-                    if(possiblePiece[x-1]->getY() == move[1]) continue;
+                    std::cout<<"here! "<<std::endl;
+                    if(possiblePiece[x]->getY() == move[1]) continue;
                     possiblePiece.erase(possiblePiece.begin()+x);
                 }
                 else{
-                    if(possiblePiece[x-1]->getX() == move[1] - 96) continue;
+                    std::cout<<possiblePiece[x]->getX()<<", "<<possiblePiece[x]->getY()<<std::endl;
+                    if(possiblePiece[x]->getX() == move[1] - 96) continue;
                     possiblePiece.erase(possiblePiece.begin()+x);                
                 }
+                
             }
         }
 
-        for(const auto& piece : possiblePiece){
+        //for(const auto& piece : possiblePiece){
             //std::cout<<"AHHHHHHHHHHHHHH"<<std::endl;
-            std::cout<<piece->getSymbol()<<", "<<piece->getColor()<<", ";
-            std::cout<<(char)(piece->getX()+96)<<", "<<piece->getY()<<std::endl;
-            
-            doMove(move, board, moveNumber, piece);
-        }    
+            //std::cout<<piece->getSymbol()<<", "<<piece->getColor()<<", ";
+            //std::cout<<(char)(piece->getX()+96)<<", "<<piece->getY()<<std::endl;
+        
+        //}    
 
         if(possiblePiece.empty() || possiblePiece.size()>1){
             std::cout<<"Move is not possible!"<<std::endl;
             continue;
         }
 
+        doMove(move, board, moveNumber, possiblePiece[0]);
 
         possiblePiece.clear();
 
