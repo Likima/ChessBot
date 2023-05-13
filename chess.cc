@@ -63,6 +63,10 @@ class Pawn: public Piece{
     public:
     Pawn(char color, int symbol, int x, int y) : Piece(color, 'P', x, y){}
     bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
+
+        if(getX() == (move[0]-96) && getY() == (move[1]- '0')){//checking if moving to same square
+            return false;
+        }
         //std::cout<<"("<<getX()<<", "<<(move[0]-97)<<", "<<getY()<<", "<<(move[1] - '0')<<")"<<std::endl;
         if(color == White){
             if(getX() == (move[0]-96) && getY()+1 == (move[1] - '0')){
@@ -151,6 +155,54 @@ class Rook: public Piece{
         int vert = 0;
 };
 
+class Bishop: public Piece{
+    public:
+    Bishop(char color, int symbol, int x, int y) : Piece(color, 'B', x, y){}
+
+    bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
+        if(getX() == (move[1]-96) && getY() == (move[2]- '0')){//checking if moving to same square
+            return false;
+        }
+
+        distX = abs(getX()-(move[1]-96));
+        distY = abs(getY()-(move[2]-'0'));
+
+        if(distX != distY) return false;
+
+        
+        for(int x = 1; x<distX; x++){
+        
+            incX = x;
+            incY = x;
+            
+            if((getY())<(move[2]-'0')) incY=-incY;
+            if(getX()>(move[1]-96)) incX=-incX;
+
+            std::cout<<"["<<(8-getY()+incY)<<", "<<(getX()-1+incX)<<std::endl;
+            if(7-getY()+incY == 8-getY() && getX()+incX == getX()-1) continue;
+            if(Board[8-getY()+incY][getX()-1+incX]->getSymbol() != '.') return false;
+        }
+        //std::cout<<"here"<<std::endl;
+        //for(int x = std::min(move[1]-96,getX()+1); x<std::max(move[1]-96,getX()); x++){
+        //    incX = x;
+        //    incY = x;
+        //    if(getY()>move[2]-'0') incY*=-1;
+        //    if(getX()>move[1]-96) incX*=-1;
+        //    std::cout<<"["<<(move[1]-96)-incY<<", "<<(move[2]-'0')-incX<<"]"<<incX<<", "<<incY<<std::endl;
+        //    if(Board[(move[1]-96)-incY+1][(move[2]-'0'+1)-incX]->getSymbol() != '.') return false;
+        //}
+        return true;
+    }
+
+    private:
+        int distY;
+        int distX;
+        int incX = 1;
+        int incY = 1;
+        //bool incY = false;
+        //bool incX = false;
+};
+
 class ChessBoard {
 public:
     ChessBoard() {
@@ -162,10 +214,10 @@ public:
         RowType FIRST_RANK{
             std::make_shared<Rook>(Black, 'R',1,8),
             std::make_shared<Piece>(Black, 'N',2,8),
-            std::make_shared<Piece>(Black, 'B',3,8),
+            std::make_shared<Bishop>(Black, 'B',3,8),
             std::make_shared<Piece>(Black, 'Q',4,8),
             std::make_shared<Piece>(Black, 'K',5,8),
-            std::make_shared<Piece>(Black, 'B',6,8),
+            std::make_shared<Bishop>(Black, 'B',6,8),
             std::make_shared<Piece>(Black, 'N',7,8),
             std::make_shared<Rook>(Black, 'R',8,8)};
         
@@ -192,10 +244,10 @@ public:
 
         EIGHTH_RANK.emplace_back(std::make_shared<Rook>(White, 'R',1,1));
         EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'N',2,1));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'B',3,1));
+        EIGHTH_RANK.emplace_back(std::make_shared<Bishop>(White, 'B',3,1));
         EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'Q',4,1));
         EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'K',5,1));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'B',6,1)); 
+        EIGHTH_RANK.emplace_back(std::make_shared<Bishop>(White, 'B',6,1)); 
         EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'N',7,1));
         EIGHTH_RANK.emplace_back(std::make_shared<Rook>(White, 'R',8,1));  
 
@@ -290,7 +342,7 @@ int main() {
                 for (const auto& piece : row) {
                     //std::cout<<piece->legalMove(move,moveNumber%2)<<" ";
                 
-                    if(piece->legalMove(move, moveNumber%2, b) == 1 && piece->getSymbol() == 'P'){
+                    if(piece->getSymbol() == 'P' && piece->legalMove(move, moveNumber%2, b) == 1){
                         std::cout<<"here! "<<std::endl;
                         possiblePiece.emplace_back(piece);
                     }
@@ -301,7 +353,7 @@ int main() {
                 //std::cout<<std::endl;
                 for (const auto& piece : row) {
                     //std::cout<<piece->legalMove(move,moveNumber%2)<<" ";
-                    if(piece->legalMove(move, moveNumber%2, b) == 1 && piece->getSymbol() == toupper(move[0])){
+                    if(piece->getSymbol() == toupper(move[0]) && piece->getColor() == moveNumber%2 && piece->legalMove(move, moveNumber%2, b) == 1){
                         std::cout<<"here! "<<std::endl;
                         possiblePiece.emplace_back(piece);
                     }
