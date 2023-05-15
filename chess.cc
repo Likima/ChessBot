@@ -7,14 +7,9 @@
 #include <algorithm>
 #include <memory>
 #include <stdlib.h>
-#define ESC "\033["
-#define LIGHT_BLUE_BKG "106"
-#define PURPLE_TXT "16"
-#define RESET "\033[m"
 
 
-//make polymorphism (look into it later) [virtual keyword]
-//this is the actual code
+//make the pawn class more efficient. Refer to bishop class, implement something similar
 
 class Piece;
 
@@ -30,7 +25,6 @@ public:
     const static int WHITE = 1;
 
     Piece(const Piece& other) : color(other.color), symbol(other.symbol), x(other.x), y(other.y), onEdge(other.onEdge) {}
-
 
     Piece() {}
     Piece(int symbol) : symbol(symbol), color(-1){}
@@ -51,7 +45,6 @@ public:
         "COLOR: "<<color<<", "<<"SYMBOL: "<<symbol;
     }
     
-
     void setColor(int color) {this->color = color;}
     void setSymbol(char symbol) {this->symbol = symbol;}
     void setX(int x){this->x = x;}
@@ -80,15 +73,15 @@ class Pawn: public Piece{
                 this->firstMove = false;
                 return true;
             }
-            else if(firstMove && getX()-1 == (move[0]-97) && getY()+2 == (move[1] - '0')&& Board[7-getY()][getX()-1]->getSymbol() == '.' && Board[6-getY()][getX()-1]->getSymbol() == '.'){
+            else if(firstMove && getX() == (move[0]-96) && getY()+2 == (move[1] - '0')&& Board[7-getY()][getX()-1]->getSymbol() == '.' && Board[6-getY()][getX()-1]->getSymbol() == '.'){
                 this->firstMove = false;
                 return true;
             }
-            else if(getX() != 1 && Board[7-getY()][getX()-2]->getSymbol() != '.'){
+            else if(getX() != 1 && getX()-1 == move[0]-96 && Board[7-getY()][getX()-2]->getSymbol() != '.'){
                 this->firstMove = false;
                 return true;
             }
-            else if(getX() != 8 && Board[7-getY()][getX()]->getSymbol() != '.'){
+            else if(getX() != 8 && getX() == move[0]-96 && Board[7-getY()][getX()]->getSymbol() != '.'){
                 this->firstMove = false;
                 return true;
             }
@@ -103,20 +96,16 @@ class Pawn: public Piece{
                 this->firstMove = false;
                 return true;
             }
-            else if(getX() != 1 && Board[9-getY()][getX()-2]->getSymbol() != '.'){
+            else if(getX() != 1 && getX()-1 == move[0]-96 && Board[9-getY()][getX()-2]->getSymbol() != '.'){
                 this->firstMove = false;
                 return true;
             }
-            else if(getX() != 8 && Board[9-getY()][getX()]->getSymbol() != '.'){
+            else if(getX() != 8 && getX() == move[0]-96 && Board[9-getY()][getX()]->getSymbol() != '.'){
                 this->firstMove = false;
                 return true;
             }
         }
-
-
-        
         return false;
-
     }
     private:
         bool firstMove = true;
@@ -128,7 +117,7 @@ class Rook: public Piece{
     Rook(char color, int symbol, int x, int y) : Piece(color, 'R', x, y){}
 
     bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
-        int moveSize = move.length()-2;//rah3 move.length()-2 is 2
+        int moveSize = move.length()-2;
 
         std::cout<<"("<<getX()<<", "<<(move[moveSize]-96)<<", "<<getY()<<", "<<(move[moveSize+1] - '0')<<")"<<std::endl;
         if(getX() == (move[moveSize]-96) && getY() == (move[moveSize+1]- '0')){//checking if moving to same square
@@ -141,41 +130,39 @@ class Rook: public Piece{
                     std::cout<<"    ["<<8-i<<", "<<getX()-1<<"]"<<std::endl;
                     if(Board[8-i][getX()-1]->getSymbol() != '.') return false;
                 }
+                if(Board[8-movingY][getX()-1]->getColor() == getColor()) return false;
                 return true;
             }
             else if(getY()>movingY){
                 for(int i = movingY+1; i<getY(); i++){
                     if(Board[8-i][getX()-1]->getSymbol() != '.') return false;
                 }
+                if(Board[8-movingY][getX()-1]->getColor() == getColor()) return false;
                 return true;
             }
         }
         else if(getY() == (move[moveSize+1]- '0')){//if the rook is travelling horizontally
-            std::cout<<"HORIZONTAL"<<std::endl;
             movingX = move[moveSize]-96;
             if(getX()<movingX){
                 for(int i = getX()+1; i<movingX; i++){
                     if(Board[8-getY()][i-1]->getSymbol() != '.') return false;
-                    //std::cout<<"here? 2"<<std::endl;
                 }
+                if(Board[8-getY()][movingX-1]->getColor() == getColor()) return false;
                 return true;                
             }
             else if(getX()>movingX){
                 for(int i = movingX; i<getX(); i++){
-                    //std::cout<<movingX<<", "<<i<<std::endl;
-                    //std::cout<<"["<<8-getY()<<", "<<i-1<<"]"<<std::endl;
                     if(Board[8-getY()][i-1]->getSymbol() != '.'){
-                        //std::cout<<"[>>"<<8-getY()<<", "<<i-1<<"<<]"<<std::endl;
                         return false;
                     }
                 }
+                if(Board[8-getY()][movingX-1]->getColor() == getColor()) return false;
                 std::cout<<"HERE"<<std::endl;
                 return true;                
             }
         }
         return false;
     }
-
     private:
         int movingX;
         int movingY;
@@ -195,10 +182,8 @@ class Bishop: public Piece{
         distY = abs(getY()-(move[2]-'0'));
 
         if(distX != distY) return false;
-
         
         for(int x = 1; x<distX; x++){
-        
             incX = x;
             incY = x;
             
@@ -209,25 +194,15 @@ class Bishop: public Piece{
             if(7-getY()+incY == 8-getY() && getX()+incX == getX()-1) continue;
             if(Board[8-getY()+incY][getX()-1+incX]->getSymbol() != '.') return false;
         }
-        //std::cout<<"here"<<std::endl;
-        //for(int x = std::min(move[1]-96,getX()+1); x<std::max(move[1]-96,getX()); x++){
-        //    incX = x;
-        //    incY = x;
-        //    if(getY()>move[2]-'0') incY*=-1;
-        //    if(getX()>move[1]-96) incX*=-1;
-        //    std::cout<<"["<<(move[1]-96)-incY<<", "<<(move[2]-'0')-incX<<"]"<<incX<<", "<<incY<<std::endl;
-        //    if(Board[(move[1]-96)-incY+1][(move[2]-'0'+1)-incX]->getSymbol() != '.') return false;
-        //}
+        if(Board[8-(move[2]-'0')][move[1]-97]->getColor() == getColor()) return false;
         return true;
     }
 
     private:
         int distY;
         int distX;
-        int incX = 1;
-        int incY = 1;
-        //bool incY = false;
-        //bool incX = false;
+        int incX;
+        int incY;
 };
 
 class ChessBoard {
