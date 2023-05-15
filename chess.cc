@@ -6,8 +6,6 @@
 #include <ctype.h>
 #include <algorithm>
 #include <memory>
-#include <stdlib.h>
-
 
 //make the pawn class more efficient. Refer to bishop class, implement something similar
 
@@ -24,7 +22,7 @@ public:
     const static int BLACK = 0;
     const static int WHITE = 1;
 
-    Piece(const Piece& other) : color(other.color), symbol(other.symbol), x(other.x), y(other.y), onEdge(other.onEdge) {}
+    Piece(const Piece& other) : color(other.color), symbol(other.symbol), x(other.x), y(other.y){}
 
     Piece() {}
     Piece(int symbol) : symbol(symbol), color(-1){}
@@ -44,81 +42,9 @@ public:
         std::cout<<"x: "<<x<<", "<<"y: "<<y<<", "
         "COLOR: "<<color<<", "<<"SYMBOL: "<<symbol;
     }
-    
-    void setColor(int color) {this->color = color;}
-    void setSymbol(char symbol) {this->symbol = symbol;}
-    void setX(int x){this->x = x;}
-    void setY(int y){this->y = y;}
 
-private:
-    int color;
-    int x;
-    int y;
-    char symbol;
-    bool onEdge;
-};
-
-class Pawn: public Piece{
-    public:
-    Pawn(char color, int symbol, int x, int y) : Piece(color, 'P', x, y){}
-
-    bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
-
-        if(getX() == (move[0]-96) && getY() == (move[1]- '0')){//checking if moving to same square
-            return false;
-        }
-        std::cout<<"("<<getX()<<", "<<(move[0]-97)<<", "<<getY()<<", "<<(move[1] - '0')<<")"<<std::endl;
-        if(color == White){
-            if(getX() == (move[0]-96) && getY()+1 == (move[1] - '0') && Board[7-getY()][getX()-1]->getSymbol() == '.'){
-                this->firstMove = false;
-                return true;
-            }
-            else if(firstMove && getX() == (move[0]-96) && getY()+2 == (move[1] - '0')&& Board[7-getY()][getX()-1]->getSymbol() == '.' && Board[6-getY()][getX()-1]->getSymbol() == '.'){
-                this->firstMove = false;
-                return true;
-            }
-            else if(getX() != 1 && getX()-1 == move[0]-96 && Board[7-getY()][getX()-2]->getSymbol() != '.'){
-                this->firstMove = false;
-                return true;
-            }
-            else if(getX() != 8 && getX() == move[0]-96 && Board[7-getY()][getX()]->getSymbol() != '.'){
-                this->firstMove = false;
-                return true;
-            }
-        }
-        else if(color == Black){
-            if(getX() == (move[0]-96) && getY()-1 == (move[1] - '0') && Board[9-getY()][getX()-1]->getSymbol() == '.'){
-                this->firstMove = false;
-                return true;
-            }
-            else if(firstMove && getX()-1 == (move[0]-97) && getY()-2 == (move[1] - '0')
-            && Board[9-getY()][getX()-1]->getSymbol() == '.' && Board[10-getY()][getX()-1]->getSymbol() == '.'){
-                this->firstMove = false;
-                return true;
-            }
-            else if(getX() != 1 && getX()-1 == move[0]-96 && Board[9-getY()][getX()-2]->getSymbol() != '.'){
-                this->firstMove = false;
-                return true;
-            }
-            else if(getX() != 8 && getX() == move[0]-96 && Board[9-getY()][getX()]->getSymbol() != '.'){
-                this->firstMove = false;
-                return true;
-            }
-        }
-        return false;
-    }
-    private:
-        bool firstMove = true;
-        bool enPassantable = false;
-};
-
-class Rook: public Piece{
-    public:
-    Rook(char color, int symbol, int x, int y) : Piece(color, 'R', x, y){}
-
-    bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
+        bool checkRook(std::string move, int color, std::vector<RowType> Board){
         int moveSize = move.length()-2;
-
         std::cout<<"("<<getX()<<", "<<(move[moveSize]-96)<<", "<<getY()<<", "<<(move[moveSize+1] - '0')<<")"<<std::endl;
         if(getX() == (move[moveSize]-96) && getY() == (move[moveSize+1]- '0')){//checking if moving to same square
             return false;
@@ -163,17 +89,8 @@ class Rook: public Piece{
         }
         return false;
     }
-    private:
-        int movingX;
-        int movingY;
-        int vert = 0;
-};
 
-class Bishop: public Piece{
-    public:
-    Bishop(char color, int symbol, int x, int y) : Piece(color, 'B', x, y){}
-
-    bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
+    bool checkBishop(std::string move, int color, std::vector<RowType> Board){
         if(getX() == (move[1]-96) && getY() == (move[2]- '0')){//checking if moving to same square
             return false;
         }
@@ -197,12 +114,108 @@ class Bishop: public Piece{
         if(Board[8-(move[2]-'0')][move[1]-97]->getColor() == getColor()) return false;
         return true;
     }
+    
+    void setColor(int color) {this->color = color;}
+    void setSymbol(char symbol) {this->symbol = symbol;}
+    void setX(int x){this->x = x;}
+    void setY(int y){this->y = y;}
 
+private:
+    int color;
+    int x;
+    int y;
+    char symbol;
+    int distY;
+    int distX;
+    int incX;
+    int incY;
+    int movingX;
+    int movingY;
+};
+
+class Pawn: public Piece{
+    public:
+    Pawn(char color, int symbol, int x, int y) : Piece(color, 'P', x, y){}
+
+    bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
+
+        if(getX() == (move[0]-96) && getY() == (move[1]- '0')){//checking if moving to same square
+            return false;
+        }
+        std::cout<<"("<<getX()<<", "<<(move[0]-97)<<", "<<getY()<<", "<<(move[1] - '0')<<")"<<std::endl;
+        if(color == White){
+            if(getX() == (move[0]-96) && getY()+1 == (move[1] - '0') && Board[7-getY()][getX()-1]->getSymbol() == '.'){
+                this->firstMove = false;
+                return true;
+            }
+            else if(firstMove && getX() == (move[0]-96) && getY()+2 == (move[1] - '0')&& Board[7-getY()][getX()-1]->getSymbol() == '.' && Board[6-getY()][getX()-1]->getSymbol() == '.'){
+                this->firstMove = false;
+                return true;
+            }
+            else if(getX() != 1 && getX()-1 == move[0]-96 && Board[7-getY()][getX()-2]->getSymbol() != '.'){
+                if(Board[7-getY()][getX()-2]->getColor() == getColor()) return false;
+                this->firstMove = false;
+                return true;
+            }
+            else if(getX() != 8 && getX() == move[0]-96 && Board[7-getY()][getX()]->getSymbol() != '.'){
+                if(Board[7-getY()][getX()]->getColor() == getColor()) return false;
+                this->firstMove = false;
+                return true;
+            }
+        }
+        else if(color == Black){
+            if(getX() == (move[0]-96) && getY()-1 == (move[1] - '0') && Board[9-getY()][getX()-1]->getSymbol() == '.'){
+                this->firstMove = false;
+                return true;
+            }
+            else if(firstMove && getX()-1 == (move[0]-97) && getY()-2 == (move[1] - '0')
+            && Board[9-getY()][getX()-1]->getSymbol() == '.' && Board[10-getY()][getX()-1]->getSymbol() == '.'){
+                this->firstMove = false;
+                return true;
+            }
+            else if(getX() != 1 && getX()-1 == move[0]-96 && Board[9-getY()][getX()-2]->getSymbol() != '.'){
+                if(Board[9-getY()][getX()-2]->getColor() == getColor()) return false;
+                this->firstMove = false;
+                return true;
+            }
+            else if(getX() != 8 && getX() == move[0]-96 && Board[9-getY()][getX()]->getSymbol() != '.'){
+                if(Board[9-getY()][getX()]->getColor() == getColor()) return false;
+                this->firstMove = false;
+                return true;
+            }
+        }
+        return false;
+    }
     private:
-        int distY;
-        int distX;
-        int incX;
-        int incY;
+        bool firstMove = true;
+        bool enPassantable = false;
+};
+
+class Rook: public Piece{
+    public:
+    Rook(char color, int symbol, int x, int y) : Piece(color, 'R', x, y){}
+
+    bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
+        return checkRook(move, color, Board);
+    }
+};
+
+class Bishop: public Piece{
+    public:
+    Bishop(char color, int symbol, int x, int y) : Piece(color, 'B', x, y){}
+
+    bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
+        return checkBishop(move, color, Board);
+    }
+};
+
+class Queen:public Piece{
+    public:
+    Queen(char color, int symbol, int x, int y) : Piece(color, 'Q', x, y){}
+
+    bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
+        return(checkRook(move,color,Board) || checkBishop(move,color,Board));
+    }
 };
 
 class ChessBoard {
@@ -217,7 +230,7 @@ public:
             std::make_shared<Rook>(Black, 'R',1,8),
             std::make_shared<Piece>(Black, 'N',2,8),
             std::make_shared<Bishop>(Black, 'B',3,8),
-            std::make_shared<Piece>(Black, 'Q',4,8),
+            std::make_shared<Queen>(Black, 'Q',4,8),
             std::make_shared<Piece>(Black, 'K',5,8),
             std::make_shared<Bishop>(Black, 'B',6,8),
             std::make_shared<Piece>(Black, 'N',7,8),
@@ -247,7 +260,7 @@ public:
         EIGHTH_RANK.emplace_back(std::make_shared<Rook>(White, 'R',1,1));
         EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'N',2,1));
         EIGHTH_RANK.emplace_back(std::make_shared<Bishop>(White, 'B',3,1));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'Q',4,1));
+        EIGHTH_RANK.emplace_back(std::make_shared<Queen>(White, 'Q',4,1));
         EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'K',5,1));
         EIGHTH_RANK.emplace_back(std::make_shared<Bishop>(White, 'B',6,1)); 
         EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'N',7,1));
