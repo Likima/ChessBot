@@ -43,7 +43,7 @@ public:
         "COLOR: "<<color<<", "<<"SYMBOL: "<<symbol;
     }
 
-        bool checkRook(std::string move, int color, std::vector<RowType> Board){
+    bool checkRook(std::string move, int color, std::vector<RowType> Board){
         int moveSize = move.length()-2;
         std::cout<<"("<<getX()<<", "<<(move[moveSize]-96)<<", "<<getY()<<", "<<(move[moveSize+1] - '0')<<")"<<std::endl;
         if(getX() == (move[moveSize]-96) && getY() == (move[moveSize+1]- '0')){//checking if moving to same square
@@ -77,7 +77,7 @@ public:
                 return true;                
             }
             else if(getX()>movingX){
-                for(int i = movingX; i<getX(); i++){
+                for(int i = movingX; i<getX()-1; i++){
                     if(Board[8-getY()][i-1]->getSymbol() != '.'){
                         return false;
                     }
