@@ -6,6 +6,12 @@
 #include <ctype.h>
 #include <algorithm>
 #include <memory>
+#include <stdlib.h>
+#define ESC "\033["
+#define LIGHT_BLUE_BKG "106"
+#define PURPLE_TXT "16"
+#define RESET "\033[m"
+
 
 //make polymorphism (look into it later) [virtual keyword]
 //this is the actual code
@@ -27,7 +33,7 @@ public:
 
 
     Piece() {}
-    Piece(int symbol) : symbol(symbol){}
+    Piece(int symbol) : symbol(symbol), color(-1){}
     Piece(int color, char symbol) : symbol(symbol), color(color){}
     Piece(int color, char symbol, int x, int y) : symbol(symbol), color(color), x(x), y(y){}
 
@@ -62,32 +68,53 @@ private:
 class Pawn: public Piece{
     public:
     Pawn(char color, int symbol, int x, int y) : Piece(color, 'P', x, y){}
+
     bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
 
         if(getX() == (move[0]-96) && getY() == (move[1]- '0')){//checking if moving to same square
             return false;
         }
-        //std::cout<<"("<<getX()<<", "<<(move[0]-97)<<", "<<getY()<<", "<<(move[1] - '0')<<")"<<std::endl;
+        std::cout<<"("<<getX()<<", "<<(move[0]-97)<<", "<<getY()<<", "<<(move[1] - '0')<<")"<<std::endl;
         if(color == White){
-            if(getX() == (move[0]-96) && getY()+1 == (move[1] - '0')){
+            if(getX() == (move[0]-96) && getY()+1 == (move[1] - '0') && Board[7-getY()][getX()-1]->getSymbol() == '.'){
                 this->firstMove = false;
                 return true;
             }
-            else if(firstMove == true && getX()-1 == (move[0]-97) && getY()+2 == (move[1] - '0')){
+            else if(firstMove && getX()-1 == (move[0]-97) && getY()+2 == (move[1] - '0')&& Board[7-getY()][getX()-1]->getSymbol() == '.' && Board[6-getY()][getX()-1]->getSymbol() == '.'){
+                this->firstMove = false;
+                return true;
+            }
+            else if(getX() != 1 && Board[7-getY()][getX()-2]->getSymbol() != '.'){
+                this->firstMove = false;
+                return true;
+            }
+            else if(getX() != 8 && Board[7-getY()][getX()]->getSymbol() != '.'){
                 this->firstMove = false;
                 return true;
             }
         }
         else if(color == Black){
-            if(getX() == (move[0]-96) && getY()-1 == (move[1] - '0')){
+            if(getX() == (move[0]-96) && getY()-1 == (move[1] - '0') && Board[9-getY()][getX()-1]->getSymbol() == '.'){
                 this->firstMove = false;
                 return true;
             }
-            else if(firstMove == true && getX()-1 == (move[0]-97) && getY()-2 == (move[1] - '0')){
+            else if(firstMove && getX()-1 == (move[0]-97) && getY()-2 == (move[1] - '0')
+            && Board[9-getY()][getX()-1]->getSymbol() == '.' && Board[10-getY()][getX()-1]->getSymbol() == '.'){
+                this->firstMove = false;
+                return true;
+            }
+            else if(getX() != 1 && Board[9-getY()][getX()-2]->getSymbol() != '.'){
+                this->firstMove = false;
+                return true;
+            }
+            else if(getX() != 8 && Board[9-getY()][getX()]->getSymbol() != '.'){
                 this->firstMove = false;
                 return true;
             }
         }
+
+
+        
         return false;
 
     }
@@ -258,6 +285,8 @@ public:
         return board;
     }
 
+    
+
     void setPiece(int x, int y, std::shared_ptr<Piece> piece) {
         board[8-(piece->getY())][(piece->getX())-1] = std::make_shared<Piece>('.'); // set old position to empty
         piece->setX(x+1); // set new position for the piece
@@ -272,11 +301,13 @@ void printBoard(const ChessBoard& board) {
     const auto& b = board.getBoard();
     for (const auto& row : b) {
         for (const auto& piece : row) {
-            std::cout << piece->getSymbol() << " ";
+            if(piece->getColor() == Black) std::cout<< "\033[0;01;02"<<"m"<< piece->getSymbol() << " "<<"\033[m";
+            else std::cout << "\033[0;01"<<"m"<<piece->getSymbol() << " "<<"\033[m";
         }
 
         std::cout << std::endl;
     }
+    //ESC[background_colour;Text_colourm output ESC[m”
 }
 
 void doMove(const std::string& move, ChessBoard& board, int moveNumber, std::shared_ptr<Piece> passedPiece = NULL) {//rn only works for three letter things like ke5...
@@ -342,7 +373,7 @@ int main() {
                 for (const auto& piece : row) {
                     //std::cout<<piece->legalMove(move,moveNumber%2)<<" ";
                 
-                    if(piece->getSymbol() == 'P' && piece->legalMove(move, moveNumber%2, b) == 1){
+                    if(piece->getColor() == moveNumber%2 && piece->getSymbol() == 'P' && piece->legalMove(move, moveNumber%2, b) == 1){
                         std::cout<<"here! "<<std::endl;
                         possiblePiece.emplace_back(piece);
                     }
@@ -376,13 +407,6 @@ int main() {
                 
             }
         }
-
-        //for(const auto& piece : possiblePiece){
-            //std::cout<<"AHHHHHHHHHHHHHH"<<std::endl;
-            //std::cout<<piece->getSymbol()<<", "<<piece->getColor()<<", ";
-            //std::cout<<(char)(piece->getX()+96)<<", "<<piece->getY()<<std::endl;
-        
-        //}    
 
         if(possiblePiece.empty() || possiblePiece.size()>1){
             std::cout<<"Move is not possible!"<<std::endl;
