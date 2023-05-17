@@ -141,46 +141,49 @@ class Pawn: public Piece{
 
     bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
 
-        if(getX() == (move[0]-96) && getY() == (move[1]- '0')){//checking if moving to same square
+        int moveSize = move.length()-2;
+        bool isTaking = move.find('x') != std::string::npos;
+
+        if(getX() == (move[moveSize]-96) && getY() == (move[moveSize+1]- '0')){//checking if moving to same square
             return false;
         }
-        std::cout<<"("<<getX()<<", "<<(move[0]-97)<<", "<<getY()<<", "<<(move[1] - '0')<<")"<<std::endl;
+        std::cout<<"("<<getX()<<", "<<(move[moveSize]-97)<<", "<<getY()<<", "<<(move[moveSize+1] - '0')<<")"<<std::endl;
         if(color == White){
-            if(getX() == (move[0]-96) && getY()+1 == (move[1] - '0') && Board[7-getY()][getX()-1]->getSymbol() == '.'){
+            if(getX() == (move[moveSize]-96) && getY()+1 == (move[moveSize+1] - '0') && Board[7-getY()][getX()-1]->getSymbol() == '.'){
                 this->firstMove = false;
                 return true;
             }
-            else if(firstMove && getX() == (move[0]-96) && getY()+2 == (move[1] - '0')&& Board[7-getY()][getX()-1]->getSymbol() == '.' && Board[6-getY()][getX()-1]->getSymbol() == '.'){
+            else if(firstMove && getX() == (move[moveSize]-96) && getY()+2 == (move[moveSize+1] - '0')&& Board[7-getY()][getX()-1]->getSymbol() == '.' && Board[6-getY()][getX()-1]->getSymbol() == '.'){
                 this->firstMove = false;
                 return true;
             }
-            else if(getX() != 1 && getX()-1 == move[0]-96 && Board[7-getY()][getX()-2]->getSymbol() != '.'){
+            else if(isTaking && getX() == move[0]-96 && getX() != 1 && getX()-1 == move[moveSize]-96 && Board[7-getY()][getX()-2]->getSymbol() != '.'){
                 if(Board[7-getY()][getX()-2]->getColor() == getColor()) return false;
                 this->firstMove = false;
                 return true;
             }
-            else if(getX() != 8 && getX() == move[0]-96 && Board[7-getY()][getX()]->getSymbol() != '.'){
+            else if(isTaking && getX() == move[0]-96 && getX() != 8 && getX()+1 == move[moveSize]-96 && Board[7-getY()][getX()]->getSymbol() != '.'){
                 if(Board[7-getY()][getX()]->getColor() == getColor()) return false;
                 this->firstMove = false;
                 return true;
             }
         }
         else if(color == Black){
-            if(getX() == (move[0]-96) && getY()-1 == (move[1] - '0') && Board[9-getY()][getX()-1]->getSymbol() == '.'){
+            if(getX() == (move[moveSize]-96) && getY()-1 == (move[moveSize+1] - '0') && Board[9-getY()][getX()-1]->getSymbol() == '.'){
                 this->firstMove = false;
                 return true;
             }
-            else if(firstMove && getX()-1 == (move[0]-97) && getY()-2 == (move[1] - '0')
+            else if(firstMove && getX()-1 == (move[moveSize]-97) && getY()-2 == (move[moveSize+1] - '0')
             && Board[9-getY()][getX()-1]->getSymbol() == '.' && Board[10-getY()][getX()-1]->getSymbol() == '.'){
                 this->firstMove = false;
                 return true;
             }
-            else if(getX() != 1 && getX()-1 == move[0]-96 && Board[9-getY()][getX()-2]->getSymbol() != '.'){
-                if(Board[9-getY()][getX()-2]->getColor() == getColor()) return false;
+            else if(isTaking && getX() == move[0]-96 && getX() != 1 && getX()-1 == move[moveSize]-96 && Board[9-getY()][getX()-2]->getSymbol() != '.'){
+                if(Board[9-getY()][getX()-2]->getColor() == getColor()) return false;//taking left
                 this->firstMove = false;
                 return true;
             }
-            else if(getX() != 8 && getX() == move[0]-96 && Board[9-getY()][getX()]->getSymbol() != '.'){
+            else if(isTaking && getX() == move[0]-96 && getX() != 8 && getX()+1 == move[moveSize]-96 && Board[9-getY()][getX()]->getSymbol() != '.'){
                 if(Board[9-getY()][getX()]->getColor() == getColor()) return false;
                 this->firstMove = false;
                 return true;
@@ -402,25 +405,16 @@ int main() {
             std::cout<<"Move is not possible!"<<std::endl;
             continue;
 
-        } else if(move.length() == 2){
-            for (const auto& row : b){
-                //std::cout<<std::endl;
-                for (const auto& piece : row) {
-                    //std::cout<<piece->legalMove(move,moveNumber%2)<<" ";
-                
-                    if(piece->getColor() == moveNumber%2 && piece->getSymbol() == 'P' && piece->legalMove(move, moveNumber%2, b) == 1){
-                        std::cout<<"here! "<<std::endl;
-                        possiblePiece.emplace_back(piece);
-                    }
-                }
-            }
-        } else if(move.length()>=3){
+        } else {
             for (const auto& row : b){
                 //std::cout<<std::endl;
                 for (const auto& piece : row) {
                     //std::cout<<piece->legalMove(move,moveNumber%2)<<" ";
                     if(piece->getSymbol() == toupper(move[0]) && piece->getColor() == moveNumber%2 && piece->legalMove(move, moveNumber%2, b) == 1){
                         std::cout<<"here! "<<std::endl;
+                        possiblePiece.emplace_back(piece);
+                    }
+                    if(piece->getSymbol() == 'P' && piece->legalMove(move, moveNumber%2, b) == 1){
                         possiblePiece.emplace_back(piece);
                     }
                 }
