@@ -9,6 +9,8 @@
 
 //make the pawn class more efficient. Refer to bishop class, implement something similar
 
+//iterate over all the attacking pieces & pass the kings position as the move
+
 class Piece;
 
 std::vector<char> coords = {'a','b','c','d','e','f','g','h'};
@@ -77,7 +79,7 @@ public:
                 return true;                
             }
             else if(getX()>movingX){
-                for(int i = movingX; i<getX()-1; i++){
+                for(int i = movingX+1; i<getX(); i++){
                     if(Board[8-getY()][i-1]->getSymbol() != '.'){
                         return false;
                     }
@@ -212,9 +214,54 @@ class Bishop: public Piece{
 class Queen:public Piece{
     public:
     Queen(char color, int symbol, int x, int y) : Piece(color, 'Q', x, y){}
-
     bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
         return(checkRook(move,color,Board) || checkBishop(move,color,Board));
+    }
+};
+
+class Knight:public Piece{
+    public:
+    Knight(char color, int symbol, int x, int y) : Piece(color, 'N', x, y){}
+    bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
+        if(getX() == (move[0]-96) && getY() == (move[1]- '0')){//checking if moving to same square
+            return false;
+        }
+        if(getX()+2 == move[1]-96 || getX()-2 == move[1]-96){
+            return(getY()+1 == move[2]-'0' || getY()-1 == move[2]-'0');
+        }
+        else if(getY()+2 == move[2]-'0' || getY()-2 == move[2]-'0'){
+            return(getX()+1 == move[1]-96 || getX()-1 == move[1]-96);
+        }
+        return false;
+    }
+
+};
+
+class King:public Piece{
+    public:
+    King(char color, int symbol, int x, int y) : Piece(color, 'K', x, y){}
+
+    bool inCheck(std::string move, std::vector<RowType> Board){
+        for (const auto& row : Board) {
+            for (const auto& piece : row) {
+                if(piece->getColor() != getColor()){
+                    if(legalMove(move, piece->getColor(), Board)){
+                        std::cout<<"You Are In Check! "<<std::endl;
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
+        if(getX() == (move[1]-96) && getY() == (move[2]- '0')){//checking if moving to same square
+            return false;
+        }
+
+        if(std::abs((move[1]-96) - getX()) == 1 || std::abs((move[2]-'0') - getY() == 1)) return(inCheck(move, Board));
+        return false;
     }
 };
 
@@ -228,12 +275,12 @@ public:
 
         RowType FIRST_RANK{
             std::make_shared<Rook>(Black, 'R',1,8),
-            std::make_shared<Piece>(Black, 'N',2,8),
+            std::make_shared<Knight>(Black, 'N',2,8),
             std::make_shared<Bishop>(Black, 'B',3,8),
             std::make_shared<Queen>(Black, 'Q',4,8),
-            std::make_shared<Piece>(Black, 'K',5,8),
+            std::make_shared<King>(Black, 'K',5,8),
             std::make_shared<Bishop>(Black, 'B',6,8),
-            std::make_shared<Piece>(Black, 'N',7,8),
+            std::make_shared<Knight>(Black, 'N',7,8),
             std::make_shared<Rook>(Black, 'R',8,8)};
         
         for(int x = 1; x<SIZE+1; x++){
@@ -258,12 +305,12 @@ public:
         board.emplace_back(SEVENTH_RANK);
 
         EIGHTH_RANK.emplace_back(std::make_shared<Rook>(White, 'R',1,1));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'N',2,1));
+        EIGHTH_RANK.emplace_back(std::make_shared<Knight>(White, 'N',2,1));
         EIGHTH_RANK.emplace_back(std::make_shared<Bishop>(White, 'B',3,1));
         EIGHTH_RANK.emplace_back(std::make_shared<Queen>(White, 'Q',4,1));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'K',5,1));
+        EIGHTH_RANK.emplace_back(std::make_shared<King>(White, 'K',5,1));
         EIGHTH_RANK.emplace_back(std::make_shared<Bishop>(White, 'B',6,1)); 
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'N',7,1));
+        EIGHTH_RANK.emplace_back(std::make_shared<Knight>(White, 'N',7,1));
         EIGHTH_RANK.emplace_back(std::make_shared<Rook>(White, 'R',8,1));  
 
         board.emplace_back(EIGHTH_RANK);
