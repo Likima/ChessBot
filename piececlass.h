@@ -45,10 +45,23 @@ public:
         "COLOR: "<<color<<", "<<"SYMBOL: "<<symbol<<std::endl;
     }
 
+    std::vector<std::string> getLegal(std::vector<RowType> board){
+        //const auto& b = board.getBoard();
+        std::vector<std::string> legalMoves;
+        const std::vector<char> coords = {'a','b','c','d','e','f','g','h'};
+        for (const auto& let : coords) {
+            for (int x = 1; x<8; x++){
+                //std::cout<<"MOVES CHECKED "<< std::string(1, getSymbol())+std::string(1, let)+std::to_string(x)<<std::endl;
+                if(legalMove(std::string(1, getSymbol())+std::string(1, let)+std::to_string(x), getColor(), board)){
+                    legalMoves.emplace_back(std::string(1, getSymbol())+std::string(1, let)+std::to_string(x));
+                }
+            }
+        }
+        return legalMoves;
+    }
+
     bool checkRook(std::string move, int color, std::vector<RowType> Board){
         int moveSize = move.length()-2;
-        std::cout<<"Rook "<<std::endl;
-        printInfo();
         //std::cout<<"("<<getX()<<", "<<(move[moveSize]-96)<<", "<<getY()<<", "<<(move[moveSize+1] - '0')<<")"<<std::endl;
         if(getX() == (move[moveSize]-96) && getY() == (move[moveSize+1]- '0')){//checking if moving to same square
             return false;
@@ -93,32 +106,31 @@ public:
     }
 
     bool checkBishop(std::string move, int color, std::vector<RowType> Board) {
-        printInfo();
         if (getX() == (move[move.length() - 2] - 96) && getY() == (move[move.length() - 1] - '0')) {
             // Checking if moving to the same square
             return false;
         }
-    
+
         int distX = abs(getX() - (move[move.length() - 2] - 96));
         int distY = abs(getY() - (move[move.length() - 1] - '0'));
-    
+
         if (distX != distY) {
             return false;
         }
-    
+
         int incX = (move[move.length() - 2] - 96 > getX()) ? 1 : -1;
         int incY = (move[move.length() - 1] - '0' > getY()) ? 1 : -1;
-    
+
         for (int x = 1; x < distX; x++) {
             if (Board[8 - (getY() + incY * x)][getX() + incX * x - 1]->getSymbol() != '.') {
                 return false;
             }
         }
-    
+
         if (Board[8 - (move[move.length() - 1] - '0')][(move[move.length() - 2] - 97)]->getColor() == getColor()) {
             return false;
         }
-    
+
         return true;
     }
 
@@ -204,7 +216,6 @@ class Bishop: public Piece{
     Bishop(char color, int symbol, int x, int y) : Piece(color, 'B', x, y){}
 
     bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
-        std::cout<<"Bishop "<<std::endl;
         return checkBishop(move, color, Board);
     }
 };
@@ -251,14 +262,12 @@ class King:public Piece{
                 if (pieceColor != getColor() && pieceSymbol != 'K' && pieceSymbol != '.') {
                     if (pieceSymbol == 'P') {
                         if (piece->legalMove((char)(getX() + 96) + "x" + move, pieceColor, Board)) {
-                            piece->printInfo();
-                            std::cout<<std::endl;
+                            //piece->printInfo();
                             return false;
                         }
                     }
-                    std::cout<<"Comb Move is: "<<pieceSymbol+move<<std::endl;
                     if(pieceSymbol != 'P' && piece->legalMove(pieceSymbol+move, pieceColor, Board)) {
-                        piece->printInfo();
+                        //piece->printInfo();
                         std::cout << "You Are In Check!" << std::endl;
                         return false;
                     }
@@ -274,8 +283,6 @@ class King:public Piece{
             return false;
         }
         if(std::abs((move[move.length()-2]-96) - getX()) <= 1 || std::abs((move[move.length()-1]-'0') - getY() <= 1)) return(inCheck(move, Board));
-        //else if(std::abs((move[move.length()-2]-96) - getX()) == 1 && std::abs((move[move.length()-1]-'0') - getY() == 0)) return(inCheck(move, Board));
-        //else if(std::abs((move[move.length()-2]-96) - getX()) == 0 && std::abs((move[move.length()-1]-'0') - getY() == 1)) return(inCheck(move, Board));
         return false;
     }
 

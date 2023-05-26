@@ -6,6 +6,19 @@
 
 //iterate over all the attacking pieces & pass the kings position as the move
 
+void printvector(std::vector<std::string> vec){
+    for(int x = 0; x<vec.size(); x++){
+        std::cout<<vec[x]<<" ";
+    }
+    std::cout<<std::endl;
+}
+
+bool mated(ChessBoard& board, int color){
+    std::vector<int> KingPosition;
+    KingPosition = board.findKing(color);
+    return false;
+}
+
 bool pawnMove(std::string move){
     //std::cout<<"HERE!!!!!!!!"<<std::endl;
     if(move.length() == 2) return true;
@@ -79,10 +92,15 @@ int main() {
     std::shared_ptr<Piece> piecePtr;
     std::shared_ptr<King> kingPtr;
 
+    std::vector<std::string> legalMoves;
     auto& b = board.getBoard();
 
     while(true) {
 
+        if(mated(board, moveNumber%2)){
+            std::cout<<"Checkmate!"<<std::endl;
+            break;
+        }
 
         if(moveNumber%2 == 1){
             std::cout<<"White's Move"<<std::endl;
@@ -169,7 +187,6 @@ int main() {
             std::cout << "You are in check!" << std::endl;
             board.setPiece(prevX-1, prevY, possiblePiece[0]);
             possiblePiece.clear();
-            //kingPtr->printInfo();
             continue;
         }
 
