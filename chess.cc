@@ -1,11 +1,6 @@
 #include "piececlass.h"
 #include "boardclass.h"
 
-
-//make the pawn class more efficient. Refer to bishop class, implement something similar
-
-//iterate over all the attacking pieces & pass the kings position as the move
-
 void printvector(std::vector<std::string> vec){
     for(int x = 0; x<vec.size(); x++){
         std::cout<<vec[x]<<" ";
@@ -14,8 +9,12 @@ void printvector(std::vector<std::string> vec){
 }
 
 bool mated(ChessBoard& board, int color){
-    std::vector<int> KingPosition;
-    KingPosition = board.findKing(color);
+    std::vector<int> kingPos = board.findKing(color);
+    std::shared_ptr piecePtr = board[kingPos[1]][kingPos[0]];
+    std::shared_ptr<King> kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
+
+    if(kingPtr->getLegal(board.getBoard()).empty()) return true;
+
     return false;
 }
 
@@ -97,7 +96,12 @@ int main() {
 
     while(true) {
 
-        if(mated(board, moveNumber%2)){
+        kingPos = board.findKing(moveNumber%2);
+        piecePtr = board[kingPos[1]][kingPos[0]];
+        kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
+        kingPosString = "K"+ std::string(1, +static_cast<char>(kingPos[0]+97))+std::to_string(8-kingPos[1]);
+        legalMoves = kingPtr->getLegal(board.getBoard());
+        if(kingPtr != NULL && legalMoves.size() == 0 && kingPtr->inCheck(kingPosString, board.getBoard())){
             std::cout<<"Checkmate!"<<std::endl;
             break;
         }
@@ -173,8 +177,6 @@ int main() {
         } piecePtr = board[kingPos[1]][kingPos[0]];
 
         kingPosString = std::string(1, static_cast<char>(kingPos[0]+97))+std::to_string(8-kingPos[1]);
-
-        //if(board.isChecked(moveNumber%2, kingPosString)) std::cout<<"You are in check!"<<std::endl;
 
         kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
 

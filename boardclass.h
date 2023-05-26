@@ -82,22 +82,6 @@ public:
         return kingPosition;
     }
 
-    bool isChecked(int color, std::string originalPos) {
-        std::vector<int> kingPosition = findKing(color);
-        int kingX = kingPosition[0];
-        int kingY = kingPosition[1];
-        for (int i = 0; i < board.size(); ++i) {
-            for (int j = 0; j < board.size(); ++j) {
-                if (board[i][j]->getColor() != color) {
-                    if (board[i][j]->legalMove(originalPos, color, board)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     RowType& operator[](int index) {
         return board[index];
     }
