@@ -7,8 +7,9 @@
 //iterate over all the attacking pieces & pass the kings position as the move
 
 bool pawnMove(std::string move){
+    //std::cout<<"HERE!!!!!!!!"<<std::endl;
     if(move.length() == 2) return true;
-    if(move.length() == 4 && move.find('x') != std::string::npos) return true;
+    else if(move.length() == 4 && move.find('x') != std::string::npos) return true;
     return false;
 }
 
@@ -73,36 +74,53 @@ int main() {
     ChessBoard board;
     printBoard(board);
     int prevX, prevY;
+    std::string kingPosString;
+    std::vector<int> kingPos;
+    std::shared_ptr<Piece> piecePtr;
+    std::shared_ptr<King> kingPtr;
 
-    const auto& b = board.getBoard();
+    auto& b = board.getBoard();
 
     while(true) {
+
+
+        if(moveNumber%2 == 1){
+            std::cout<<"White's Move"<<std::endl;
+        } else {
+            std::cout<< "\033[0;01;02"<<"m"<< "Black's Move" << " "<<"\033[m"<<std::endl;
+        }
+        std::cout<<std::endl;
         std::cout << "Enter move: ";
         std::cin >> move;
+        if(move == "display"){
+            printBoard(board);
+            continue;
+        }
         if(move.length()<2 || move.length()>4){
             std::cout<<"Move is not possible!"<<std::endl;
             continue;
 
         } else {
-
-            
-
-            for (const auto& row : b){
-                std::cout<<std::endl;
+            for (const auto& row : board.getBoard()){
+                //std::cout<<std::endl;
                 for (const auto& piece : row) {
-                    //std::cout<<piece->legalMove(move,moveNumber%2,b)<<" ";
                     if(piece->getSymbol() == toupper(move[0]) && piece->getSymbol() != 
-                    'P' && piece->getColor() == moveNumber%2 && piece->legalMove(move, moveNumber%2, b) == 1){
-                        std::cout<<"here! "<<std::endl;
+                    'P' && piece->getColor() == moveNumber%2 && move.length() == 3 &&
+                    piece->legalMove(move, moveNumber%2, board.getBoard()) == 1){
                         possiblePiece.emplace_back(piece);
                     }
+                    //if(piece->getSymbol() == 'P') std::cout<<piece->legalMove(move, moveNumber%2, b)<<" ";
                     else if(piece->getSymbol() == 'P' && piece->getColor() == moveNumber%2 
-                    && piece->legalMove(move, moveNumber%2, b) == 1 && pawnMove(move)){
-                        possiblePiece.emplace_back(piece);//error here, checking both pawns
+                    && piece->legalMove(move, moveNumber%2, board.getBoard()) == 1 && pawnMove(move)){
+                        possiblePiece.emplace_back(piece);
                     }
                 }
             }            
         }
+
+        for(int x = 0; x<possiblePiece.size(); x++){
+            std::cout<<possiblePiece[x]->getSymbol()<<" ";
+        } std::cout<<std::endl;
 
         if(possiblePiece.size() > 1 && move.size() == 4){
             for(int x = possiblePiece.size()-1; x>-1; x--){
@@ -122,15 +140,42 @@ int main() {
 
         if(possiblePiece.empty() || possiblePiece.size()>1){
             std::cout<<"Move is not possible!"<<std::endl;
+            possiblePiece.clear();
             continue;
         }
+        prevX = (possiblePiece[0]->getX());
+        prevY = (possiblePiece[0]->getY());
+
 
         doMove(move, board, moveNumber, possiblePiece[0]);
 
-        possiblePiece.clear();
+        kingPos = board.findKing(moveNumber%2);
+        for(int x = 0; x<kingPos.size(); x++){
+            std::cout<<kingPos[x]<<" ";
+        } piecePtr = board[kingPos[1]][kingPos[0]];
 
-        //doMove(move, board, moveNumber);
+        kingPosString = std::string(1, static_cast<char>(kingPos[0]+97))+std::to_string(8-kingPos[1]);
+
+        //if(board.isChecked(moveNumber%2, kingPosString)) std::cout<<"You are in check!"<<std::endl;
+
+        kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
+
+        std::cout<<"KingPosString: "<<kingPosString<<std::endl;
+
+        kingPtr->printInfo();
+        //kingPtr->printMoves();
+
+        if (kingPtr != NULL && !kingPtr->inCheck(kingPosString, board.getBoard())){
+            std::cout << "You are in check!" << std::endl;
+            board.setPiece(prevX-1, prevY, possiblePiece[0]);
+            possiblePiece.clear();
+            //kingPtr->printInfo();
+            continue;
+        }
+
+        kingPosString = "";
         std::cout<<std::endl;;
+        possiblePiece.clear();
         printBoard(board);
         moveNumber++;
     }
