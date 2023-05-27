@@ -38,8 +38,11 @@ void printBoard(const ChessBoard& board) {
     //ESC[background_colour;Text_colourm output ESC[m”
 }
 
-void doMove(const std::string& move, ChessBoard& board, int moveNumber, std::shared_ptr<Piece> passedPiece = NULL) {//rn only works for three letter things like ke5...
-    //cout<<move[2]<<endl;
+void shortCastle(ChessBoard& board, int moveNumber){
+
+}
+
+void doMove(const std::string& move, ChessBoard& board, int moveNumber, std::shared_ptr<Piece> passedPiece = NULL) {//clean up if have time
     int moveSize = move.length()-2;
     char m = move[0];
     char horizontalCoord = move[moveSize];
@@ -101,7 +104,8 @@ int main() {
         kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
         kingPosString = "K"+ std::string(1, +static_cast<char>(kingPos[0]+97))+std::to_string(8-kingPos[1]);
         legalMoves = kingPtr->getLegal(board.getBoard());
-        if(kingPtr != NULL && legalMoves.size() == 0 && kingPtr->inCheck(kingPosString, board.getBoard())){
+
+        if(kingPtr != NULL && legalMoves.size() == 0 && !kingPtr->inCheck(kingPosString, board.getBoard())){
             std::cout<<"Checkmate!"<<std::endl;
             break;
         }
@@ -118,6 +122,15 @@ int main() {
             printBoard(board);
             continue;
         }
+
+        if(move[0] == '?' && move.length() == 4 && board.findPiece(move)){
+            printvector(board.findPiece(move)->getLegal(board.getBoard()));
+            if(board.findPiece(move)->getLegal(board.getBoard()).empty()) std::cout<<"No Legal Moves "<<std::endl;
+            continue;
+        } if(move[0] == '?'){
+            std::cout<<"Not a valid piece "<<std::endl;
+        }
+
         if(move.length()<2 || move.length()>4){
             std::cout<<"Move is not possible!"<<std::endl;
             continue;
@@ -128,12 +141,12 @@ int main() {
                 for (const auto& piece : row) {
                     if(piece->getSymbol() == toupper(move[0]) && piece->getSymbol() != 
                     'P' && piece->getColor() == moveNumber%2 && move.length() == 3 &&
-                    piece->legalMove(move, moveNumber%2, board.getBoard()) == 1){
+                    piece->legalMove(move, board.getBoard()) == 1){
                         possiblePiece.emplace_back(piece);
                     }
                     //if(piece->getSymbol() == 'P') std::cout<<piece->legalMove(move, moveNumber%2, b)<<" ";
                     else if(piece->getSymbol() == 'P' && piece->getColor() == moveNumber%2 
-                    && piece->legalMove(move, moveNumber%2, board.getBoard()) == 1 && pawnMove(move)){
+                    && piece->legalMove(move, board.getBoard()) == 1 && pawnMove(move)){
                         possiblePiece.emplace_back(piece);
                     }
                 }

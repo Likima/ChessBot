@@ -68,6 +68,22 @@ public:
         board[8-y][x] = std::move(piece); // move the piece to the new position
     }
 
+    std::shared_ptr<Piece> findPiece(std::string location){
+        int pieceSymbol = std::toupper(location[1]);
+        char pieceX = location[2]-97;
+        char pieceY = 8-(location[3]-'0');
+
+        for(int i = 0; i<board.size(); ++i){
+            for(int j = 0; j< board.size(); ++j){
+                if(i == pieceY && j == pieceX && board[i][j]->getSymbol() == pieceSymbol){
+                    board[i][j]->printInfo();
+                    return board[i][j];
+                }
+            }
+        }
+    return NULL;
+    }
+
     std::vector<int> findKing(int color) {
         std::vector<int> kingPosition;
         for (int i = 0; i < board.size(); ++i) {

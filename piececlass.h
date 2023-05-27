@@ -31,7 +31,7 @@ public:
     Piece(int color, char symbol) : symbol(symbol), color(color){}
     Piece(int color, char symbol, int x, int y) : symbol(symbol), color(color), x(x), y(y){}
 
-    virtual bool legalMove(std::string move, int color, std::vector<RowType> Board){return false;}
+    virtual bool legalMove(std::string move, std::vector<RowType> Board){return false;}
     virtual void movePiece(std::string move){};
     virtual ~Piece() {}
     
@@ -39,6 +39,7 @@ public:
     char getSymbol() const {return symbol;}
     int getX() const {return x;}
     int getY() const {return y;}
+    int getFirstMove() const{return firstMove;}
 
     void printInfo(){
         std::cout<<"x: "<<x<<", "<<"y: "<<y<<", "
@@ -52,7 +53,7 @@ public:
         for (const auto& let : coords) {
             for (int x = 1; x<8; x++){
                 //std::cout<<"MOVES CHECKED "<< std::string(1, getSymbol())+std::string(1, let)+std::to_string(x)<<std::endl;
-                if(legalMove(std::string(1, getSymbol())+std::string(1, let)+std::to_string(x)+"^", getColor(), board)){
+                if(legalMove("^"+std::string(1, getSymbol())+std::string(1, let)+std::to_string(x), board)){
                     legalMoves.emplace_back(std::string(1, getSymbol())+std::string(1, let)+std::to_string(x));
                 }
             }
@@ -60,7 +61,7 @@ public:
         return legalMoves;
     }
 
-    bool checkRook(std::string move, int color, std::vector<RowType> Board){
+    bool checkRook(std::string move, std::vector<RowType> Board){
         int moveSize = move.length()-2;
         //std::cout<<"("<<getX()<<", "<<(move[moveSize]-96)<<", "<<getY()<<", "<<(move[moveSize+1] - '0')<<")"<<std::endl;
         if(getX() == (move[moveSize]-96) && getY() == (move[moveSize+1]- '0')){//checking if moving to same square
@@ -105,7 +106,7 @@ public:
         return false;
     }
 
-    bool checkBishop(std::string move, int color, std::vector<RowType> Board) {
+    bool checkBishop(std::string move, std::vector<RowType> Board) {
         if (getX() == (move[move.length() - 2] - 96) && getY() == (move[move.length() - 1] - '0')) {
             // Checking if moving to the same square
             return false;
@@ -158,7 +159,7 @@ class Pawn: public Piece{
     public:
         Pawn(char color, int symbol, int x, int y) : Piece(color, 'P', x, y){}
 
-    bool legalMove(std::string move, int color, std::vector<RowType> Board) override {
+    bool legalMove(std::string move, std::vector<RowType> Board) override {
         int moveSize = move.length() - 2;
         int multi = 1;
         bool isTaking = move.find('x') != std::string::npos;
@@ -207,8 +208,8 @@ class Rook: public Piece{
     public:
     Rook(char color, int symbol, int x, int y) : Piece(color, 'R', x, y){}
 
-    bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
-        return checkRook(move, color, Board);
+    bool legalMove(std::string move, std::vector<RowType> Board) override{
+        return checkRook(move, Board);
     }
 };
 
@@ -216,23 +217,23 @@ class Bishop: public Piece{
     public:
     Bishop(char color, int symbol, int x, int y) : Piece(color, 'B', x, y){}
 
-    bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
-        return checkBishop(move, color, Board);
+    bool legalMove(std::string move, std::vector<RowType> Board) override{
+        return checkBishop(move, Board);
     }
 };
 
 class Queen:public Piece{
     public:
     Queen(char color, int symbol, int x, int y) : Piece(color, 'Q', x, y){}
-    bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
-        return(checkRook(move,color,Board) || checkBishop(move,color,Board));
+    bool legalMove(std::string move, std::vector<RowType> Board) override{
+        return(checkRook(move,Board) || checkBishop(move,Board));
     }
 };
 
 class Knight:public Piece{
     public:
     Knight(char color, int symbol, int x, int y) : Piece(color, 'N', x, y){}
-    bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
+    bool legalMove(std::string move, std::vector<RowType> Board) override{
         if(getX() == (move[move.length()-2]-96) && getY() == (move[move.length()-1]- '0')){//checking if moving to same square
             return false;
         }
@@ -252,9 +253,6 @@ class King:public Piece{
     King(char color, int symbol, int x, int y) : Piece(color, 'K', x, y){}
 
     bool inCheck(std::string move, const std::vector<RowType>& Board) {
-        int targetX = move[move.length() - 2] - 96;
-        int targetY = move[move.length() - 1] - '0';
-
         for (const auto& row : Board) {
             for (const auto& piece : row) {
                 int pieceColor = piece->getColor();
@@ -262,12 +260,12 @@ class King:public Piece{
 
                 if (pieceColor != getColor() && pieceSymbol != 'K' && pieceSymbol != '.') {
                     if (pieceSymbol == 'P') {
-                        if (piece->legalMove((char)(getX() + 96) + "x" + move + "^", pieceColor, Board)) {
+                        if (piece->legalMove((char)(getX() + 96) + "x" + move + "^", Board)) {
                             //piece->printInfo();
                             return false;
                         }
                     }
-                    if(pieceSymbol != 'P' && piece->legalMove(pieceSymbol+move, pieceColor, Board)) {
+                    if(pieceSymbol != 'P' && piece->legalMove(pieceSymbol+move, Board)) {
                         //piece->printInfo();
                         //std::cout << "You Are In Check!" << std::endl;
                         return false;
@@ -279,11 +277,65 @@ class King:public Piece{
     return true;
 }
 
-    bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
+    bool legalMove(std::string move, std::vector<RowType> Board) override{
         if(getX() == (move[move.length()-2]-96) && getY() == (move[move.length()-1]- '0')){//checking if moving to same square
             return false;
         }
-        if(std::abs((move[move.length()-2]-96) - getX()) <= 1 || std::abs((move[move.length()-1]-'0') - getY() <= 1)) return(inCheck(move, Board));
+        if(std::abs((move[move.length()-2]-96) - getX()) <= 1 && std::abs((move[move.length()-1]-'0') - getY() <= 1)){
+            if(Board[move[move.length()-1]-'0'][move[move.length()-2]-97]->getSymbol() == '.') return(inCheck(move, Board));
+        }
+        return false;
+    }
+
+    bool canCastle(std::string move, std::vector<RowType> Board) {
+        std::string kingPosString;
+        std::shared_ptr<King> kingPtr;
+        if (move == "O-O") {
+            if (getColor() == White) {
+                if (Board[7][4]->getSymbol() == 'K' && Board[7][7]->getSymbol() == 'R' && Board[7][5]->getSymbol() == '.' && Board[7][6]->getSymbol() == '.') {
+                    if (Board[7][4]->getFirstMove() && Board[7][7]->getFirstMove()) {
+                        kingPtr = std::dynamic_pointer_cast<King>(Board[7][5]);
+                        if (kingPtr->inCheck("f1", Board) || kingPtr->inCheck("g1", Board)) {
+                            return false;
+                        }
+                        return true;
+                    }
+                }
+            } else {
+                if (Board[0][4]->getSymbol() == 'K' && Board[0][7]->getSymbol() == 'R' && Board[0][5]->getSymbol() == '.' && Board[0][6]->getSymbol() == '.') {
+                    if (Board[0][4]->getFirstMove() && Board[0][7]->getFirstMove()) {
+                        kingPtr = std::dynamic_pointer_cast<King>(Board[0][5]);
+                        if (kingPtr->inCheck("f8", Board) || kingPtr->inCheck("g8", Board)) {
+                            return false;
+                        }
+                        return true;
+                    }
+                }
+            }
+        } else if (move == "O-O-O") {
+            if (getColor() == White) {
+                if (Board[7][4]->getSymbol() == 'K' && Board[7][0]->getSymbol() == 'R' && Board[7][1]->getSymbol() == '.' && Board[7][2]->getSymbol() == '.' && Board[7][3]->getSymbol() == '.') {
+                    if (Board[7][4]->getFirstMove() && Board[7][0]->getFirstMove()) {
+                        kingPtr = std::dynamic_pointer_cast<King>(Board[7][3]);
+                        if (kingPtr->inCheck("d1", Board) || kingPtr->inCheck("c1", Board)) {
+                            return false;
+                        }
+                        return true;
+                    }
+                }
+            } else {
+                if (Board[0][4]->getSymbol() == 'K' && Board[0][0]->getSymbol() == 'R' && Board[0][1]->getSymbol() == '.' && Board[0][2]->getSymbol() == '.' && Board[0][3]->getSymbol() == '.') {
+                    if (Board[0][4]->getFirstMove() && Board[0][0]->getFirstMove()) {
+                        kingPtr = std::dynamic_pointer_cast<King>(Board[0][3]);
+                        if (kingPtr->inCheck("d8", Board) || kingPtr->inCheck("c8", Board)) {
+                            return false;
+                        }
+                        return true;
+                    }
+                }
+            }
+        }
+
         return false;
     }
 };
