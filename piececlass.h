@@ -22,7 +22,7 @@ class Piece {
 public:
     const static int BLACK = 0;
     const static int WHITE = 1;
-    bool firstMove = true;
+    //bool firstMove = true;
 
     Piece(const Piece& other) : color(other.color), symbol(other.symbol), x(other.x), y(other.y){}
 
@@ -136,7 +136,7 @@ public:
     }
 
 
-    
+    void setFirstMove(){this->firstMove = false;}
     void setColor(int color) {this->color = color;}
     void setSymbol(char symbol) {this->symbol = symbol;}
     void setX(int x){this->x = x;}
@@ -153,6 +153,7 @@ private:
     int incY;
     int movingX;
     int movingY;
+    bool firstMove = true;
 };
 
 class Pawn: public Piece{
@@ -178,22 +179,22 @@ class Pawn: public Piece{
         }
 
         if (currentX == targetX && abs(currentY - targetY) == 1 && Board[8 + multi - currentY][currentX - 1]->getSymbol() == '.') {
-            if (!isChecking) this->firstMove = false;
+            if (!isChecking) setFirstMove();
             return true;
-        } else if (firstMove && currentX == targetX && abs(currentY - targetY) == 2 && Board[8 + multi - currentY][currentX - 1]->getSymbol() == '.' && Board[8 + (2*multi) - currentY][currentX - 1]->getSymbol() == '.') {
-            if (!isChecking) this->firstMove = false;
+        } else if (getFirstMove() && currentX == targetX && abs(currentY - targetY) == 2 && Board[8 + multi - currentY][currentX - 1]->getSymbol() == '.' && Board[8 + (2*multi) - currentY][currentX - 1]->getSymbol() == '.') {
+            if (!isChecking) setFirstMove();
             return true;
         } else if (isTaking && currentX == move[0] - 96 && currentX != 1 && abs(currentX - targetX) == 1 && Board[8 + multi - currentY][currentX - 2]->getSymbol() != '.') {
             if (Board[8 + multi - currentY][currentX - 2]->getColor() == getColor()) {
                 return false;
             }
-            if (!isChecking) this->firstMove = false;
+            if (!isChecking) setFirstMove();
             return true;
         } else if (isTaking && currentX == move[0] - 96 && currentX != 8 && abs(currentX - targetX) == 1 && Board[8 + multi - currentY][currentX]->getSymbol() != '.') {
             if (Board[8 + multi - currentY][currentX]->getColor() == getColor()) {
                 return false;
             }
-            if (!isChecking) this->firstMove = false;
+            if (!isChecking) setFirstMove();
             return true;
         }
 
@@ -282,7 +283,7 @@ class King:public Piece{
             return false;
         }
         if(std::abs((move[move.length()-2]-96) - getX()) <= 1 && std::abs((move[move.length()-1]-'0') - getY() <= 1)){
-            if(Board[move[move.length()-1]-'0'][move[move.length()-2]-97]->getSymbol() == '.') return(inCheck(move, Board));
+            if(Board[8-(move[move.length()-1]-'0')][move[move.length()-2]-97]->getSymbol() == '.') return(inCheck(move, Board));
         }
         return false;
     }
