@@ -81,7 +81,7 @@ public:
                 }
             }
         }
-    return NULL;
+    return std::shared_ptr<Piece>(nullptr);
     }
 
     std::vector<int> findKing(int color) {

@@ -47,7 +47,6 @@ public:
     }
 
     std::vector<std::string> getLegal(std::vector<RowType> board){
-        //const auto& b = board.getBoard();
         std::vector<std::string> legalMoves;
         const std::vector<char> coords = {'a','b','c','d','e','f','g','h'};
         for (const auto& let : coords) {
@@ -63,10 +62,7 @@ public:
 
     bool checkRook(std::string move, std::vector<RowType> Board){
         int moveSize = move.length()-2;
-        //std::cout<<"("<<getX()<<", "<<(move[moveSize]-96)<<", "<<getY()<<", "<<(move[moveSize+1] - '0')<<")"<<std::endl;
-        if(getX() == (move[moveSize]-96) && getY() == (move[moveSize+1]- '0')){//checking if moving to same square
-            return false;
-        }
+        if(getX() == (move[moveSize]-96) && getY() == (move[moveSize+1]- '0')){return false;}
         else if(getX() == (move[moveSize]-96)){//if the rook is travelling vertically
             movingY = move[moveSize+1]-'0';
             if(getY()<movingY){
@@ -254,21 +250,22 @@ class King:public Piece{
     King(char color, int symbol, int x, int y) : Piece(color, 'K', x, y){}
 
     bool inCheck(std::string move, const std::vector<RowType>& Board) {
+        int pieceColor;
+        char pieceSymbol;
         for (const auto& row : Board) {
             for (const auto& piece : row) {
-                int pieceColor = piece->getColor();
-                char pieceSymbol = piece->getSymbol();
+                pieceColor = piece->getColor();
+                pieceSymbol = piece->getSymbol();
 
                 if (pieceColor != getColor() && pieceSymbol != 'K' && pieceSymbol != '.') {
                     if (pieceSymbol == 'P') {
-                        if (piece->legalMove((char)(getX() + 96) + "x" + move + "^", Board)) {
-                            //piece->printInfo();
+                        if (piece->legalMove("^"+std::string(1,(char)(getX() + 96)) + "x" + move, Board)) {
+                            printInfo();
                             return false;
                         }
                     }
                     if(pieceSymbol != 'P' && piece->legalMove(pieceSymbol+move, Board)) {
-                        //piece->printInfo();
-                        //std::cout << "You Are In Check!" << std::endl;
+                        printInfo();
                         return false;
                     }
                 }
@@ -291,6 +288,7 @@ class King:public Piece{
     bool canCastle(std::string move, std::vector<RowType> Board) {
         std::string kingPosString;
         std::shared_ptr<King> kingPtr;
+
         if (move == "O-O") {
             if (getColor() == White) {
                 if (Board[7][4]->getSymbol() == 'K' && Board[7][7]->getSymbol() == 'R' && Board[7][5]->getSymbol() == '.' && Board[7][6]->getSymbol() == '.') {
