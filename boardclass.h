@@ -55,14 +55,13 @@ public:
         board.emplace_back(EIGHTH_RANK);
     }
 
-    const std::vector<RowType>& getBoard() const {
-        return board;
-    }
+    const std::vector<RowType>& getBoard() const {return board;}
 
     
 
-    void setPiece(int x, int y, std::shared_ptr<Piece> piece) {
-        board[8-(piece->getY())][(piece->getX())-1] = std::make_shared<Piece>('.'); // set old position to empty
+    void setPiece(int x, int y, std::shared_ptr<Piece> piece, int isChecking = 0) {
+
+        if(isChecking == 0) board[8-(piece->getY())][(piece->getX())-1] = std::make_shared<Piece>('.'); // set old position to empty
         piece->setX(x+1); // set new position for the piece
         piece->setY(y);
         board[8-y][x] = std::move(piece); // move the piece to the new position

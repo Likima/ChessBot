@@ -11,13 +11,7 @@ void printvector(std::vector<std::string> vec){
 bool mated(ChessBoard& board, int color){
     std::vector<int> kingPos = board.findKing(color);
     std::shared_ptr<Piece> piecePtr = board[kingPos[1]][kingPos[0]];
-    std::shared_ptr<King> kingPtr;
-    if(piecePtr != nullptr){
-        kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
-    } else {
-        std::cout<<"ERROR: No king found"<<std::endl;
-        return false;
-    }
+    std::shared_ptr<King> kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
 
     if(kingPtr->getLegal(board.getBoard()).empty()) return true;
 
@@ -45,38 +39,29 @@ void printBoard(const ChessBoard& board) {
 }
 
 void shortCastle(ChessBoard& board, int moveNumber){
-    int n = 0;
-    if(moveNumber == 0) n = 7;
-    std::shared_ptr<King> king = std::dynamic_pointer_cast<King>(board.findPiece("-Ke"+std::to_string(n+1)));
-    std::shared_ptr<Rook> rook = std::dynamic_pointer_cast<Rook>(board.findPiece("-Rh"+std::to_string(n+1)));
+    int n = 1;
+    if(moveNumber == 0) n = 8;
+    std::shared_ptr<King> king = std::dynamic_pointer_cast<King>(board.findPiece("-Ke"+std::to_string(n)));
+    std::shared_ptr<Rook> rook = std::dynamic_pointer_cast<Rook>(board.findPiece("-Rh"+std::to_string(n)));
     board.setPiece(6,n,king);
     board.setPiece(5,n,rook);
 }
 
 void longCastle(ChessBoard& board, int moveNumber){
-    int n = 0;
-    if(moveNumber == 0) n = 7;
-    std::shared_ptr<King> king = std::dynamic_pointer_cast<King>(board.findPiece("-Ke"+std::to_string(n+1)));
-    std::shared_ptr<Piece> rook = std::dynamic_pointer_cast<Rook>(board.findPiece("-Ra"+std::to_string(n+1)));
+    int n = 1;
+    if(moveNumber == 0) n = 8;
+    std::shared_ptr<Piece> king = std::dynamic_pointer_cast<King>(board.findPiece("-Ke"+std::to_string(n)));
+    std::shared_ptr<Piece> rook = std::dynamic_pointer_cast<Rook>(board.findPiece("-Ra"+std::to_string(n)));
     board.setPiece(2,n,king);
     board.setPiece(3,n,rook);
 }
 
-void doMove(const std::string& move, ChessBoard& board, int moveNumber, std::shared_ptr<Piece> passedPiece = nullptr) {//clean up if have time
-    
-    std::vector<int> kingPos = board.findKing(moveNumber%2);
+void castle(std::string move, ChessBoard& board, int moveNumber){
+    if(move == "O-O") shortCastle(board, moveNumber);
+    else if(move == "O-O-O") longCastle(board, moveNumber);
+}
 
-    std::shared_ptr<King> king = std::dynamic_pointer_cast<King>(board[kingPos[1]][kingPos[0]]);
-    if(king == NULL) std::cout<<"ERROR"<<std::endl;    
-
-    if(move == "O-O" && king->canCastle(move, board.getBoard())){
-        std::cout<<"HERE"<<std::endl;
-        shortCastle(board, moveNumber);
-        return;
-    } else if(move == "O-O-O" && king->canCastle(move, board.getBoard())){
-        longCastle(board, moveNumber);
-        return;
-    }
+void doMove(const std::string& move, ChessBoard& board, int moveNumber, std::shared_ptr<Piece> passedPiece = NULL) {//clean up if have time
     
     int moveSize = move.length()-2;
     char m = move[0];
@@ -128,6 +113,7 @@ int main() {
     std::vector<int> kingPos;
     std::shared_ptr<Piece> piecePtr;
     std::shared_ptr<King> kingPtr;
+    std::shared_ptr<Piece> nullpiece = std::make_shared<Piece>('.');
 
     std::vector<std::string> legalMoves;
     auto& b = board.getBoard();
@@ -164,6 +150,11 @@ int main() {
             continue;
         } if(move[0] == '?'){
             std::cout<<"Not a valid piece "<<std::endl;
+            continue;
+        }
+        if(move[0] == '!' && move.length() == 4 && board.findPiece(move)){
+            board.setPiece((board.findPiece(move)->getX()-1),(board.findPiece(move)->getY()),nullpiece, 1);
+            continue;
         }
 
         std::cout<<move.length()<<std::endl;
@@ -171,9 +162,19 @@ int main() {
         if(move.length()<2){
             std::cout<<"Move is not possible!"<<std::endl;
             continue;
-        } else if(move == "O-O-O" || move == "O-O"){
-            std::cout<<"hasodifhasopeifh"<<std::endl;
-            possiblePiece.emplace_back(move);
+
+        } else if(move == "O-O" || move == "O-O-O"){
+            if(kingPtr->canCastle(move, board.getBoard())){
+                std::cout<<"Castled"<<std::endl;
+                castle(move, board, moveNumber%2);
+                moveNumber++;
+                printBoard(board);
+                continue;
+            }
+            else{
+                std::cout<<"You Cannot Castle! "<<std::endl;
+                continue;
+            } 
         } else {
             for (const auto& row : board.getBoard()){
                 //std::cout<<std::endl;

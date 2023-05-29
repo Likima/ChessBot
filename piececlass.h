@@ -174,13 +174,13 @@ class Pawn: public Piece{
             return false;  // Same square
         }
 
-        if (currentX == targetX && abs(currentY - targetY) == 1 && Board[8 + multi - currentY][currentX - 1]->getSymbol() == '.') {
+        if (currentX == targetX && currentY - targetY == 1 * multi && Board[8 + multi - currentY][currentX - 1]->getSymbol() == '.') {
             if (!isChecking) setFirstMove();
             return true;
-        } else if (getFirstMove() && currentX == targetX && abs(currentY - targetY) == 2 && Board[8 + multi - currentY][currentX - 1]->getSymbol() == '.' && Board[8 + (2*multi) - currentY][currentX - 1]->getSymbol() == '.') {
+        } else if (getFirstMove() && currentX == targetX && currentY - targetY == 2 * multi && Board[8 + multi - currentY][currentX - 1]->getSymbol() == '.' && Board[8 + (2*multi) - currentY][currentX - 1]->getSymbol() == '.') {
             if (!isChecking) setFirstMove();
             return true;
-        } else if (isTaking && currentX == move[0] - 96 && currentX != 1 && abs(currentX - targetX) == 1 && Board[8 + multi - currentY][currentX - 2]->getSymbol() != '.') {
+        } else if (isTaking && currentX == move[0] - 96 && currentX != 1 && currentX - targetX == 1 * multi && Board[8 + multi - currentY][currentX - 2]->getSymbol() != '.') {
             if (Board[8 + multi - currentY][currentX - 2]->getColor() == getColor()) {
                 return false;
             }
@@ -254,18 +254,22 @@ class King:public Piece{
         char pieceSymbol;
         for (const auto& row : Board) {
             for (const auto& piece : row) {
-                pieceColor = piece->getColor();
-                pieceSymbol = piece->getSymbol();
+                int pieceColor = piece->getColor();
+                //std::cout << "Checking for check" << std::endl;
+                char pieceSymbol = piece->getSymbol();
+
+                //piece->printInfo();
 
                 if (pieceColor != getColor() && pieceSymbol != 'K' && pieceSymbol != '.') {
                     if (pieceSymbol == 'P') {
                         if (piece->legalMove("^"+std::string(1,(char)(getX() + 96)) + "x" + move, Board)) {
-                            printInfo();
+                            piece->printInfo();
                             return false;
                         }
                     }
-                    if(pieceSymbol != 'P' && piece->legalMove(pieceSymbol+move, Board)) {
-                        printInfo();
+                    if(pieceSymbol != 'P' && piece->legalMove(std::to_string(pieceSymbol)+move, Board)) {
+                        piece->printInfo();
+                        //std::cout << "You Are In Check!" << std::endl;
                         return false;
                     }
                 }
@@ -293,8 +297,11 @@ class King:public Piece{
             if (getColor() == White) {
                 if (Board[7][4]->getSymbol() == 'K' && Board[7][7]->getSymbol() == 'R' && Board[7][5]->getSymbol() == '.' && Board[7][6]->getSymbol() == '.') {
                     if (Board[7][4]->getFirstMove() && Board[7][7]->getFirstMove()) {
-                        kingPtr = std::dynamic_pointer_cast<King>(Board[7][5]);
-                        if (kingPtr->inCheck("f1", Board) || kingPtr->inCheck("g1", Board)) {
+                        //kingPtr = std::dynamic_pointer_cast<King>(Board[7][4]);
+                        std::cout<<"Here"<<std::endl;
+                        if(inCheck("f1", Board)) std::cout<<"f1"<<std::endl;
+                        if(inCheck("g1", Board)) std::cout<<"g1"<<std::endl;
+                        if (!inCheck("f1", Board) || !inCheck("g1", Board)) {
                             return false;
                         }
                         return true;
@@ -303,8 +310,8 @@ class King:public Piece{
             } else {
                 if (Board[0][4]->getSymbol() == 'K' && Board[0][7]->getSymbol() == 'R' && Board[0][5]->getSymbol() == '.' && Board[0][6]->getSymbol() == '.') {
                     if (Board[0][4]->getFirstMove() && Board[0][7]->getFirstMove()) {
-                        kingPtr = std::dynamic_pointer_cast<King>(Board[0][5]);
-                        if (kingPtr->inCheck("f8", Board) || kingPtr->inCheck("g8", Board)) {
+                        kingPtr = std::dynamic_pointer_cast<King>(Board[0][4]);
+                        if (!kingPtr->inCheck("f8", Board) || !kingPtr->inCheck("g8", Board)) {
                             return false;
                         }
                         return true;
@@ -315,8 +322,8 @@ class King:public Piece{
             if (getColor() == White) {
                 if (Board[7][4]->getSymbol() == 'K' && Board[7][0]->getSymbol() == 'R' && Board[7][1]->getSymbol() == '.' && Board[7][2]->getSymbol() == '.' && Board[7][3]->getSymbol() == '.') {
                     if (Board[7][4]->getFirstMove() && Board[7][0]->getFirstMove()) {
-                        kingPtr = std::dynamic_pointer_cast<King>(Board[7][3]);
-                        if (kingPtr->inCheck("d1", Board) || kingPtr->inCheck("c1", Board)) {
+                        kingPtr = std::dynamic_pointer_cast<King>(Board[7][4]);
+                        if (!kingPtr->inCheck("d1", Board) || !kingPtr->inCheck("c1", Board)) {
                             return false;
                         }
                         return true;
@@ -325,8 +332,8 @@ class King:public Piece{
             } else {
                 if (Board[0][4]->getSymbol() == 'K' && Board[0][0]->getSymbol() == 'R' && Board[0][1]->getSymbol() == '.' && Board[0][2]->getSymbol() == '.' && Board[0][3]->getSymbol() == '.') {
                     if (Board[0][4]->getFirstMove() && Board[0][0]->getFirstMove()) {
-                        kingPtr = std::dynamic_pointer_cast<King>(Board[0][3]);
-                        if (kingPtr->inCheck("d8", Board) || kingPtr->inCheck("c8", Board)) {
+                        kingPtr = std::dynamic_pointer_cast<King>(Board[0][4]);
+                        if (!kingPtr->inCheck("d8", Board) || !kingPtr->inCheck("c8", Board)) {
                             return false;
                         }
                         return true;
