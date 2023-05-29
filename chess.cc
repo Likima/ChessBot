@@ -157,6 +157,8 @@ int main() {
             continue;
         }
 
+        std::cout<<move.length()<<std::endl;
+
         if(move.length()<2){
             std::cout<<"Move is not possible!"<<std::endl;
             continue;
@@ -191,9 +193,11 @@ int main() {
             }            
         }
 
+        /*
         for(int x = 0; x<possiblePiece.size(); x++){
             std::cout<<possiblePiece[x]->getSymbol()<<" ";
         } std::cout<<std::endl;
+        */
 
         if(possiblePiece.size() > 1 && move.size() == 4){
             for(int x = possiblePiece.size()-1; x>-1; x--){
