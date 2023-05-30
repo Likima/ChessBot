@@ -165,7 +165,7 @@ class Pawn: public Piece{
         int multi = 1;
         bool isTaking = move.find('x') != std::string::npos;
         bool isChecking = move.find('^') != std::string::npos;
-        if(isChecking) isTaking = true;
+        if(isChecking) isTaking = true; //need to make sure that the piece is taking if it is checking add the exf4 or something
 
         int targetX = move[moveSize] - 96;
         int targetY = move[moveSize + 1] - '0';
@@ -240,7 +240,7 @@ class Knight:public Piece{
 
         if(getX()+2 == move[move.length()-2]-96 || getX()-2 == move[move.length()-2]-96){
             if(getY()+1 == move[move.length()-1]-'0' || getY()-1 == move[move.length()-1]-'0'){
-                if((Board[8-(move[move.length()-1]-'0')][move[move.length()-2]-97])->getSymbol() != '.'){
+                if((Board[8-(move[move.length()-1]-'0')][move[move.length()-2]-97])->getSymbol() == '.'){
                     return true;
                 }
                 return(((Board[8-(move[move.length()-1]-'0')][move[move.length()-2]-97])->getSymbol() != '.') && (Board[8-(move[move.length()-1]-'0')][move[move.length()-2]-97])->getColor() != getColor());//checking if moving to same square
@@ -249,7 +249,7 @@ class Knight:public Piece{
         }
         else if(getY()+2 == move[move.length()-1]-'0' || getY()-2 == move[move.length()-1]-'0'){
             if(getX()+1 == move[move.length()-2]-96 || getX()-1 == move[move.length()-2]-96){
-                if((Board[8-(move[move.length()-1]-'0')][move[move.length()-2]-97])->getSymbol() != '.'){
+                if((Board[8-(move[move.length()-1]-'0')][move[move.length()-2]-97])->getSymbol() == '.'){
                     return true;
                 }
                 return(((Board[8-(move[move.length()-1]-'0')][move[move.length()-2]-97])->getSymbol() != '.') && (Board[8-(move[move.length()-1]-'0')][move[move.length()-2]-97])->getColor() != getColor());//checking if moving to same square
@@ -299,8 +299,9 @@ class King:public Piece{
         if(getX() == (move[move.length()-2]-96) && getY() == (move[move.length()-1]- '0')){//checking if moving to same square
             return false;
         }
-        if(std::abs((move[move.length()-2]-96) - getX()) <= 1 && std::abs((move[move.length()-1]-'0') - getY() <= 1)){
+        if(((std::abs(((move[move.length()-2])-96) - getX()) <= 1 && std::abs(((move[move.length()-1]) - '0') - getY()) <= 1))){
             if(Board[8-(move[move.length()-1]-'0')][move[move.length()-2]-97]->getSymbol() == '.') return(inCheck(move, Board));
+            else if(Board[8-(move[move.length()-1]-'0')][move[move.length()-2]-97]->getSymbol() != '.' && Board[8-(move[move.length()-1]-'0')][move[move.length()-2]-97]->getColor() != getColor()) return(inCheck(move, Board));
         }
         return false;
     }
