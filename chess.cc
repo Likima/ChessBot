@@ -1,5 +1,6 @@
 #include "piececlass.h"
 #include "boardclass.h"
+#include "chessalgorithm.h"
 
 void printvector(std::vector<std::string> vec){
     for(int x = 0; x<vec.size(); x++){
@@ -35,7 +36,6 @@ void printBoard(const ChessBoard& board) {
 
         std::cout << std::endl;
     }
-    //ESC[background_colour;Text_colourm output ESC[m”
 }
 
 void shortCastle(ChessBoard& board, int moveNumber){
@@ -109,6 +109,8 @@ int main() {
     ChessBoard board;
     printBoard(board);
     int prevX, prevY;
+    char BotSide;
+    int BotMove;
     std::string kingPosString;
     std::vector<int> kingPos;
     std::shared_ptr<Piece> piecePtr;
@@ -118,16 +120,41 @@ int main() {
     std::vector<std::string> legalMoves;
     auto& b = board.getBoard();
 
-    while(true) {
+    std::cout<<"What Side Are You Playing? [B/W]"<<std::endl;
+    if(std::cin>>BotSide){
+        if(BotSide == 'B') BotMove = 1;
+        else if(BotSide == 'W') BotMove = 0;
+        else {
+            std::cout<<"Invalid Input"<<std::endl;
+            return 0;
+        }
+    } else {
+        std::cout<<"Invalid Input"<<std::endl;
+        return 0;
+    }
 
+    while(true) {
         kingPos = board.findKing(moveNumber%2);
         piecePtr = board[kingPos[1]][kingPos[0]];
         kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
         kingPosString = "K"+ std::string(1, +static_cast<char>(kingPos[0]+97))+std::to_string(8-kingPos[1]);
         legalMoves = kingPtr->getLegal(board.getBoard());
 
+        if(BotMove == moveNumber%2){
+            //doMove(moveChoice(board, moveNumber%2), board, moveNumber%2);
+            moveChoice(board, moveNumber%2);
+            moveNumber++;
+            printBoard(board);
+            continue;
+        }
+
         if(kingPtr != NULL && legalMoves.size() == 0 && !kingPtr->inCheck(kingPosString, board.getBoard())){
             std::cout<<"Checkmate!"<<std::endl;
+            if(moveNumber%2 == 1){
+                std::cout<<"White Wins!"<<std::endl;
+            } else {
+                std::cout<<"Black Wins!"<<std::endl;
+            }
             break;
         }
 
@@ -193,11 +220,6 @@ int main() {
             }            
         }
 
-        /*
-        for(int x = 0; x<possiblePiece.size(); x++){
-            std::cout<<possiblePiece[x]->getSymbol()<<" ";
-        } std::cout<<std::endl;
-        */
 
         if(possiblePiece.size() > 1 && move.size() == 4){
             for(int x = possiblePiece.size()-1; x>-1; x--){
@@ -226,6 +248,8 @@ int main() {
 
         doMove(move, board, moveNumber, possiblePiece[0]);
 
+        if(possiblePiece[0]->getFirstMove()){possiblePiece[0]->setFirstMove();}
+
         kingPos = board.findKing(moveNumber%2);
         for(int x = 0; x<kingPos.size(); x++){
             std::cout<<kingPos[x]<<" ";
@@ -235,11 +259,6 @@ int main() {
 
         kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
 
-        std::cout<<"KingPosString: "<<kingPosString<<std::endl;
-
-        kingPtr->printInfo();
-        //kingPtr->printMoves();
-
         if (kingPtr != NULL && !kingPtr->inCheck(kingPosString, board.getBoard())){
             std::cout << "You are in check!" << std::endl;
             board.setPiece(prevX-1, prevY, possiblePiece[0]);
@@ -247,7 +266,7 @@ int main() {
             continue;
         }
 
-        kingPosString = "";
+        //kingPosString = "";
         std::cout<<std::endl;;
         possiblePiece.clear();
         printBoard(board);

@@ -13,17 +13,17 @@ public:
         RowType EIGHTH_RANK;
 
         RowType FIRST_RANK{
-            std::make_shared<Rook>(Black, 'R',1,8),
-            std::make_shared<Knight>(Black, 'N',2,8),
-            std::make_shared<Bishop>(Black, 'B',3,8),
-            std::make_shared<Queen>(Black, 'Q',4,8),
-            std::make_shared<King>(Black, 'K',5,8),
-            std::make_shared<Bishop>(Black, 'B',6,8),
-            std::make_shared<Knight>(Black, 'N',7,8),
-            std::make_shared<Rook>(Black, 'R',8,8)};
+            std::make_shared<Rook>(Black, 'R',1,8,5),
+            std::make_shared<Knight>(Black, 'N',2,8,3),
+            std::make_shared<Bishop>(Black, 'B',3,8,3),
+            std::make_shared<Queen>(Black, 'Q',4,8,8),
+            std::make_shared<King>(Black, 'K',5,8,0),
+            std::make_shared<Bishop>(Black, 'B',6,8,3),
+            std::make_shared<Knight>(Black, 'N',7,8,3),
+            std::make_shared<Rook>(Black, 'R',8,8,5)};
         
         for(int x = 1; x<SIZE+1; x++){
-            SECOND_RANK.emplace_back(std::make_shared<Pawn>(Black, 'P',x,7));
+            SECOND_RANK.emplace_back(std::make_shared<Pawn>(Black, 'P',x,7,1));
         }
         
         board.emplace_back(std::move(FIRST_RANK));
@@ -38,19 +38,19 @@ public:
         }
 
         for(int x = 1; x<SIZE+1; x++){
-            SEVENTH_RANK.emplace_back(std::make_shared<Pawn>(White, 'P',x,2));
+            SEVENTH_RANK.emplace_back(std::make_shared<Pawn>(White, 'P',x,2,1));
         }
 
         board.emplace_back(SEVENTH_RANK);
 
-        EIGHTH_RANK.emplace_back(std::make_shared<Rook>(White, 'R',1,1));
-        EIGHTH_RANK.emplace_back(std::make_shared<Knight>(White, 'N',2,1));
-        EIGHTH_RANK.emplace_back(std::make_shared<Bishop>(White, 'B',3,1));
-        EIGHTH_RANK.emplace_back(std::make_shared<Queen>(White, 'Q',4,1));
-        EIGHTH_RANK.emplace_back(std::make_shared<King>(White, 'K',5,1));
-        EIGHTH_RANK.emplace_back(std::make_shared<Bishop>(White, 'B',6,1)); 
-        EIGHTH_RANK.emplace_back(std::make_shared<Knight>(White, 'N',7,1));
-        EIGHTH_RANK.emplace_back(std::make_shared<Rook>(White, 'R',8,1));  
+        EIGHTH_RANK.emplace_back(std::make_shared<Rook>(White, 'R',1,1,5));
+        EIGHTH_RANK.emplace_back(std::make_shared<Knight>(White, 'N',2,1,3));
+        EIGHTH_RANK.emplace_back(std::make_shared<Bishop>(White, 'B',3,1,3));
+        EIGHTH_RANK.emplace_back(std::make_shared<Queen>(White, 'Q',4,1,8));
+        EIGHTH_RANK.emplace_back(std::make_shared<King>(White, 'K',5,1,0));
+        EIGHTH_RANK.emplace_back(std::make_shared<Bishop>(White, 'B',6,1,3)); 
+        EIGHTH_RANK.emplace_back(std::make_shared<Knight>(White, 'N',7,1,3));
+        EIGHTH_RANK.emplace_back(std::make_shared<Rook>(White, 'R',8,1,5));  
 
         board.emplace_back(EIGHTH_RANK);
     }
