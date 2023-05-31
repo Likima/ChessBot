@@ -56,11 +56,12 @@ public:
     }
 
     const std::vector<RowType>& getBoard() const {return board;}
-
+    const std::vector<std::string>& getMoves() const {return moves;}
     
 
     void setPiece(int x, int y, std::shared_ptr<Piece> piece, int isChecking = 0) {
-
+        if(piece->getSymbol() == 'P') moves.emplace_back(std::string(1, 97+x) + std::to_string(y));
+        else moves.emplace_back(std::string(1, piece->getSymbol()) + std::string(1, 97+x) + std::to_string(y));
         if(isChecking == 0) board[8-(piece->getY())][(piece->getX())-1] = std::make_shared<Piece>('.'); // set old position to empty
         piece->setX(x+1); // set new position for the piece
         piece->setY(y);
@@ -75,7 +76,7 @@ public:
         for(int i = 0; i<board.size(); ++i){
             for(int j = 0; j< board.size(); ++j){
                 if(i == pieceY && j == pieceX && board[i][j]->getSymbol() == pieceSymbol){
-                    board[i][j]->printInfo();
+                    //board[i][j]->printInfo();
                     return board[i][j];
                 }
             }
@@ -109,6 +110,7 @@ public:
 
 private:
     std::vector<RowType> board;
+    std::vector<std::string> moves;
 };
 
 #endif

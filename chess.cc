@@ -36,6 +36,7 @@ void printBoard(const ChessBoard& board) {
 
         std::cout << std::endl;
     }
+    printvector(board.getMoves());
 }
 
 void shortCastle(ChessBoard& board, int moveNumber){
@@ -92,8 +93,6 @@ void doMove(const std::string& move, ChessBoard& board, int moveNumber, std::sha
 
     for (std::vector<char>::iterator t = coords.begin(); t != coords.end(); ++t) {
         if(*t == horizontalCoord){
-            std::cout<<horizontalInt<<", "<<verticalCoord<<std::endl;
-            std::cout<<moved->getX()<<", "<<moved->getY()<<std::endl;
             board.setPiece(horizontalInt, verticalCoord, std::move(moved));
             break;
         }
@@ -110,8 +109,10 @@ int main() {
     printBoard(board);
     int prevX, prevY;
     char BotSide;
+    char promote;
     int BotMove;
     std::string kingPosString;
+    std::vector<std::string> playedMoves;
     std::vector<int> kingPos;
     std::shared_ptr<Piece> piecePtr;
     std::shared_ptr<King> kingPtr;
@@ -120,7 +121,7 @@ int main() {
     std::vector<std::string> legalMoves;
     auto& b = board.getBoard();
 
-    std::cout<<"What Side Are You Playing? [B/W]"<<std::endl;
+    std::cout<<"What Side Are You Playing? [B/W] ";
     if(std::cin>>BotSide){
         if(BotSide == 'B') BotMove = 1;
         else if(BotSide == 'W') BotMove = 0;
@@ -134,19 +135,15 @@ int main() {
     }
 
     while(true) {
+        if(!playedMoves.empty()){
+            //printvector(playedMoves);
+            //std::cout<<", "<<std::endl;
+        }
         kingPos = board.findKing(moveNumber%2);
         piecePtr = board[kingPos[1]][kingPos[0]];
         kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
         kingPosString = "K"+ std::string(1, +static_cast<char>(kingPos[0]+97))+std::to_string(8-kingPos[1]);
         legalMoves = kingPtr->getLegal(board.getBoard());
-
-        if(BotMove == moveNumber%2){
-            //doMove(moveChoice(board, moveNumber%2), board, moveNumber%2);
-            moveChoice(board, moveNumber%2);
-            moveNumber++;
-            printBoard(board);
-            continue;
-        }
 
         if(kingPtr != NULL && legalMoves.size() == 0 && !kingPtr->inCheck(kingPosString, board.getBoard())){
             std::cout<<"Checkmate!"<<std::endl;
@@ -157,6 +154,20 @@ int main() {
             }
             break;
         }
+
+        if(BotMove == moveNumber%2){
+            //doMove(moveChoice(board, moveNumber%2), board, moveNumber%2);
+            moveChoice(board, moveNumber%2);
+            moveNumber++;
+            printBoard(board);
+            continue;
+        }
+        //else{
+        //    moveChoice(board, moveNumber%2);
+        //    moveNumber++;
+        //    printBoard(board);
+        //    continue;
+        //}
 
         if(moveNumber%2 == 1){
             std::cout<<"White's Move"<<std::endl;
@@ -211,10 +222,64 @@ int main() {
                     piece->legalMove(move, board.getBoard()) == 1){
                         possiblePiece.emplace_back(piece);
                     }
-                    //if(piece->getSymbol() == 'P') std::cout<<piece->legalMove(move, moveNumber%2, b)<<" ";
                     else if(piece->getSymbol() == 'P' && piece->getColor() == moveNumber%2 
                     && piece->legalMove(move, board.getBoard()) == 1 && pawnMove(move)){
                         possiblePiece.emplace_back(piece);
+                        std::cout<<"Pawn X "<<piece->getX()<<std::endl;
+                        if(moveNumber%2 == 1 && piece->getX() == 7){
+                            while(true){
+                                std::cout<<"Promote to: [Q/R/B/N]"<<std::endl;
+                                std::cin>>promote;
+                                if(promote == 'Q') {
+                                    piece->setSymbol('Q');
+                                    board.setPiece(piece->getX(), piece->getY(), std::dynamic_pointer_cast<Queen>(piece), 1);
+                                }
+                                else if(promote == 'R') {
+                                    piece->setSymbol('R');
+                                    board.setPiece(piece->getX(), piece->getY(), std::dynamic_pointer_cast<Rook>(piece), 1);
+                                }
+                                else if(promote == 'B') {
+                                    piece->setSymbol('B');
+                                    board.setPiece(piece->getX(), piece->getY(), std::dynamic_pointer_cast<Bishop>(piece), 1);
+                                }
+                                else if(promote == 'N') {
+                                    piece->setSymbol('N');
+                                    board.setPiece(piece->getX(), piece->getY(), std::dynamic_pointer_cast<Knight>(piece), 1);
+                                }
+                                else {
+                                    std::cout<<"Invalid Input"<<std::endl;
+                                    continue;
+                                }
+                                break;
+                            }
+                        }
+                        else if(moveNumber%2 == 0 && piece->getX() == 2){
+                            while(true){
+                                std::cout<<"Promote to: [Q/R/B/N]"<<std::endl;
+                                std::cin>>promote;
+                                if(promote == 'Q') {
+                                    piece->setSymbol('Q');
+                                    board.setPiece(piece->getX(), piece->getY(), std::dynamic_pointer_cast<Queen>(piece), 1);
+                                }
+                                else if(promote == 'R') {
+                                    piece->setSymbol('r');
+                                    board.setPiece(piece->getX(), piece->getY(), std::dynamic_pointer_cast<Rook>(piece), 1);
+                                }
+                                else if(promote == 'B') {
+                                    piece->setSymbol('b');
+                                    board.setPiece(piece->getX(), piece->getY(), std::dynamic_pointer_cast<Bishop>(piece), 1);
+                                }
+                                else if(promote == 'N') {
+                                    piece->setSymbol('n');
+                                    board.setPiece(piece->getX(), piece->getY(), std::dynamic_pointer_cast<Knight>(piece), 1);
+                                }
+                                else {
+                                    std::cout<<"Invalid Input"<<std::endl;
+                                    continue;
+                                }
+                                break;
+                            }
+                        }
                     }
                 }
             }            
@@ -269,6 +334,7 @@ int main() {
         //kingPosString = "";
         std::cout<<std::endl;;
         possiblePiece.clear();
+        playedMoves.emplace_back(move);
         printBoard(board);
         moveNumber++;
     }

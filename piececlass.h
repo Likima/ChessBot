@@ -56,7 +56,8 @@ public:
             for (int x = 1; x<8; x++){
                 //std::cout<<"MOVES CHECKED "<< std::string(1, getSymbol())+std::string(1, let)+std::to_string(x)<<std::endl;
                 if(legalMove(std::string(1, getSymbol())+"^"+std::string(1, let)+std::to_string(x), board)){
-                    legalMoves.emplace_back(std::string(1, getSymbol())+std::string(1, let)+std::to_string(x));
+                    if(getSymbol() != 'P') legalMoves.emplace_back(std::string(1, getSymbol())+std::string(1, let)+std::to_string(x));
+                    else(legalMoves.emplace_back(std::string(1, let)+std::to_string(x)));
                 }
             }
         }
@@ -165,8 +166,11 @@ class Pawn: public Piece{
         int multi = 1;
         bool isTaking = move.find('x') != std::string::npos;
         bool isChecking = move.find('^') != std::string::npos;
-        if(isChecking) isTaking = true; //need to make sure that the piece is taking if it is checking add the exf4 or something
-
+        if(isChecking && std::abs(getX() - move[moveSize]-96) == 1) {
+            isTaking = true;
+            move = std::string(1,getX())+'x'+move;
+             //need to make sure that the piece is taking if it is checking add the exf4 or something
+        }
         int targetX = move[moveSize] - 96;
         int targetY = move[moveSize + 1] - '0';
 
@@ -185,13 +189,13 @@ class Pawn: public Piece{
         } else if (getFirstMove() && currentX == targetX && currentY - targetY == 2 * multi && Board[8 + multi - currentY][currentX - 1]->getSymbol() == '.' && Board[8 + (2*multi) - currentY][currentX - 1]->getSymbol() == '.') {
             if (!isChecking) setFirstMove();
             return true;
-        } else if (isTaking && currentX == move[0] - 96 && currentX != 1 && currentX - targetX == 1 * multi && Board[8 + multi - currentY][currentX - 2]->getSymbol() != '.') {
+        } else if (isTaking && currentX == move[0] - 96 && currentX != 1 && currentX - targetX == 1 && Board[8 + multi - currentY][currentX - 2]->getSymbol() != '.') {
             if (Board[8 + multi - currentY][currentX - 2]->getColor() == getColor()) {
                 return false;
             }
             if (!isChecking) setFirstMove();
             return true;
-        } else if (isTaking && currentX == move[0] - 96 && currentX != 8 && abs(currentX - targetX) == 1 && Board[8 + multi - currentY][currentX]->getSymbol() != '.') {
+        } else if (isTaking && currentX == move[0] - 96 && currentX != 8 && currentX - targetX == -1 && Board[8 + multi - currentY][currentX]->getSymbol() != '.') {
             if (Board[8 + multi - currentY][currentX]->getColor() == getColor()) {
                 return false;
             }
@@ -237,22 +241,24 @@ class Knight:public Piece{
     Knight(char color, int symbol, int x, int y, int value) : Piece(color, 'N', x, y, 3){}
     bool legalMove(std::string move, std::vector<RowType> Board) override{
         if(getX() == (move[move.length()-2]-96) && getY() == (move[move.length()-1]- '0')) return false;
+        int moveX = move[move.length()-2]-96;
+        int moveY = move[move.length()-1]-'0';
+        std::shared_ptr<Piece> movingSquare = Board[8-moveY][moveX-1];
 
-        if(getX()+2 == move[move.length()-2]-96 || getX()-2 == move[move.length()-2]-96){
-            if(getY()+1 == move[move.length()-1]-'0' || getY()-1 == move[move.length()-1]-'0'){
-                if((Board[8-(move[move.length()-1]-'0')][move[move.length()-2]-97])->getSymbol() == '.'){
+        if(getX()+2 == moveX || getX()-2 == moveX){
+            if(getY()+1 == moveY || getY()-1 == moveY){
+                if(movingSquare->getSymbol() == '.'){
                     return true;
                 }
-                return(((Board[8-(move[move.length()-1]-'0')][move[move.length()-2]-97])->getSymbol() != '.') && (Board[8-(move[move.length()-1]-'0')][move[move.length()-2]-97])->getColor() != getColor());//checking if moving to same square
+                return(((movingSquare)->getSymbol() != '.') && (movingSquare)->getColor() != getColor());//checking if moving to same square
             }
-            
         }
-        else if(getY()+2 == move[move.length()-1]-'0' || getY()-2 == move[move.length()-1]-'0'){
-            if(getX()+1 == move[move.length()-2]-96 || getX()-1 == move[move.length()-2]-96){
-                if((Board[8-(move[move.length()-1]-'0')][move[move.length()-2]-97])->getSymbol() == '.'){
+        else if(getY()+2 == moveY || getY()-2 == moveY){
+            if(getX()+1 == moveX || getX()-1 == moveX){
+                if(movingSquare->getSymbol() == '.'){
                     return true;
                 }
-                return(((Board[8-(move[move.length()-1]-'0')][move[move.length()-2]-97])->getSymbol() != '.') && (Board[8-(move[move.length()-1]-'0')][move[move.length()-2]-97])->getColor() != getColor());//checking if moving to same square
+                return(movingSquare->getSymbol() != '.' && movingSquare->getColor() != getColor());//checking if moving to same square
             }
         }
         return false;
@@ -314,10 +320,6 @@ class King:public Piece{
             if (getColor() == White) {
                 if (Board[7][4]->getSymbol() == 'K' && Board[7][7]->getSymbol() == 'R' && Board[7][5]->getSymbol() == '.' && Board[7][6]->getSymbol() == '.') {
                     if (Board[7][4]->getFirstMove() && Board[7][7]->getFirstMove()) {
-                        //kingPtr = std::dynamic_pointer_cast<King>(Board[7][4]);
-                        std::cout<<"Here"<<std::endl;
-                        if(inCheck("f1", Board)) std::cout<<"f1"<<std::endl;
-                        if(inCheck("g1", Board)) std::cout<<"g1"<<std::endl;
                         if (!inCheck("f1", Board) || !inCheck("g1", Board)) {
                             return false;
                         }

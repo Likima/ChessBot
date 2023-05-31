@@ -6,7 +6,6 @@
 
 void moveChoice(ChessBoard &board, int color) {
     RowType movablePieces;
-    //std::cout<<"here! "<<std::endl;
     std::random_device rd;
     std::mt19937 eng(rd());
 
@@ -14,13 +13,13 @@ void moveChoice(ChessBoard &board, int color) {
         for (auto& piece : row) {
             if (piece->getSymbol() != '.' && piece->getColor() == color) {
                 if (!piece->getLegal(board.getBoard()).empty()){
-                    piece->printInfo();
+                    //piece->printInfo();
                     movablePieces.emplace_back(piece);
                 }
             }
         }
     }
-    std::cout<<movablePieces.size()<<std::endl;
+    //std::cout<<movablePieces.size()<<std::endl;
 
     int minNumber = 1;
     int maxNumber = movablePieces.size();
@@ -31,7 +30,7 @@ void moveChoice(ChessBoard &board, int color) {
     std::uniform_int_distribution<int> distro(minNumber, movablePieces[randomNumber - 1]->getLegal(board.getBoard()).size());
     int randomMove = distro(eng);
 
-    std::cout << movablePieces[randomNumber - 1]->getLegal(board.getBoard())[randomMove - 1] << std::endl;
+    //std::cout << movablePieces[randomNumber - 1]->getLegal(board.getBoard())[randomMove - 1] << std::endl;
 
     doMove(movablePieces[randomNumber - 1]->getLegal(board.getBoard())[randomMove - 1], board, color, movablePieces[randomNumber - 1]);
 
