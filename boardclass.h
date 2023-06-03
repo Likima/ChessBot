@@ -32,7 +32,7 @@ public:
         for (int i = 2; i < SIZE - 2; ++i) {
             RowType BLANK_RANK; 
             for(int x = 0; x<SIZE; x++){
-                BLANK_RANK.emplace_back(std::make_shared<Piece>('.'));
+                BLANK_RANK.emplace_back(std::make_shared<Piece>(-1, '.', x+1, 8-i));
             }
             board.emplace_back(std::move(BLANK_RANK));
         }
@@ -57,12 +57,13 @@ public:
 
     const std::vector<RowType>& getBoard() const {return board;}
     const std::vector<std::string>& getMoves() const {return moves;}
+    void setMoves(std::shared_ptr<Piece> piece){
+        if(piece->getSymbol() == 'P') moves.emplace_back(std::string(1, char(97+piece->getX()-1)) + std::to_string(piece->getY()));
+        else moves.emplace_back(std::string(1, piece->getSymbol()) + std::string(1, 97+piece->getX()-1) + std::to_string(piece->getY()));
+    }
     
-
-    void setPiece(int x, int y, std::shared_ptr<Piece> piece, int isChecking = 0) {
-        if(piece->getSymbol() == 'P') moves.emplace_back(std::string(1, 97+x) + std::to_string(y));
-        else moves.emplace_back(std::string(1, piece->getSymbol()) + std::string(1, 97+x) + std::to_string(y));
-        if(isChecking == 0) board[8-(piece->getY())][(piece->getX())-1] = std::make_shared<Piece>('.'); // set old position to empty
+    void setPiece(int x, int y, std::shared_ptr<Piece> piece) {
+        board[8-(piece->getY())][(piece->getX())-1] = std::make_shared<Piece>(-1, '.', piece->getX(), piece->getY()); // set old position to empty
         piece->setX(x+1); // set new position for the piece
         piece->setY(y);
         board[8-y][x] = std::move(piece); // move the piece to the new position
@@ -102,7 +103,6 @@ public:
         return board[index];
     }
 
-    // Overload square bracket operator for setting elements
     const RowType& operator[](int index) const {
         return board[index];
     }

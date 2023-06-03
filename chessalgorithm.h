@@ -4,37 +4,47 @@
 #include "piececlass.h"
 #include "boardclass.h"
 
-void moveChoice(ChessBoard &board, int color) {
-    RowType movablePieces;
-    std::random_device rd;
-    std::mt19937 eng(rd());
 
+void moveChoice(ChessBoard &board, int color) {
+    ChessBoard tempboard = board;
+    RowType movablePieces;
+    std::vector<int> kingPos = board.findKing(color);
+    std::shared_ptr<Piece> piecePtr = board.getBoard()[kingPos[1]][kingPos[0]];
+    std::shared_ptr<King> kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
+    RowType possiblePiece;
+    pieceType possibleMoves;
+    std::vector<std::string> legalMoves;
+    std::random_device rd;
+    std::shared_ptr<Piece> movingPiece;
+    std::mt19937 eng(rd());
+    std::string move;
+    //printBoard(board);
     for (const auto& row : board.getBoard()) {
         for (auto& piece : row) {
             if (piece->getSymbol() != '.' && piece->getColor() == color) {
                 if (!piece->getLegal(board.getBoard()).empty()){
-                    //piece->printInfo();
                     movablePieces.emplace_back(piece);
                 }
             }
         }
     }
-    //std::cout<<movablePieces.size()<<std::endl;
+    for(auto& piece : movablePieces){
+        for(auto& moves : piece->getLegal(board.getBoard())){
+            if(!movingToCheck(board, moves, color, piece)){
+                legalMoves.emplace_back(moves);
+            }
+        }
+    }
 
-    int minNumber = 1;
-    int maxNumber = movablePieces.size();
-
-    std::uniform_int_distribution<int> distr(minNumber, maxNumber);
+    std::uniform_int_distribution<int> distr(1, legalMoves.size());
     int randomNumber = distr(eng);
+    move = legalMoves[randomNumber-1];
+    std::cout<<move<<std::endl;
 
-    std::uniform_int_distribution<int> distro(minNumber, movablePieces[randomNumber - 1]->getLegal(board.getBoard()).size());
-    int randomMove = distro(eng);
+    possiblePiece = getPieces(board, move, color);
 
-    //std::cout << movablePieces[randomNumber - 1]->getLegal(board.getBoard())[randomMove - 1] << std::endl;
-
-    doMove(movablePieces[randomNumber - 1]->getLegal(board.getBoard())[randomMove - 1], board, color, movablePieces[randomNumber - 1]);
-
-    //return movablePieces[randomNumber - 1]->getLegal(board.getBoard())[randomMove - 1];
+    doMove(move, board, color, possiblePiece[0]);
+    board.setMoves(possiblePiece[0]);
 }
 
 
