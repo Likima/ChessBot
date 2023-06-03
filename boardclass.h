@@ -55,6 +55,7 @@ public:
         board.emplace_back(EIGHTH_RANK);
     }
 
+
     const std::vector<RowType>& getBoard() const {return board;}
     const std::vector<std::string>& getMoves() const {return moves;}
     void setMoves(std::shared_ptr<Piece> piece){
@@ -62,27 +63,31 @@ public:
         else moves.emplace_back(std::string(1, piece->getSymbol()) + std::string(1, 97+piece->getX()-1) + std::to_string(piece->getY()));
     }
     
-    void setPiece(int x, int y, std::shared_ptr<Piece> piece) {
-        board[8-(piece->getY())][(piece->getX())-1] = std::make_shared<Piece>(-1, '.', piece->getX(), piece->getY()); // set old position to empty
+    void setPiece(int x, int y, std::shared_ptr<Piece> piece, std::shared_ptr<Piece> prevPiece = nullptr) {
+        if(prevPiece == nullptr){
+            prevPiece = std::make_shared<Piece>(-1, '.', piece->getX(), piece->getY());
+        }
+        board[8-(piece->getY())][(piece->getX())-1] = prevPiece; // set old position to empty
         piece->setX(x+1); // set new position for the piece
         piece->setY(y);
         board[8-y][x] = std::move(piece); // move the piece to the new position
     }
 
     std::shared_ptr<Piece> findPiece(std::string location){
-        int pieceSymbol = std::toupper(location[1]);
-        char pieceX = location[2]-97;
-        char pieceY = 8-(location[3]-'0');
+        char pieceX = location[location.size()-2]-97;
+        char pieceY = 8-(location[location.size()-1]-'0');
 
         for(int i = 0; i<board.size(); ++i){
             for(int j = 0; j< board.size(); ++j){
-                if(i == pieceY && j == pieceX && board[i][j]->getSymbol() == pieceSymbol){
-                    //board[i][j]->printInfo();
+                if(i == pieceY && j == pieceX){
                     return board[i][j];
                 }
             }
         }
     return std::shared_ptr<Piece>(nullptr);
+    }
+    std::shared_ptr<Piece> findPiece(int x, int y){
+        return board[8-y][x-1];
     }
 
     std::vector<int> findKing(int color) {

@@ -9,6 +9,7 @@ bool moveIsValid(std::string move, ChessBoard &board, int moveNumber, std::share
     int prevX, prevY;
     RowType possiblePiece;
     std::vector<RowType> b = board.getBoard();
+    std::shared_ptr<Piece> prevPiece = board.findPiece(move);
 
     if (move.length() < 2)
     {
@@ -64,7 +65,7 @@ bool moveIsValid(std::string move, ChessBoard &board, int moveNumber, std::share
     if (movingToCheck(board, move, moveNumber % 2, possiblePiece[0]))
     {
         std::cout << "You are in check!" << std::endl;
-        board.setPiece(prevX - 1, prevY, possiblePiece[0]);
+        board.setPiece(prevX - 1, prevY, possiblePiece[0], prevPiece);
         return false;
     }
     if(possiblePiece[0]->getSymbol() == 'P' && (possiblePiece[0]->getY() == 1 || possiblePiece[0]->getY() == 8)){
@@ -106,10 +107,10 @@ bool mated(ChessBoard &board, int color)
                     prevY = piece->getY();
                     doMove(move, board, color, piece);
 
-                    std::vector<int> tempKingPos = board.findKing(color);
-                    std::shared_ptr<Piece> tempPiecePtr = board[tempKingPos[1]][tempKingPos[0]];
-                    std::shared_ptr<King> tempKingPtr = std::dynamic_pointer_cast<King>(tempPiecePtr);
-                    if (!tempKingPtr->inCheck(move, board.getBoard()))
+                    kingPos = board.findKing(color);
+                    piecePtr = board[kingPos[1]][kingPos[0]];
+                    kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
+                    if (!kingPtr->inCheck(move, board.getBoard()))
                     {
                         board.setPiece(prevX-1, prevY, piece);
                         return false; // King is not in checkmate
@@ -127,8 +128,9 @@ bool movingToCheck(ChessBoard& board, std::string move, int color, std::shared_p
 {
     int prevX = passedPiece->getX();
     int prevY = passedPiece->getY();
-    
 
+    std::shared_ptr<Piece> prevPiece = board.findPiece(move);
+    
     doMove(move, board, color, passedPiece);
 
     std::vector<int> kingPos = board.findKing(color);
@@ -138,11 +140,13 @@ bool movingToCheck(ChessBoard& board, std::string move, int color, std::shared_p
     std::string kingPosString = std::string(1, static_cast<char>(kingPos[0] + 97)) + std::to_string(8 - kingPos[1]);
 
     if(kingPtr->inCheck(kingPosString, board.getBoard())){
-        board.setPiece(prevX-1, prevY, passedPiece);
+        board.setPiece(prevX-1, prevY, passedPiece, prevPiece);
+        return false;
     }
-    board.setPiece(prevX-1,prevY,passedPiece);
+    board.setPiece(prevX-1, prevY, passedPiece, prevPiece);
+    return true;
 
-    return !(kingPtr->inCheck(kingPosString, board.getBoard()));
+    //return !(kingPtr->inCheck(kingPosString, board.getBoard()));
 
 }
 #endif

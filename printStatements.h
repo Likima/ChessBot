@@ -63,11 +63,11 @@ void printY(ChessBoard& board){
         {
             if (piece->getColor() == Black)
                 std::cout << "\033[0;01;02"
-                          << "m" << piece->getSymbol() << " "
+                          << "m" << piece->getY() << " "
                           << "\033[m";
             else
                 std::cout << "\033[0;01"
-                          << "m" << piece->getSymbol() << " "
+                          << "m" << piece->getY() << " "
                           << "\033[m";
         }
         

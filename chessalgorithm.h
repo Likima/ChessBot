@@ -8,17 +8,13 @@
 void moveChoice(ChessBoard &board, int color) {
     ChessBoard tempboard = board;
     RowType movablePieces;
-    std::vector<int> kingPos = board.findKing(color);
-    std::shared_ptr<Piece> piecePtr = board.getBoard()[kingPos[1]][kingPos[0]];
-    std::shared_ptr<King> kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
     RowType possiblePiece;
-    pieceType possibleMoves;
     std::vector<std::string> legalMoves;
     std::random_device rd;
     std::shared_ptr<Piece> movingPiece;
     std::mt19937 eng(rd());
     std::string move;
-    //printBoard(board);
+
     for (const auto& row : board.getBoard()) {
         for (auto& piece : row) {
             if (piece->getSymbol() != '.' && piece->getColor() == color) {
@@ -46,6 +42,5 @@ void moveChoice(ChessBoard &board, int color) {
     doMove(move, board, color, possiblePiece[0]);
     board.setMoves(possiblePiece[0]);
 }
-
 
 #endif

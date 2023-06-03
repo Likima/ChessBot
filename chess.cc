@@ -16,21 +16,17 @@ bool pawnMove(std::string move)
 
 void doMove(const std::string &move, ChessBoard &board, int moveNumber, std::shared_ptr<Piece> passedPiece)
 { 
-
     int moveSize = move.length() - 2;
     char horizontalCoord = move[moveSize] - 97;
     int verticalCoord = (move[moveSize + 1] - '0');
-    int horizontalInt = 0;
 
     board.setPiece(horizontalCoord, verticalCoord, passedPiece);
-    
 }
 
 RowType getPieces(ChessBoard &board, std::string move, int moveNumber)
 {
     int movenumber = moveNumber%2;
     RowType possiblePiece;
-    char promote;
 
     for (const auto &row : board.getBoard())
     {
@@ -52,20 +48,16 @@ RowType getPieces(ChessBoard &board, std::string move, int moveNumber)
 
 int main()
 {
-    std::string move;
     RowType possiblePiece;
     int moveNumber = 1;
     ChessBoard board;
-    int prevX, prevY;
+    int prevX, prevY, BotMove;
     char BotSide;
-    char promote;
-    int BotMove;
-    std::string kingPosString;
+    std::string kingPosString, move;
     std::vector<std::string> playedMoves;
     std::vector<int> kingPos;
     std::shared_ptr<Piece> piecePtr;
     std::shared_ptr<King> kingPtr;
-    std::shared_ptr<Piece> nullpiece = std::make_shared<Piece>('.');
 
     std::vector<std::string> legalMoves;
     auto &b = board.getBoard();
@@ -102,14 +94,7 @@ int main()
         if (!kingPtr->inCheck(kingPosString, board.getBoard()) && mated(board, moveNumber % 2))
         {
             std::cout << "Checkmate!" << std::endl;
-            if (moveNumber % 2 == 0)
-            {
-                std::cout << "White Wins!" << std::endl;
-            }
-            else
-            {
-                std::cout << "Black Wins!" << std::endl;
-            }
+            moveNumber%2 == 0 ? std::cout << "White Wins!" << std::endl : std::cout << "Black Wins!" << std::endl;
             break;
         }
 
@@ -120,20 +105,15 @@ int main()
             printBoard(board);
             continue;
         }
+        moveNumber % 2 == 1 ? std::cout << "White's move" 
+                : std::cout << "\033[0;01;02"
+                << "m"
+                << "Black's Move"
+                << " "
+                << "\033[m";
 
-        if (moveNumber % 2 == 1)
-        {
-            std::cout << "White's Move" << std::endl;
-        }
-        else
-        {
-            std::cout << "\033[0;01;02"
-                      << "m"
-                      << "Black's Move"
-                      << " "
-                      << "\033[m" << std::endl;
-        }
-        std::cout << std::endl;
+        std::cout<<std::endl<<std::endl;
+        
         std::cout << "Enter move: ";
         std::cin >> move;
         if (move == "display")
@@ -156,15 +136,17 @@ int main()
         }
         if (move[0] == '!' && move.length() == 4 && board.findPiece(move))
         {
-            board.setPiece((board.findPiece(move)->getX() - 1), (board.findPiece(move)->getY()), nullpiece);
+            board.setPiece((board.findPiece(move)->getX() - 1), (board.findPiece(move)->getY()), std::make_shared<Piece>('.'));
+            continue;
+        }
+        if(move[0] == '!'){
+            std::cout<<"Not a valid piece "<<std::endl;
             continue;
         }
 
         if (!moveIsValid(move, board, moveNumber, kingPtr)) continue;
 
         printBoard(board);
-        printY(board);
-        printX(board);
         moveNumber++;
     }
     return 0;

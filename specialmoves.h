@@ -5,6 +5,7 @@
 #include "boardclass.h"
 
 void Promote(ChessBoard& board, std::shared_ptr<Piece> piece){
+    int color = piece->getColor();
     char promote;
     while (true)
         {
@@ -12,8 +13,7 @@ void Promote(ChessBoard& board, std::shared_ptr<Piece> piece){
             std::cin >> promote;
             if (promote == 'Q')
             {
-                piece->setSymbol('Q');
-                board.setPiece(piece->getX(), piece->getY(), std::dynamic_pointer_cast<Queen>(piece));
+                board.setPiece(piece->getX(), piece->getY(), std::make_shared<Queen>(color, 'Q', piece->getX(), piece->getY(), 8));
             }
             else if (promote == 'R')
             {

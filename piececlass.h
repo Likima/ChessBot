@@ -35,12 +35,6 @@ bool moveIsValid(std::string, ChessBoard&, int, std::shared_ptr<King>);
 bool mated(ChessBoard&, int);
 RowType getPieces(ChessBoard&, std::string, int);
 
-struct pieceType{
-    RowType ptype;
-    int location;
-    std::vector<std::string> legalmoves;
-};
-
 class Piece {
 public:
     const static int BLACK = 0;
