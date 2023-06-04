@@ -13,7 +13,7 @@ void Promote(ChessBoard& board, std::shared_ptr<Piece> piece){
             std::cin >> promote;
             if (promote == 'Q')
             {
-                board.setPiece(piece->getX(), piece->getY(), std::make_shared<Queen>(color, 'Q', piece->getX(), piece->getY(), 8));
+                board.setPiece(piece->getX()-1, piece->getY(), std::make_shared<Queen>(color, 'Q', piece->getX(), piece->getY(), 8));
             }
             else if (promote == 'R')
             {

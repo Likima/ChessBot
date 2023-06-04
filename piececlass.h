@@ -57,6 +57,7 @@ public:
     int getX() const {return x;}
     int getY() const {return y;}
     int getFirstMove() const{return firstMove;}
+    int getValue() const{return value;}
 
     void printInfo(){
         std::cout<<"x: "<<x<<", "<<"y: "<<y<<", "
@@ -208,18 +209,18 @@ class Pawn: public Piece{
             return true;
         } else if (getFirstMove() && currentX == targetX && currentY - targetY == 2 * multi && Board[8 + multi - currentY][currentX - 1]->getSymbol() == '.' && Board[8 + (2*multi) - currentY][currentX - 1]->getSymbol() == '.') {
             return true;
-        } else if (isTaking && currentX == move[0] - 96 && currentX != 1 && currentX - targetX == 1 && Board[8 + multi - currentY][currentX - 2]->getSymbol() != '.') {
-            if (Board[8 + multi - currentY][currentX - 2]->getColor() == getColor()) {
-                return false;
-            }
-            return true;
-        } else if (isTaking && currentX == move[0] - 96 && currentX != 8 && currentX - targetX == -1 && Board[8 + multi - currentY][currentX]->getSymbol() != '.') {
-            if (Board[8 + multi - currentY][currentX]->getColor() == getColor()) {
-                return false;
-            }
-            return true;
-        }
 
+        } else if(isTaking && currentY - targetY == 1 * multi && currentX == move[0] - 96){
+
+            if(Board[8 + multi - currentY][currentX]->getSymbol() != '.'){
+                return Board[8 + multi - currentY][currentX - 2]->getColor() != getColor();
+            }
+
+            else if(Board[8 + multi - currentY][currentX - 2]->getSymbol() != '.'){
+                return Board[8 + multi - currentY][currentX - 2]->getColor() != getColor();
+            }
+
+        }
         return false;
     }
 

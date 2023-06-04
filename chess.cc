@@ -37,7 +37,7 @@ RowType getPieces(ChessBoard &board, std::string move, int moveNumber)
             {
                 possiblePiece.emplace_back(piece);
             }
-            else if (piece->getColor() == movenumber && piece->legalMove(move, board.getBoard()) == 1 && pawnMove(move))
+            else if (piece->getSymbol() == 'P' && piece->getColor() == movenumber && piece->legalMove(move, board.getBoard()) == 1 && pawnMove(move))
             {
                 possiblePiece.emplace_back(piece);
             }
@@ -102,7 +102,6 @@ int main()
         {
             moveChoice(board, moveNumber % 2);
             moveNumber++;
-            printBoard(board);
             continue;
         }
         moveNumber % 2 == 1 ? std::cout << "White's move" 
@@ -147,6 +146,7 @@ int main()
         if (!moveIsValid(move, board, moveNumber, kingPtr)) continue;
 
         printBoard(board);
+        board.materialPrint();
         moveNumber++;
     }
     return 0;

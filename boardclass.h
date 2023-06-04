@@ -58,6 +58,9 @@ public:
 
     const std::vector<RowType>& getBoard() const {return board;}
     const std::vector<std::string>& getMoves() const {return moves;}
+
+    void setMoves(std::string move){moves.emplace_back(move);}
+
     void setMoves(std::shared_ptr<Piece> piece){
         if(piece->getSymbol() == 'P') moves.emplace_back(std::string(1, char(97+piece->getX()-1)) + std::to_string(piece->getY()));
         else moves.emplace_back(std::string(1, piece->getSymbol()) + std::string(1, 97+piece->getX()-1) + std::to_string(piece->getY()));
@@ -71,6 +74,20 @@ public:
         piece->setX(x+1); // set new position for the piece
         piece->setY(y);
         board[8-y][x] = std::move(piece); // move the piece to the new position
+    }
+
+    void materialPrint(){
+        int whiteMaterial = 0;
+        int blackMaterial = 0;
+        std::cout << "Material: " << std::endl;
+        for(auto& row : board){
+            for(auto& piece : row){
+                if(piece->getColor() == 1 || piece->getColor() == 0)
+                piece->getColor() == White ? whiteMaterial += piece->getValue() : blackMaterial += piece->getValue();
+            }
+        }
+        std::cout << "White: " << whiteMaterial << std::endl;
+        std::cout << "Black: " << blackMaterial << std::endl;
     }
 
     std::shared_ptr<Piece> findPiece(std::string location){

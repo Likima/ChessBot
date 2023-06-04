@@ -40,19 +40,22 @@ bool moveIsValid(std::string move, ChessBoard &board, int moveNumber, std::share
             if (isdigit(move[1]))
             {
                 if (possiblePiece[x]->getY() == move[1])
-                    return false;
+                    return true;
                 possiblePiece.erase(possiblePiece.begin() + x);
             }
             else
             {
-                if (possiblePiece[x]->getX() == move[1] - 96)
-                    return false;
+                if (std::to_string(possiblePiece[x]->getX()) == std::string(1, move[1] - 96))
+                    return true;
                 possiblePiece.erase(possiblePiece.begin() + x);
             }
         }
     }
     if (possiblePiece.empty() || possiblePiece.size() > 1)
     {
+        for(auto& piece : possiblePiece){
+            piece->printInfo();
+        }
         std::cout << "Move is not possible!" << std::endl;
         return false;
     }
@@ -70,11 +73,13 @@ bool moveIsValid(std::string move, ChessBoard &board, int moveNumber, std::share
     }
     if(possiblePiece[0]->getSymbol() == 'P' && (possiblePiece[0]->getY() == 1 || possiblePiece[0]->getY() == 8)){
         Promote(board, possiblePiece[0]);
+        board.setMoves(move+"="+std::string(1,board[8-possiblePiece[0]->getY()][possiblePiece[0]->getX()-1]->getSymbol()));
+        return true;
     }
     if(possiblePiece[0]->getFirstMove() == true){
         possiblePiece[0]->setFirstMove();
     }
-    board.setMoves(possiblePiece[0]);
+    board.setMoves(move);
     return true;
 }
 bool mated(ChessBoard &board, int color)
@@ -137,7 +142,7 @@ bool movingToCheck(ChessBoard& board, std::string move, int color, std::shared_p
     std::shared_ptr<Piece> piecePtr = board.getBoard()[kingPos[1]][kingPos[0]];
     std::shared_ptr<King> kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
 
-    std::string kingPosString = std::string(1, static_cast<char>(kingPos[0] + 97)) + std::to_string(8 - kingPos[1]);
+    std::string kingPosString = "K"+std::string(1, static_cast<char>(kingPos[0] + 97)) + std::to_string(8 - kingPos[1]);
 
     if(kingPtr->inCheck(kingPosString, board.getBoard())){
         board.setPiece(prevX-1, prevY, passedPiece, prevPiece);
