@@ -4,13 +4,15 @@
 #include "piececlass.h"
 #include "boardclass.h"
 
-void Promote(ChessBoard& board, std::shared_ptr<Piece> piece){
+void Promote(ChessBoard& board, std::shared_ptr<Piece> piece, bool botmove = false){
     int color = piece->getColor();
     char promote;
     while (true)
         {
             std::cout << "Promote to: [Q/R/B/N]" << std::endl;
-            std::cin >> promote;
+            if(botmove == false) std::cin >> promote;
+            else promote = 'Q';
+
             if (promote == 'Q')
             {
                 board.setPiece(piece->getX()-1, piece->getY(), std::make_shared<Queen>(color, 'Q', piece->getX(), piece->getY(), 8));

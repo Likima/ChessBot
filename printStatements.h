@@ -32,7 +32,7 @@ void printBoard(const ChessBoard &board)
         
         std::cout << std::endl;
     }
-    printvector(board.getMoves());
+    //printvector(board.getMoves());
 }
 
 void printX(ChessBoard& board){

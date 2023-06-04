@@ -26,9 +26,9 @@ void printBoard(const ChessBoard&);
 void printvector(std::vector<std::string>);
 void printX(const ChessBoard&);
 void printY(const ChessBoard&);
-void Promote(ChessBoard&, std::shared_ptr<Piece>);
-void shortCastle(ChessBoard&, int);
-void longCastle(ChessBoard&, int);
+void Promote(ChessBoard&, std::shared_ptr<Piece>, bool);
+void shortCastle(ChessBoard&, int, bool);
+void longCastle(ChessBoard&, int, bool);
 void castle(std::string, ChessBoard&, int);
 bool movingToCheck(ChessBoard&, std::string, int, std::shared_ptr<Piece>);
 bool moveIsValid(std::string, ChessBoard&, int, std::shared_ptr<King>);
@@ -72,10 +72,7 @@ public:
             for (int x = 1; x<8; x++){
                 move = std::string(1,let)+std::to_string(x);
                 move = (getSymbol() == 'P') ? move : getSymbol() + move;
-                //std::cout<<"MOVES CHECKED "<< std::string(1, getSymbol())+std::string(1, let)+std::to_string(x)<<std::endl;
                 if(legalMove(move, board)){
-                    //if(getSymbol() != 'P') legalMoves.emplace_back(std::string(1, getSymbol())+std::string(1, let)+std::to_string(x));
-                    //else(legalMoves.emplace_back(std::string(1, let)+std::to_string(x)));
                     legalMoves.emplace_back(move);
                 }
             }
@@ -262,6 +259,7 @@ class Knight:public Piece{
         int moveX = move[move.length()-2]-96;
         int moveY = move[move.length()-1]-'0';
         std::shared_ptr<Piece> movingSquare = Board[8-moveY][moveX-1];
+    
 
         if(getX()+2 == moveX || getX()-2 == moveX){
             if(getY()+1 == moveY || getY()-1 == moveY){
@@ -286,8 +284,7 @@ class Knight:public Piece{
 
 class King:public Piece{
     public:
-    King(char color, int symbol, int x, int y, int value) : Piece(color, 'K', x, y, 0
-    ){}
+    King(char color, int symbol, int x, int y, int value) : Piece(color, 'K', x, y, 0){}
 
     bool inCheck(std::string move, const std::vector<RowType>& Board) {
         int pieceColor;
@@ -295,21 +292,15 @@ class King:public Piece{
         for (const auto& row : Board) {
             for (const auto& piece : row) {
                 int pieceColor = piece->getColor();
-                //std::cout << "Checking for check" << std::endl;
                 char pieceSymbol = piece->getSymbol();
-
-                //piece->printInfo();
 
                 if (pieceColor != getColor() && pieceSymbol != 'K' && pieceSymbol != '.') {
                     if (pieceSymbol == 'P') {
-                        //if (piece->legalMove("^"+std::string(1,(char)(getX() + 96)) + "x" + move, Board)) {
-                            //piece->printInfo();
-                        //    return false;
-                        //}
+                        if (piece->legalMove(std::string(1,(char)(piece->getX() + 96)) + "x" + move, Board)) {
+                           return false;
+                        }
                     }
                     if(pieceSymbol != 'P' && piece->legalMove(std::to_string(pieceSymbol)+move, Board)) {
-                        //piece->printInfo();
-                        //std::cout << "You Are In Check!" << std::endl;
                         return false;
                     }
                 }
@@ -317,7 +308,7 @@ class King:public Piece{
         }
 
     return true;
-}
+    }
 
     bool legalMove(std::string move, std::vector<RowType> Board) override{
         int moveX = (move[move.length()-2])- 96;

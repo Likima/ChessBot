@@ -15,7 +15,7 @@ bool pawnMove(std::string move)
 }
 
 void doMove(const std::string &move, ChessBoard &board, int moveNumber, std::shared_ptr<Piece> passedPiece)
-{ 
+{
     int moveSize = move.length() - 2;
     char horizontalCoord = move[moveSize] - 97;
     int verticalCoord = (move[moveSize + 1] - '0');
@@ -97,6 +97,11 @@ int main()
             moveNumber%2 == 0 ? std::cout << "White Wins!" << std::endl : std::cout << "Black Wins!" << std::endl;
             break;
         }
+        if(moveNumber == 100){
+            std::cout<<"Draw!"<<std::endl;
+            printvector(board.getMoves());
+            break;
+        }
 
         if (BotMove == moveNumber % 2)
         {
@@ -104,6 +109,15 @@ int main()
             moveNumber++;
             continue;
         }
+
+        else{
+            std::cout<<moveNumber<<std::endl;
+            moveChoice(board, moveNumber % 2);
+            moveNumber++;
+            printBoard(board);
+            continue;
+        }
+
         moveNumber % 2 == 1 ? std::cout << "White's move" 
                 : std::cout << "\033[0;01;02"
                 << "m"
@@ -146,6 +160,7 @@ int main()
         if (!moveIsValid(move, board, moveNumber, kingPtr)) continue;
 
         printBoard(board);
+        board.playedMovePrint();
         board.materialPrint();
         moveNumber++;
     }

@@ -90,6 +90,14 @@ public:
         std::cout << "Black: " << blackMaterial << std::endl;
     }
 
+    void playedMovePrint(){
+        std::cout << "Played moves: " << std::endl;
+        for(auto& move : moves){
+            std::cout << move << " ";
+        }
+        std::cout << std::endl;
+    }
+
     std::shared_ptr<Piece> findPiece(std::string location){
         char pieceX = location[location.size()-2]-97;
         char pieceY = 8-(location[location.size()-1]-'0');

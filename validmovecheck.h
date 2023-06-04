@@ -72,7 +72,7 @@ bool moveIsValid(std::string move, ChessBoard &board, int moveNumber, std::share
         return false;
     }
     if(possiblePiece[0]->getSymbol() == 'P' && (possiblePiece[0]->getY() == 1 || possiblePiece[0]->getY() == 8)){
-        Promote(board, possiblePiece[0]);
+        Promote(board, possiblePiece[0], false);
         board.setMoves(move+"="+std::string(1,board[8-possiblePiece[0]->getY()][possiblePiece[0]->getX()-1]->getSymbol()));
         return true;
     }
