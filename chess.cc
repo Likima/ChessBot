@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #include <iostream>
 #include <vector>
 #include <string>
@@ -86,260 +87,172 @@ class Pawn: public Piece{
             }
         }
         return false;
+=======
+#include "piececlass.h"
+#include "boardclass.h"
+#include "chessalgorithm.h"
+#include "printStatements.h"
+#include "specialmoves.h"
+#include "validmovecheck.h"
 
-    }
-    private:
-        bool firstMove = true;
-        bool enPassantable = false;
-};
+bool pawnMove(std::string move)
+{
+    if (move.length() == 2)
+        return true;
+    else if (move.length() == 4 && move.find('x') != std::string::npos)
+        return true;
+    return false;
+}
+>>>>>>> 867c3707c0d4bc13ae25c9716ca106ae7b6081f3
 
-class Rook: public Piece{
-    public:
-    Rook(char color, int symbol, int x, int y) : Piece(color, 'R', x, y){}
+void doMove(const std::string &move, ChessBoard &board, int moveNumber, std::shared_ptr<Piece> passedPiece)
+{
+    int moveSize = move.length() - 2;
+    char horizontalCoord = move[moveSize] - 97;
+    int verticalCoord = (move[moveSize + 1] - '0');
 
-    bool legalMove(std::string move, int color, std::vector<RowType> Board) override{
-        int moveSize = move.length()-2;
-
-        std::cout<<"("<<getX()<<", "<<(move[moveSize]-96)<<", "<<getY()<<", "<<(move[moveSize+1] - '0')<<")"<<std::endl;
-        if(getX() == (move[moveSize]-96) && getY() == (move[moveSize+1]- '0')){//checking if moving to same square
-            return false;
-        }
-        else if(getX() == (move[moveSize]-96)){//if the rook is travelling vertically
-            movingY = move[moveSize+1]-'0';
-            if(getY()<movingY){
-                for(int i = getY()+1; i<movingY; i++){
-                    std::cout<<"    ["<<8-i<<", "<<getX()-1<<"]"<<std::endl;
-                    if(Board[8-i][getX()-1]->getSymbol() != '.') return false;
-                }
-                return true;
-            }
-            else if(getY()>movingY){
-                for(int i = movingY+1; i<getY(); i++){
-                    if(Board[8-i][getX()-1]->getSymbol() != '.') return false;
-                }
-                return true;
-            }
-        }
-        else if(getY() == (move[moveSize+1]- '0')){//if the rook is travelling horizontally
-            std::cout<<"HORIZONTAL"<<std::endl;
-            movingX = move[moveSize]-96;
-            if(getX()<movingX){
-                for(int i = getX()+1; i<movingX; i++){
-                    if(Board[8-getY()][i-1]->getSymbol() != '.') return false;
-                    //std::cout<<"here? 2"<<std::endl;
-                }
-                return true;                
-            }
-            else if(getX()>movingX){
-                for(int i = movingX; i<getX()+1; i++){
-                    //std::cout<<"here? 3"<<std::endl;
-                    if(Board[8-getY()][i-1]->getSymbol() != '.'){
-                        return 0;
-                    }
-                }
-                return true;                
-            }
-        }
-        return false;
-    }
-
-    private:
-        int movingX;
-        int movingY;
-        int vert = 0;
-};
-
-class ChessBoard {
-public:
-    ChessBoard() {
-        const int SIZE = 8;
-        RowType SECOND_RANK;
-        RowType SEVENTH_RANK;
-        RowType EIGHTH_RANK;
-
-        RowType FIRST_RANK{
-            std::make_shared<Rook>(Black, 'R',1,8),
-            std::make_shared<Piece>(Black, 'N',2,8),
-            std::make_shared<Piece>(Black, 'B',3,8),
-            std::make_shared<Piece>(Black, 'Q',4,8),
-            std::make_shared<Piece>(Black, 'K',5,8),
-            std::make_shared<Piece>(Black, 'B',6,8),
-            std::make_shared<Piece>(Black, 'N',7,8),
-            std::make_shared<Rook>(Black, 'R',8,8)};
-        
-        for(int x = 1; x<SIZE+1; x++){
-            SECOND_RANK.emplace_back(std::make_shared<Pawn>(Black, 'P',x,7));
-        }
-        
-        board.emplace_back(std::move(FIRST_RANK));
-        board.emplace_back(std::move(SECOND_RANK));
-
-        for (int i = 2; i < SIZE - 2; ++i) {
-            RowType BLANK_RANK; 
-            for(int x = 0; x<SIZE; x++){
-                BLANK_RANK.emplace_back(std::make_shared<Piece>('.'));
-            }
-            board.emplace_back(std::move(BLANK_RANK));
-        }
-
-        for(int x = 1; x<SIZE+1; x++){
-            SEVENTH_RANK.emplace_back(std::make_shared<Pawn>(White, 'P',x,2));
-        }
-
-        board.emplace_back(SEVENTH_RANK);
-
-        EIGHTH_RANK.emplace_back(std::make_shared<Rook>(White, 'R',1,1));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'N',2,1));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'B',3,1));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'Q',4,1));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'K',5,1));
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'B',6,1)); 
-        EIGHTH_RANK.emplace_back(std::make_shared<Piece>(White, 'N',7,1));
-        EIGHTH_RANK.emplace_back(std::make_shared<Rook>(White, 'R',8,1));  
-
-        board.emplace_back(EIGHTH_RANK);
-    }
-
-    const std::vector<RowType>& getBoard() const {
-        return board;
-    }
-
-    void setPiece(int x, int y, std::shared_ptr<Piece> piece) {
-        board[8-(piece->getY())][(piece->getX())-1] = std::make_shared<Piece>('.'); // set old position to empty
-        piece->setX(x+1); // set new position for the piece
-        piece->setY(y);
-        board[8-y][x] = std::move(piece); // move the piece to the new position
-    }
-private:
-    std::vector<RowType> board;
-};
-
-void printBoard(const ChessBoard& board) {
-    const auto& b = board.getBoard();
-    for (const auto& row : b) {
-        for (const auto& piece : row) {
-            std::cout << piece->getSymbol() << " ";
-        }
-
-        std::cout << std::endl;
-    }
+    board.setPiece(horizontalCoord, verticalCoord, passedPiece);
 }
 
-void doMove(const std::string& move, ChessBoard& board, int moveNumber, std::shared_ptr<Piece> passedPiece = NULL) {//rn only works for three letter things like ke5...
-    //cout<<move[2]<<endl;
-    int moveSize = move.length()-2;
-    char m = move[0];
-    char horizontalCoord = move[moveSize];
-    int verticalCoord = (move[moveSize+1] - '0');
-    int horizontalInt = 0;
+RowType getPieces(ChessBoard &board, std::string move, int moveNumber)
+{
+    int movenumber = moveNumber%2;
+    RowType possiblePiece;
 
-    std::shared_ptr<Piece> moved;
-    const auto& b = board.getBoard();
-
-    if(passedPiece == NULL){
-        for (const auto& row : b) {
-            for (auto& piece : row) {
-                if(piece && piece->getSymbol() == toupper(m) && piece->getColor() == moveNumber%2){
-                    moved = piece;
-                    break;
-                }
+    for (const auto &row : board.getBoard())
+    {
+        for (const auto &piece : row)
+        {
+            if (piece->getSymbol() == toupper(move[0]) && piece->getSymbol() != 'P' && piece->getColor() == movenumber && move.length() == 3 &&
+                piece->legalMove(move, board.getBoard()) == 1)
+            {
+                possiblePiece.emplace_back(piece);
+            }
+            else if (piece->getSymbol() == 'P' && piece->getColor() == movenumber && piece->legalMove(move, board.getBoard()) == 1 && pawnMove(move))
+            {
+                possiblePiece.emplace_back(piece);
             }
         }
-    }else{
-        moved = passedPiece;
-        if(move.length() == 2){
-            horizontalCoord = move[0];
-            verticalCoord = move[1] - '0';
-        }
     }
-    
-
-    for (std::vector<char>::iterator t = coords.begin(); t != coords.end(); ++t) {
-        if(*t == horizontalCoord){
-            std::cout<<horizontalInt<<", "<<verticalCoord<<std::endl;
-            std::cout<<moved->getX()<<", "<<moved->getY()<<std::endl;
-            board.setPiece(horizontalInt, verticalCoord, std::move(moved));
-            break;
-        }
-        horizontalInt++;            
-    }
+    return possiblePiece;
 }
 
-
-int main() {
-    std::string move;
+int main()
+{
     RowType possiblePiece;
     int moveNumber = 1;
     ChessBoard board;
+    int prevX, prevY, BotMove;
+    char BotSide;
+    std::string kingPosString, move;
+    std::vector<std::string> playedMoves;
+    std::vector<int> kingPos;
+    std::shared_ptr<Piece> piecePtr;
+    std::shared_ptr<King> kingPtr;
+
+    std::vector<std::string> legalMoves;
+    auto &b = board.getBoard();
+
     printBoard(board);
 
-    const auto& b = board.getBoard();
+    std::cout << "What Side Are You Playing? [B/W] ";
+    if (std::cin >> BotSide)
+    {
+        if (BotSide == 'B')
+            BotMove = 1;
+        else if (BotSide == 'W')
+            BotMove = 0;
+        else
+        {
+            std::cout << "Invalid Input" << std::endl;
+            return 0;
+        }
+    }
+    else
+    {
+        std::cout << "Invalid Input" << std::endl;
+        return 0;
+    }
 
-    while (true) {
+    while (true)
+    {
+        kingPos = board.findKing(moveNumber % 2);
+        piecePtr = board[kingPos[1]][kingPos[0]];
+        kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
+        kingPosString = "K" + std::string(1, static_cast<char>(kingPos[0] + 97)) + std::to_string(8 - kingPos[1]);
+        legalMoves = kingPtr->getLegal(board.getBoard());
+
+        if (!kingPtr->inCheck(kingPosString, board.getBoard()) && mated(board, moveNumber % 2))
+        {
+            std::cout << "Checkmate!" << std::endl;
+            moveNumber%2 == 0 ? std::cout << "White Wins!" << std::endl : std::cout << "Black Wins!" << std::endl;
+            break;
+        }
+        if(moveNumber == 100){
+            std::cout<<"Draw!"<<std::endl;
+            printvector(board.getMoves());
+            break;
+        }
+
+        if (BotMove == moveNumber % 2)
+        {
+            moveChoice(board, moveNumber % 2);
+            moveNumber++;
+            continue;
+        }
+
+        else{
+            std::cout<<moveNumber<<std::endl;
+            moveChoice(board, moveNumber % 2);
+            moveNumber++;
+            printBoard(board);
+            continue;
+        }
+
+        moveNumber % 2 == 1 ? std::cout << "White's move" 
+                : std::cout << "\033[0;01;02"
+                << "m"
+                << "Black's Move"
+                << " "
+                << "\033[m";
+
+        std::cout<<std::endl<<std::endl;
+        
         std::cout << "Enter move: ";
         std::cin >> move;
-        if(move.length()<2 || move.length()>4){
-            std::cout<<"Move is not possible!"<<std::endl;
-            continue;
-
-        } else if(move.length() == 2){
-            for (const auto& row : b){
-                //std::cout<<std::endl;
-                for (const auto& piece : row) {
-                    //std::cout<<piece->legalMove(move,moveNumber%2)<<" ";
-                
-                    if(piece->legalMove(move, moveNumber%2, b) == 1 && piece->getSymbol() == 'P'){
-                        std::cout<<"here! "<<std::endl;
-                        possiblePiece.emplace_back(piece);
-                    }
-                }
-            }
-        } else if(move.length()>=3){
-            for (const auto& row : b){
-                //std::cout<<std::endl;
-                for (const auto& piece : row) {
-                    //std::cout<<piece->legalMove(move,moveNumber%2)<<" ";
-                
-                    if(piece->legalMove(move, moveNumber%2, b) == 1 && piece->getSymbol() == toupper(move[0])){
-                        std::cout<<"here! "<<std::endl;
-                        possiblePiece.emplace_back(piece);
-                    }
-                }
-            }            
-        }
-
-        if(possiblePiece.size() > 1 && move.size() == 4){
-            for(int x = 1; x<possiblePiece.size()+1; x++){
-                if(isdigit(move[1])){
-                    if(possiblePiece[x-1]->getY() == move[1]) continue;
-                    possiblePiece.erase(possiblePiece.begin()+x);
-                }
-                else{
-                    if(possiblePiece[x-1]->getX() == move[1] - 96) continue;
-                    possiblePiece.erase(possiblePiece.begin()+x);                
-                }
-            }
-        }
-
-        for(const auto& piece : possiblePiece){
-            //std::cout<<"AHHHHHHHHHHHHHH"<<std::endl;
-            std::cout<<piece->getSymbol()<<", "<<piece->getColor()<<", ";
-            std::cout<<(char)(piece->getX()+96)<<", "<<piece->getY()<<std::endl;
-            
-            doMove(move, board, moveNumber, piece);
-        }    
-
-        if(possiblePiece.empty() || possiblePiece.size()>1){
-            std::cout<<"Move is not possible!"<<std::endl;
+        if (move == "display")
+        {
+            printBoard(board);
             continue;
         }
 
+        if (move[0] == '?' && move.length() == 4 && board.findPiece(move))
+        {
+            printvector(board.findPiece(move)->getLegal(board.getBoard()));
+            if (board.findPiece(move)->getLegal(board.getBoard()).empty())
+                std::cout << "No Legal Moves " << std::endl;
+            continue;
+        }
+        if (move[0] == '?')
+        {
+            std::cout << "Not a valid piece " << std::endl;
+            continue;
+        }
+        if (move[0] == '!' && move.length() == 4 && board.findPiece(move))
+        {
+            board.setPiece((board.findPiece(move)->getX() - 1), (board.findPiece(move)->getY()), std::make_shared<Piece>('.'));
+            continue;
+        }
+        if(move[0] == '!'){
+            std::cout<<"Not a valid piece "<<std::endl;
+            continue;
+        }
 
-        possiblePiece.clear();
+        if (!moveIsValid(move, board, moveNumber, kingPtr)) continue;
 
-        //doMove(move, board, moveNumber);
-        std::cout<<std::endl;;
         printBoard(board);
+        board.playedMovePrint();
+        board.materialPrint();
         moveNumber++;
     }
     return 0;
