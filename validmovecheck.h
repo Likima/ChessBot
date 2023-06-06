@@ -85,15 +85,13 @@ bool moveIsValid(std::string move, ChessBoard &board, int moveNumber, std::share
 bool mated(ChessBoard &board, int color)
 {
     std::vector<int> kingPos = board.findKing(color);
-    std::shared_ptr<Piece> piecePtr = board[kingPos[1]][kingPos[0]];
+    std::shared_ptr<Piece> piecePtr = board.getBoard()[kingPos[1]][kingPos[0]];
     std::shared_ptr<King> kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
     int prevX, prevY;
+    std::cout<<kingPos[0]<<"<-x y->"<<kingPos[1]<<std::endl;
 
-    if (!kingPtr->getLegal(board.getBoard()).empty())
-    {
-        return false; 
-    }
-
+    if (!kingPtr->getLegal(board.getBoard()).empty()) return false; 
+    
     const auto &b = board.getBoard();
     for (const auto &row : b)
     {
@@ -113,7 +111,7 @@ bool mated(ChessBoard &board, int color)
                     doMove(move, board, color, piece);
 
                     kingPos = board.findKing(color);
-                    piecePtr = board[kingPos[1]][kingPos[0]];
+                    piecePtr = board.getBoard()[kingPos[1]][kingPos[0]];
                     kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
                     if (!kingPtr->inCheck(move, board.getBoard()))
                     {

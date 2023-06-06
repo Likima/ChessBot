@@ -117,8 +117,8 @@ public:
 
     std::vector<int> findKing(int color) {
         std::vector<int> kingPosition;
-        for (int i = 0; i < board.size(); ++i) {
-            for (int j = 0; j < board.size(); ++j) {
+        for (auto i = 0; i < board.size(); i++) {
+            for (auto j = 0; j < board.size(); j++) {
                 if (board[i][j]->getSymbol() == 'K' && board[i][j]->getColor() == color) {
                     kingPosition.emplace_back(j);
                     kingPosition.emplace_back(i);

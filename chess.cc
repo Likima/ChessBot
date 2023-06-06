@@ -25,19 +25,18 @@ void doMove(const std::string &move, ChessBoard &board, int moveNumber, std::sha
 
 RowType getPieces(ChessBoard &board, std::string move, int moveNumber)
 {
-    int movenumber = moveNumber%2;
     RowType possiblePiece;
 
     for (const auto &row : board.getBoard())
     {
         for (const auto &piece : row)
         {
-            if (piece->getSymbol() == toupper(move[0]) && piece->getSymbol() != 'P' && piece->getColor() == movenumber && move.length() == 3 &&
+            if (piece->getSymbol() == toupper(move[0]) && piece->getSymbol() != 'P' && piece->getColor() == moveNumber%2 && move.length() == 3 &&
                 piece->legalMove(move, board.getBoard()) == 1)
             {
                 possiblePiece.emplace_back(piece);
             }
-            else if (piece->getSymbol() == 'P' && piece->getColor() == movenumber && piece->legalMove(move, board.getBoard()) == 1 && pawnMove(move))
+            else if (piece->getSymbol() == 'P' && piece->getColor() == moveNumber%2 && piece->legalMove(move, board.getBoard()) == 1 && pawnMove(move))
             {
                 possiblePiece.emplace_back(piece);
             }
@@ -86,10 +85,9 @@ int main()
     while (true)
     {
         kingPos = board.findKing(moveNumber % 2);
-        piecePtr = board[kingPos[1]][kingPos[0]];
+        piecePtr = board.getBoard()[kingPos[1]][kingPos[0]];
         kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
         kingPosString = "K" + std::string(1, static_cast<char>(kingPos[0] + 97)) + std::to_string(8 - kingPos[1]);
-        legalMoves = kingPtr->getLegal(board.getBoard());
 
         if (!kingPtr->inCheck(kingPosString, board.getBoard()) && mated(board, moveNumber % 2))
         {
@@ -97,16 +95,12 @@ int main()
             moveNumber%2 == 0 ? std::cout << "White Wins!" << std::endl : std::cout << "Black Wins!" << std::endl;
             break;
         }
-        if(moveNumber == 100){
-            std::cout<<"Draw!"<<std::endl;
-            printvector(board.getMoves());
-            break;
-        }
 
         if (BotMove == moveNumber % 2)
         {
             moveChoice(board, moveNumber % 2);
             moveNumber++;
+            printBoard(board);
             continue;
         }
 

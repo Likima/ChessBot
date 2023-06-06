@@ -68,10 +68,18 @@ public:
         std::vector<std::string> legalMoves;
         const std::vector<char> coords = {'a','b','c','d','e','f','g','h'};
         std::string move;
+
         for (const auto& let : coords) {
-            for (int x = 1; x<8; x++){
+            for (int x = 1; x<9; x++){//error here!
                 move = std::string(1,let)+std::to_string(x);
+                std::cout<<move<<std::endl;
+                if(getSymbol() == 'P' && abs(int(let-96)-getX()) == 1 && abs(getY()-x)==1
+                && legalMove((std::string(1, char(getX()+96))+"x"+move), board)){
+                    std::cout<<std::string(1, char(getX()+96))+"x"+move<<std::endl;
+                    legalMoves.emplace_back(std::string(1, char(getX()+96))+"x"+move);
+                }
                 move = (getSymbol() == 'P') ? move : getSymbol() + move;
+
                 if(legalMove(move, board)){
                     legalMoves.emplace_back(move);
                 }
@@ -179,24 +187,15 @@ class Pawn: public Piece{
 
     bool legalMove(std::string move, std::vector<RowType> Board) override {
         int moveSize = move.length() - 2;
-        int multi = 1;
         bool isTaking = move.find('x') != std::string::npos;
         
         int targetX = move[moveSize] - 96;
         int targetY = move[moveSize + 1] - '0';
 
-        //std::cout<<move<<" ";
-
         int currentX = getX();
         int currentY = getY();
-        /*
-        std::cout<<"TargetX "<<targetX<<" "
-                 <<"TargetY "<<targetY<<" "
-                 <<"CurrentX "<<currentX<<" "
-                 <<"CurrentY "<<currentY<<" "<<std::endl;
-        */
 
-        if(getColor() == White) multi*=-1;
+        int multi = getColor() == White ? -1 : 1;
 
         if (currentX == targetX && currentY == targetY) {
             return false;  // Same square
@@ -258,9 +257,9 @@ class Knight:public Piece{
         if(getX() == (move[move.length()-2]-96) && getY() == (move[move.length()-1]- '0')) return false;
         int moveX = move[move.length()-2]-96;
         int moveY = move[move.length()-1]-'0';
+
         std::shared_ptr<Piece> movingSquare = Board[8-moveY][moveX-1];
     
-
         if(getX()+2 == moveX || getX()-2 == moveX){
             if(getY()+1 == moveY || getY()-1 == moveY){
                 if(movingSquare->getSymbol() == '.'){
@@ -286,7 +285,7 @@ class King:public Piece{
     public:
     King(char color, int symbol, int x, int y, int value) : Piece(color, 'K', x, y, 0){}
 
-    bool inCheck(std::string move, const std::vector<RowType>& Board) {
+    bool inCheck(std::string move, const std::vector<RowType>& Board) {//returns true if not in check... a bit confusing
         int pieceColor;
         char pieceSymbol;
         for (const auto& row : Board) {
@@ -327,11 +326,14 @@ class King:public Piece{
     bool canCastle(std::string move, std::vector<RowType> Board) {
         std::string kingPosString;
         std::shared_ptr<King> kingPtr;
+        if (getFirstMove() == false) {
+            return false;
+        }
 
         if (move == "O-O") {
             if (getColor() == White) {
                 if (Board[7][4]->getSymbol() == 'K' && Board[7][7]->getSymbol() == 'R' && Board[7][5]->getSymbol() == '.' && Board[7][6]->getSymbol() == '.') {
-                    if (Board[7][4]->getFirstMove() && Board[7][7]->getFirstMove()) {
+                    if (getFirstMove() && Board[7][7]->getFirstMove()) {
                         if (!inCheck("f1", Board) || !inCheck("g1", Board)) {
                             return false;
                         }
