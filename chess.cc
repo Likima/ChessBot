@@ -144,7 +144,8 @@ int main()
         }
         if (move[0] == '!' && move.length() == 4 && board.findPiece(move))
         {
-            board.setPiece((board.findPiece(move)->getX() - 1), (board.findPiece(move)->getY()), std::make_shared<Piece>('.'));
+            board[8-(board.findPiece(move)->getY())][board.findPiece(move)->getX()-1] = std::make_shared<Piece>('.');
+            //board.setPiece((board.findPiece(move)->getX() - 1), (board.findPiece(move)->getY()), std::make_shared<Piece>('.'));
             continue;
         }
         if(move[0] == '!'){
