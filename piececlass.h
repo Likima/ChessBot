@@ -72,12 +72,12 @@ public:
         for (const auto& let : coords) {
             for (int x = 1; x<9; x++){//error here!
                 move = std::string(1,let)+std::to_string(x);
-                std::cout<<move<<std::endl;
-                if(getSymbol() == 'P' && abs(int(let-96)-getX()) == 1 && abs(getY()-x)==1
-                && legalMove((std::string(1, char(getX()+96))+"x"+move), board)){
-                    std::cout<<std::string(1, char(getX()+96))+"x"+move<<std::endl;
-                    legalMoves.emplace_back(std::string(1, char(getX()+96))+"x"+move);
-                }
+                //std::cout<<move<<std::endl;
+                //if(getSymbol() == 'P' && abs(int(let-96)-getX()) == 1 && abs(getY()-x)==1
+                //&& legalMove((std::string(1, char(getX()+96))+"x"+move), board)){
+                //    std::cout<<std::string(1, char(getX()+96))+"x"+move<<std::endl;
+                //    legalMoves.emplace_back(std::string(1, char(getX()+96))+"x"+move);
+                //}
                 move = (getSymbol() == 'P') ? move : getSymbol() + move;
 
                 if(legalMove(move, board)){
@@ -90,44 +90,30 @@ public:
 
     bool checkRook(std::string move, std::vector<RowType> Board){
         int moveSize = move.length()-2;
-        if(getX() == (move[moveSize]-96) && getY() == (move[moveSize+1]- '0')){return false;}
-        else if(getX() == (move[moveSize]-96)){//if the rook is travelling vertically
-            movingY = move[moveSize+1]-'0';
-            if(getY()<movingY){
-                for(int i = getY()+1; i<movingY; i++){
-                    if(Board[8-i][getX()-1]->getSymbol() != '.') return false;
-                }
-                if(Board[8-movingY][getX()-1]->getColor() == getColor()) return false;
-                return true;
-            }
-            else if(getY()>movingY){
-                for(int i = movingY+1; i<getY(); i++){
-                    if(Board[8-i][getX()-1]->getSymbol() != '.') return false;
-                }
-                if(Board[8-movingY][getX()-1]->getColor() == getColor()) return false;
-                return true;
+
+        movingX = move[moveSize]-96;
+        movingY = move[moveSize+1]-'0';
+
+        const int smallerX = std::min(getX(), movingX);
+        const int biggerX = std::max(getX(), movingX);
+        const int smallerY = std::min(getY(), movingY);
+        const int biggerY = std::max(getY(), movingY);
+
+        if(getX() == movingX && getY() == movingY){return false;}
+
+        else if(getX() == (movingX)){//if the rook is travelling vertically
+            for(int i = smallerY+1; i<biggerY; i++){
+                if(Board[8-i][getX()-1]->getSymbol() != '.') return false;
             }
         }
-        else if(getY() == (move[moveSize+1] - '0')){//if the rook is travelling horizontally
-            movingX = move[moveSize]-96;
-            if(getX()<movingX){
-                for(int i = getX()+1; i<movingX; i++){
-                    if(Board[8-getY()][i-1]->getSymbol() != '.') return false;
-                }
-                if(Board[8-getY()][movingX-1]->getColor() == getColor()) return false;
-                return true;                
-            }
-            else if(getX()>movingX){
-                for(int i = movingX+1; i<getX(); i++){
-                    if(Board[8-getY()][i-1]->getSymbol() != '.'){
-                        return false;
-                    }
-                }
-                if(Board[8-getY()][movingX-1]->getColor() == getColor()) return false;
-                return true;                
+
+        else if(getY() == (movingY)){//if the rook is travelling horizontally
+            for(int i = smallerX+1; i<biggerX; i++){
+                if(Board[8-getY()][i-1]->getSymbol() != '.') return false;
             }
         }
-        return false;
+        if(getX() != movingX && getY() != movingY){return false;}
+        return(Board[8-movingY][movingX-1]->getColor() != getColor());
     }
 
     bool checkBishop(std::string move, std::vector<RowType> Board) {

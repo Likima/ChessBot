@@ -53,14 +53,10 @@ void moveChoice(ChessBoard &board, int color) {
     int randomNumber = distr(eng);
     move = legalMoves[randomNumber-1];
 
-    std::cout<<"move before"<<move<<std::endl;
-
     possiblePiece = getPieces(board, move, color);
-
 
     if (possiblePiece.size() > 1)
     {
-        std::cout<<"Ambiguous Move"<<std::endl;
         for(auto &row : board.getBoard()){
             for(auto &piece : row){
                 if(piece->getSymbol() == possiblePiece[0]->getSymbol() && piece->getColor() == possiblePiece[0]->getColor()){

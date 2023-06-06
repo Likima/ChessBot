@@ -96,22 +96,22 @@ int main()
             break;
         }
 
-        if (BotMove == moveNumber % 2)
-        {
-            moveChoice(board, moveNumber % 2);
-            moveNumber++;
-            printBoard(board);
-            continue;
-        }
-
-        else{
-            std::cout<<moveNumber<<std::endl;
-            moveChoice(board, moveNumber % 2);
-            moveNumber++;
-            printBoard(board);
-            continue;
-        }
-
+        //if (BotMove == moveNumber % 2)
+        //{
+        //    moveChoice(board, moveNumber % 2);
+        //    moveNumber++;
+        //    printBoard(board);
+        //    continue;
+        //}
+//
+        //else{
+        //    std::cout<<moveNumber<<std::endl;
+        //    moveChoice(board, moveNumber % 2);
+        //    moveNumber++;
+        //    printBoard(board);
+        //    continue;
+        //}
+//
         moveNumber % 2 == 1 ? std::cout << "White's move" 
                 : std::cout << "\033[0;01;02"
                 << "m"
@@ -136,6 +136,7 @@ int main()
                 std::cout << "No Legal Moves " << std::endl;
             continue;
         }
+
         if (move[0] == '?')
         {
             std::cout << "Not a valid piece " << std::endl;
