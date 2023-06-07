@@ -25,14 +25,11 @@ bool moveIsValid(std::string move, ChessBoard &board, int moveNumber, std::share
             moveNumber++;
             return true;
         }
-        else
-        {
-            std::cout << "You Cannot Castle! " << std::endl;
-            return true;
-        }
+        std::cout<<"You cannot castle"<<std::endl;
         return false;
     }
-    else possiblePiece = getPieces(board, move, moveNumber);
+    else possiblePiece = getPieces(board.getBoard(), move, moveNumber);
+
     if (possiblePiece.size() > 1 && move.size() == 4)
     {
         for (int x = possiblePiece.size() - 1; x > -1; x--)
@@ -76,9 +73,9 @@ bool moveIsValid(std::string move, ChessBoard &board, int moveNumber, std::share
         board.setMoves(move+"="+std::string(1,board[8-possiblePiece[0]->getY()][possiblePiece[0]->getX()-1]->getSymbol()));
         return true;
     }
-    if(possiblePiece[0]->getFirstMove() == true){
-        possiblePiece[0]->setFirstMove();
-    }
+
+    if(possiblePiece[0]->getFirstMove() == true) possiblePiece[0]->setFirstMove();
+
     board.setMoves(move);
     return true;
 }
@@ -88,7 +85,6 @@ bool mated(ChessBoard &board, int color)
     std::shared_ptr<Piece> piecePtr = board.getBoard()[kingPos[1]][kingPos[0]];
     std::shared_ptr<King> kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
     int prevX, prevY;
-    std::cout<<kingPos[0]<<"<-x y->"<<kingPos[1]<<std::endl;
 
     if (!kingPtr->getLegal(board.getBoard()).empty()) return false; 
     
@@ -148,8 +144,6 @@ bool movingToCheck(ChessBoard& board, std::string move, int color, std::shared_p
     }
     board.setPiece(prevX-1, prevY, passedPiece, prevPiece);
     return true;
-
-    //return !(kingPtr->inCheck(kingPosString, board.getBoard()));
 
 }
 #endif

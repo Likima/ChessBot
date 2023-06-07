@@ -23,20 +23,20 @@ void doMove(const std::string &move, ChessBoard &board, int moveNumber, std::sha
     board.setPiece(horizontalCoord, verticalCoord, passedPiece);
 }
 
-RowType getPieces(ChessBoard &board, std::string move, int moveNumber)
+RowType getPieces(std::vector<RowType> board, std::string move, int moveNumber)
 {
     RowType possiblePiece;
 
-    for (const auto &row : board.getBoard())
+    for (const auto &row : board)
     {
         for (const auto &piece : row)
         {
             if (piece->getSymbol() == toupper(move[0]) && piece->getSymbol() != 'P' && piece->getColor() == moveNumber%2 && move.length() == 3 &&
-                piece->legalMove(move, board.getBoard()) == 1)
+                piece->legalMove(move, board) == 1)
             {
                 possiblePiece.emplace_back(piece);
             }
-            else if (piece->getSymbol() == 'P' && piece->getColor() == moveNumber%2 && piece->legalMove(move, board.getBoard()) == 1 && pawnMove(move))
+            else if (piece->getSymbol() == 'P' && piece->getColor() == moveNumber%2 && piece->legalMove(move, board) == 1 && pawnMove(move))
             {
                 possiblePiece.emplace_back(piece);
             }
@@ -89,29 +89,34 @@ int main()
         kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
         kingPosString = "K" + std::string(1, static_cast<char>(kingPos[0] + 97)) + std::to_string(8 - kingPos[1]);
 
+        if(board.checkStalemate()){
+            std::cout <<"Stalemate!"<< std::endl;
+            break;
+        }
+
         if (!kingPtr->inCheck(kingPosString, board.getBoard()) && mated(board, moveNumber % 2))
         {
             std::cout << "Checkmate!" << std::endl;
             moveNumber%2 == 0 ? std::cout << "White Wins!" << std::endl : std::cout << "Black Wins!" << std::endl;
             break;
         }
+        
+        if (BotMove == moveNumber % 2)
+        {
+            moveChoice(board, moveNumber % 2);
+            moveNumber++;
+            printBoard(board);
+            continue;
+        }
 
-        //if (BotMove == moveNumber % 2)
-        //{
-        //    moveChoice(board, moveNumber % 2);
-        //    moveNumber++;
-        //    printBoard(board);
-        //    continue;
-        //}
-//
-        //else{
-        //    std::cout<<moveNumber<<std::endl;
-        //    moveChoice(board, moveNumber % 2);
-        //    moveNumber++;
-        //    printBoard(board);
-        //    continue;
-        //}
-//
+        else{
+            std::cout<<moveNumber<<std::endl;
+            moveChoice(board, moveNumber % 2);
+            moveNumber++;
+            printBoard(board);
+            continue;
+        }
+
         moveNumber % 2 == 1 ? std::cout << "White's move" 
                 : std::cout << "\033[0;01;02"
                 << "m"

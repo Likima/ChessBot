@@ -114,6 +114,17 @@ public:
     std::shared_ptr<Piece> findPiece(int x, int y){
         return board[8-y][x-1];
     }
+    
+    bool checkStalemate(){
+        for(auto& row : board){
+            for(auto& piece : row){
+                if(piece->getSymbol() == 'R' || piece->getSymbol() == 'P' || piece->getSymbol() == 'Q' || piece->getSymbol() == 'N'){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
     std::vector<int> findKing(int color) {
         std::vector<int> kingPosition;

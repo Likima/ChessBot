@@ -33,7 +33,7 @@ void castle(std::string, ChessBoard&, int);
 bool movingToCheck(ChessBoard&, std::string, int, std::shared_ptr<Piece>);
 bool moveIsValid(std::string, ChessBoard&, int, std::shared_ptr<King>);
 bool mated(ChessBoard&, int);
-RowType getPieces(ChessBoard&, std::string, int);
+RowType getPieces(std::vector<RowType>, std::string, int);
 
 class Piece {
 public:
@@ -67,6 +67,7 @@ public:
     std::vector<std::string> getLegal(std::vector<RowType> board){
         std::vector<std::string> legalMoves;
         const std::vector<char> coords = {'a','b','c','d','e','f','g','h'};
+        RowType ambiguousPieces;
         std::string move;
 
         for (const auto& let : coords) {
@@ -75,13 +76,22 @@ public:
                 //std::cout<<move<<std::endl;
                 if(getSymbol() == 'P' && abs(int(let-96)-getX()) == 1 && abs(getY()-x)==1
                 && legalMove((std::string(1, (char)(getX()+96))+"x"+move), board)){
-                    //std::cout<<std::string(1, (char)(getX()+96))+"x"+move<<std::endl;
                     legalMoves.emplace_back(std::string(1, char(getX()+96))+"x"+move);
                 }
                 move = (getSymbol() == 'P') ? move : getSymbol() + move;
 
-                if(legalMove(move, board)){
-                    legalMoves.emplace_back(move);
+                if(legalMove(move, board)){//check for ambiguous moves
+                    ambiguousPieces = getPieces(board, move, getColor());
+                    if(ambiguousPieces.size() > 1){
+                        move.erase(0,1);
+                        for(auto& piece : ambiguousPieces){
+                            if(piece->getX() == getX()){
+                                legalMoves.emplace_back(std::string(1, getSymbol())+std::string(1, (char)(getY()))+move);
+                            }
+                            else legalMoves.emplace_back(std::string(1, getSymbol())+std::string(1, (char)(getX()+96))+move);
+                        }
+                    }
+                    else legalMoves.emplace_back(move);
                 }
             }
         }
@@ -174,19 +184,21 @@ class Pawn: public Piece{
 
         if (currentX == targetX && currentY == targetY) {return false;}
 
-        if (currentX == targetX && currentY - targetY == 1 * multi && Board[8 + multi - currentY][currentX - 1]->getSymbol() == '.') {
-            return true;
-        } else if (getFirstMove() && currentX == targetX && currentY - targetY == 2 * multi && Board[8 + multi - currentY][currentX - 1]->getSymbol() == '.' && Board[8 + (2*multi) - currentY][currentX - 1]->getSymbol() == '.') {
-            return true;
-        } else if(isTaking && currentY - targetY == 1 * multi && currentX == move[0] - 96){
+        else if(isTaking && currentY - targetY == 1 * multi && currentX == move[0] - 96){
 
-            if(getX() != 8 && Board[8 + multi - currentY][currentX]->getSymbol() != '.'){
+            if(currentX+1 == targetX && getX() != 8 && Board[8 + multi - currentY][currentX]->getSymbol() != '.'){//if this not true defaults to the other one
                 return Board[8 + multi - currentY][currentX]->getColor() != getColor();
             }
 
-            else if(getX() != 1 && Board[8 + multi - currentY][currentX - 2]->getSymbol() != '.'){
+            else if(currentX-1 == targetX && getX() != 1 && Board[8 + multi - currentY][currentX - 2]->getSymbol() != '.'){
                 return Board[8 + multi - currentY][currentX - 2]->getColor() != getColor();
             }
+        }
+
+        else if (currentX == targetX && currentY - targetY == 1 * multi && Board[8 + multi - currentY][currentX - 1]->getSymbol() == '.') {
+            return true;
+        } else if (getFirstMove() && currentX == targetX && currentY - targetY == 2 * multi && Board[8 + multi - currentY][currentX - 1]->getSymbol() == '.' && Board[8 + (2*multi) - currentY][currentX - 1]->getSymbol() == '.') {
+            return true;
         }
         return false;
     }
@@ -264,7 +276,7 @@ class King:public Piece{
                 pieceColor = piece->getColor();
                 pieceSymbol = piece->getSymbol();
 
-                if (pieceColor != getColor() && pieceSymbol != 'K' && pieceSymbol != '.') {
+                if (pieceColor != getColor() && pieceSymbol != '.') {
                     if (pieceSymbol == 'P') {
                         if (piece->legalMove(std::string(1,(char)(piece->getX() + 96)) + "x" + move, Board)) {
                            return false;
