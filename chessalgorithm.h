@@ -62,6 +62,9 @@ void moveChoice(ChessBoard &board, int color) {
 
     if(move.first == "O-O" || move.first == "O-O-O"){
         castle(move.first, board, color);
+        move.second->setFirstMove();
+        board.setMoves(move.first);
+        board.playedMovePrint();
         return;
     }
     

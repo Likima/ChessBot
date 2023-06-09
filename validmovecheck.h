@@ -99,13 +99,14 @@ bool mated(ChessBoard &board, int color)
             {
                 for (const auto &move : piece->getLegal(board.getBoard()))
                 {
-                    if (movingToCheck(board, move.first, color, piece) || !piece->legalMove(move.first, board.getBoard()))
+                    if (movingToCheck(board, move.first, color, piece) && !piece->legalMove(move.first, board.getBoard()))
                     {
                         continue;
                     }
 
                     prevX = piece->getX();
                     prevY = piece->getY();
+                    //prevPiece = board[move.first[move.first.size()-1]]
                     doMove(move.first, board, color, piece);
 
                     kingPos = board.findKing(color);
