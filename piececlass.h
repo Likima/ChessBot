@@ -9,6 +9,7 @@
 #include <ctype.h>
 #include <algorithm>
 #include <memory>
+#include <utility>
 #include <random>
 
 class Piece;
@@ -16,6 +17,7 @@ class ChessBoard;
 class King;
 
 using RowType = std::vector<std::shared_ptr<Piece>>;
+using piecePair = std::pair<std::string, std::shared_ptr<Piece>>;
 
 int Black = 0;
 int White = 1;
@@ -24,6 +26,7 @@ std::vector<char> coords = {'a','b','c','d','e','f','g','h'};
 void doMove(const std::string&, ChessBoard&, int, std::shared_ptr<Piece>);
 void printBoard(const ChessBoard&);
 void printvector(std::vector<std::string>);
+void printvector(std::vector<piecePair>);
 void printX(const ChessBoard&);
 void printY(const ChessBoard&);
 void Promote(ChessBoard&, std::shared_ptr<Piece>, bool);
@@ -64,34 +67,38 @@ public:
         "COLOR: "<<color<<", "<<"SYMBOL: "<<symbol<<std::endl;
     }
 
-    std::vector<std::string> getLegal(std::vector<RowType> board){
-        std::vector<std::string> legalMoves;
+    std::vector<piecePair> getLegal(std::vector<RowType> board){
+        //std::vector<std::string> legalMoves
+        std::vector<piecePair> legalMoves;
         const std::vector<char> coords = {'a','b','c','d','e','f','g','h'};
         RowType ambiguousPieces;
         std::string move;
 
         for (const auto& let : coords) {
-            for (int x = 1; x<9; x++){//error here!
+            for (int x = 1; x<9; x++){
                 move = std::string(1,let)+std::to_string(x);
-                //std::cout<<move<<std::endl;
                 if(getSymbol() == 'P' && abs(int(let-96)-getX()) == 1 && abs(getY()-x)==1
                 && legalMove((std::string(1, (char)(getX()+96))+"x"+move), board)){
-                    legalMoves.emplace_back(std::string(1, char(getX()+96))+"x"+move);
+                    legalMoves.emplace_back(std::make_pair(std::string(1, (char)(getX()+96))+"x"+move, board[8-x][int(let-97)]));
                 }
                 move = (getSymbol() == 'P') ? move : getSymbol() + move;
 
-                if(legalMove(move, board)){//check for ambiguous moves
+                if(legalMove(move, board)){
                     ambiguousPieces = getPieces(board, move, getColor());
                     if(ambiguousPieces.size() > 1){
                         move.erase(0,1);
                         for(auto& piece : ambiguousPieces){
-                            if(piece->getX() == getX()){
-                                legalMoves.emplace_back(std::string(1, getSymbol())+std::string(1, (char)(getY()))+move);
+                            if(piece->getY() == getY()){
+                                legalMoves.emplace_back(std::make_pair(std::string(1, getSymbol())+std::string(1,(char)getX()+96)+move, piece));
                             }
-                            else legalMoves.emplace_back(std::string(1, getSymbol())+std::string(1, (char)(getX()+96))+move);
+                            else{
+                                legalMoves.emplace_back(std::make_pair(std::string(1, getSymbol())+std::string(1, getY())+std::string(1, (char)(getY()+48))+move, piece));
+                            }
                         }
                     }
-                    else legalMoves.emplace_back(move);
+                    else{
+                        legalMoves.emplace_back(move, ambiguousPieces[0]);
+                    }
                 }
             }
         }
@@ -212,7 +219,9 @@ class Rook: public Piece{
     Rook(char color, int symbol, int x, int y, int value) : Piece(color, 'R', x, y, 5){}
 
     bool legalMove(std::string move, std::vector<RowType> Board) override{
-        return checkRook(move, Board);
+        if(move.length() == 4){
+            if(getX() != move[1]-96 || getY() != move[1]-'0') return false;
+        } return checkRook(move, Board);
     }
 };
 
@@ -238,6 +247,9 @@ class Knight:public Piece{
     Knight(char color, int symbol, int x, int y, int value) : Piece(color, 'N', x, y, 3){}
     bool legalMove(std::string move, std::vector<RowType> Board) override{
         if(getX() == (move[move.length()-2]-96) && getY() == (move[move.length()-1]- '0')) return false;
+        if(move.length() == 4){
+            if(getX() != move[1]-96 || getY() != move[1]-'0') return false;
+        }
         int moveX = move[move.length()-2]-96;
         int moveY = move[move.length()-1]-'0';
 

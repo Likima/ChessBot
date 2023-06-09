@@ -95,21 +95,21 @@ bool mated(ChessBoard &board, int color)
         {
             if (piece && piece->getColor() == color)
             {
-                for (const std::string &move : piece->getLegal(board.getBoard()))
+                for (const auto &move : piece->getLegal(board.getBoard()))
                 {
-                    if (movingToCheck(board, move, color, piece) && !piece->legalMove(move, board.getBoard()))
+                    if (movingToCheck(board, move.first, color, piece) && !piece->legalMove(move.first, board.getBoard()))
                     {
                         continue;
                     }
 
                     prevX = piece->getX();
                     prevY = piece->getY();
-                    doMove(move, board, color, piece);
+                    doMove(move.first, board, color, piece);
 
                     kingPos = board.findKing(color);
                     piecePtr = board.getBoard()[kingPos[1]][kingPos[0]];
                     kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
-                    if (!kingPtr->inCheck(move, board.getBoard()))
+                    if (!kingPtr->inCheck(move.first, board.getBoard()))
                     {
                         board.setPiece(prevX-1, prevY, piece);
                         return false; // King is not in checkmate

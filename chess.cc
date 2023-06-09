@@ -11,34 +11,35 @@ bool pawnMove(std::string move)
         return true;
     else if (move.length() == 4 && move.find('x') != std::string::npos)
         return true;
+    else if(move[0] == 'P') return true;
     return false;
 }
 
 void doMove(const std::string &move, ChessBoard &board, int moveNumber, std::shared_ptr<Piece> passedPiece)
 {
-    int moveSize = move.length() - 2;
-    char horizontalCoord = move[moveSize] - 97;
-    int verticalCoord = (move[moveSize + 1] - '0');
-
+    int moveSize = move.length();
+    char horizontalCoord = move[moveSize-2] - 97;
+    int verticalCoord = (move[moveSize-1] - '0');
     board.setPiece(horizontalCoord, verticalCoord, passedPiece);
 }
 
-RowType getPieces(std::vector<RowType> board, std::string move, int moveNumber)
-{
+RowType getPieces(std::vector<RowType> board, std::string move, int color)
+{//error with getPieces
     RowType possiblePiece;
 
     for (const auto &row : board)
     {
         for (const auto &piece : row)
         {
-            if (piece->getSymbol() == toupper(move[0]) && piece->getSymbol() != 'P' && piece->getColor() == moveNumber%2 && move.length() == 3 &&
-                piece->legalMove(move, board) == 1)
-            {
-                possiblePiece.emplace_back(piece);
-            }
-            else if (piece->getSymbol() == 'P' && piece->getColor() == moveNumber%2 && piece->legalMove(move, board) == 1 && pawnMove(move))
-            {
-                possiblePiece.emplace_back(piece);
+            if(piece->getColor() == color){
+                if (piece->getSymbol() == toupper(move[0]) && piece->getSymbol() != 'P' && piece->legalMove(move, board))
+                {
+                    possiblePiece.emplace_back(piece);
+                }
+                else if (piece->getSymbol() == 'P' && pawnMove(move) && piece->legalMove(move, board))
+                {
+                    possiblePiece.emplace_back(piece);
+                }
             }
         }
     }
@@ -136,7 +137,7 @@ int main()
 
         if (move[0] == '?' && move.length() == 4 && board.findPiece(move))
         {
-            printvector(board.findPiece(move)->getLegal(board.getBoard()));
+            printvector(board.findPiece(move)->getLegal(board.getBoard())); //gives error idk why
             if (board.findPiece(move)->getLegal(board.getBoard()).empty())
                 std::cout << "No Legal Moves " << std::endl;
             continue;

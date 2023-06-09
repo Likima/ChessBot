@@ -9,11 +9,13 @@ void moveChoice(ChessBoard &board, int color) {
     color == White ? std::cout<<"White's move"<<std::endl : std::cout<<"Black's move"<<std::endl;
     ChessBoard tempboard = board;
     RowType movablePieces, possiblePiece;
-    std::vector<std::string> legalMoves;
+    std::vector<piecePair> legalMoves;
     std::random_device rd;
     std::shared_ptr<Piece> movingPiece;
     std::mt19937 eng(rd());
-    std::string move;
+    piecePair move;
+
+    std::pair<std::shared_ptr<Piece>, std::string> bestMove = std::make_pair(nullptr, "");
 
     std::vector<int> kingPos = board.findKing(color);
     std::shared_ptr<Piece> piecePtr;
@@ -24,26 +26,30 @@ void moveChoice(ChessBoard &board, int color) {
     kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
 
     if(kingPtr->canCastle("O-O", board.getBoard())){
-        legalMoves.emplace_back("O-O");
+        legalMoves[legalMoves.size()-1].first = "O-O";
+        legalMoves[legalMoves.size()-1].second = kingPtr;
     }
     if(kingPtr->canCastle("O-O-O",board.getBoard())){
-        legalMoves.emplace_back("O-O-O");
+        legalMoves[legalMoves.size()-1].first = "O-O-O";
+        legalMoves[legalMoves.size()-1].second = kingPtr;
     }
 
     for (const auto& row : board.getBoard()) {
         for (auto& piece : row) {
             if (piece->getSymbol() != '.' && piece->getColor() == color) {
                 if (!piece->getLegal(board.getBoard()).empty()){
+
                     movablePieces.emplace_back(piece);
                 }
             }
         }
     }
+    std::cout<<"check 2.5 "<<movablePieces.size()<<std::endl;
 
     for(auto& piece : movablePieces){
         for(auto& moves : piece->getLegal(board.getBoard())){
-            if(!movingToCheck(board, moves, color, piece)){
-                legalMoves.emplace_back(moves);
+            if(!movingToCheck(board, moves.first, color, piece)){
+                legalMoves.emplace_back(std::make_pair(moves.first, piece));
             }
         }
     }
@@ -51,49 +57,28 @@ void moveChoice(ChessBoard &board, int color) {
     std::uniform_int_distribution<int> distr(1, legalMoves.size());
     int randomNumber = distr(eng);
     move = legalMoves[randomNumber-1];
-    std::cout<<move<<std::endl;
 
-    possiblePiece = getPieces(board.getBoard(), move, color);
+    std::cout<<"check 3"<<std::endl;
 
-    std::cout<<"check 4: "<<possiblePiece.size()<<std::endl;
-
-    if (possiblePiece.size() > 1)
-    {
-        for (int x = possiblePiece.size() - 1; x > -1; x--)
-        {
-            if (isdigit(move[1]))
-            {
-                if (possiblePiece[x]->getY() == move[1]){
-                    movingPiece = possiblePiece[x];
-                    break;
-                }
-                possiblePiece.erase(possiblePiece.begin() + x);
-            }
-            else
-            {
-                if (std::to_string(possiblePiece[x]->getX()) == std::string(1, move[1] - 96)){
-                    movingPiece = possiblePiece[x];
-                    break;
-                }
-                possiblePiece.erase(possiblePiece.begin() + x);
-            }
-        }
-    } else movingPiece = possiblePiece[0];
+    if(move.first == "O-O" || move.first == "O-O-O"){
+        castle(move.first, board, color);
+        return;
+    }
     
-    std::cout<<move<<std::endl;
-    std::cout<<possiblePiece.size()<<std::endl;
+    std::cout<<move.first<<std::endl;
 
-    doMove(move, board, color, movingPiece);
-    if(possiblePiece[0]->getSymbol() == 'P'){
-        if(movingPiece->getY() == 1 || movingPiece->getY() == 8){
-            move = move+"=Q";
-            Promote(board, movingPiece, true);
+    doMove(move.first, board, color, move.second);
+
+    if(move.second->getSymbol() == 'P'){
+        if(move.second->getY() == 1 || move.second->getY() == 8){
+            move.first = move.first+"=Q";
+            Promote(board, move.second, true);
         }
     }
-    if(movingPiece->getFirstMove()){
-        movingPiece->setFirstMove();
+    if(move.second->getFirstMove()){
+        move.second->setFirstMove();
     }
-    board.setMoves(move);
+    board.setMoves(move.first);
     board.playedMovePrint();
 }
 

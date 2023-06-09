@@ -8,9 +8,7 @@ class ChessBoard {
 public:
     ChessBoard() {
         const int SIZE = 8;
-        RowType SECOND_RANK;
-        RowType SEVENTH_RANK;
-        RowType EIGHTH_RANK;
+        RowType SECOND_RANK, SEVENTH_RANK, EIGHTH_RANK;
 
         RowType FIRST_RANK{
             std::make_shared<Rook>(Black, 'R',1,8,5),
