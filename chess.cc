@@ -32,7 +32,7 @@ RowType getPieces(std::vector<RowType> board, std::string move, int color)
         for (const auto &piece : row)
         {
             if(piece->getColor() == color){
-                if (piece->getSymbol() == toupper(move[0]) && piece->getSymbol() != 'P' && piece->legalMove(move, board))
+                if (!pawnMove(move) && piece->getSymbol() == toupper(move[0]) && piece->getSymbol() != 'P' && piece->legalMove(move, board))
                 {
                     possiblePiece.emplace_back(piece);
                 }
@@ -95,13 +95,14 @@ int main()
             break;
         }
 
-        if (!kingPtr->inCheck(kingPosString, board.getBoard()) && mated(board, moveNumber % 2))
-        {
-            std::cout << "Checkmate!" << std::endl;
-            moveNumber%2 == 0 ? std::cout << "White Wins!" << std::endl : std::cout << "Black Wins!" << std::endl;
-            break;
+        if (!kingPtr->inCheck(kingPosString, board.getBoard())){
+            if(mated(board, moveNumber % 2))
+            {
+                std::cout << "Checkmate!" << std::endl;
+                moveNumber%2 == 0 ? std::cout << "White Wins!" << std::endl : std::cout << "Black Wins!" << std::endl;
+                break;
+            }
         }
-        
         if (BotMove == moveNumber % 2)
         {
             moveChoice(board, moveNumber % 2);

@@ -51,7 +51,7 @@ public:
     Piece(int color, char symbol) : symbol(symbol), color(color){}
     Piece(int color, char symbol, int x, int y, int value) : color(color), symbol(symbol), x(x), y(y), value(value){}
 
-    virtual bool legalMove(std::string move, std::vector<RowType> Board){return false;}
+    virtual bool legalMove(std::string move, const std::vector<RowType>& Board){return false;}
     virtual void movePiece(std::string move){};
     virtual ~Piece() {}
     
@@ -79,12 +79,12 @@ public:
                 move = std::string(1,let)+std::to_string(x);
                 if(getSymbol() == 'P' && abs(int(let-96)-getX()) == 1 && abs(getY()-x)==1
                 && legalMove((std::string(1, (char)(getX()+96))+"x"+move), board)){
-                    legalMoves.emplace_back(std::make_pair(std::string(1, (char)(getX()+96))+"x"+move, board[8-x][int(let-97)]));
+                    legalMoves.emplace_back(std::make_pair(std::string(1, (char)(getX()+96))+"x"+move, board[8-x][let-97]));
                 }
                 move = (getSymbol() == 'P') ? move : getSymbol() + move;
 
                 if(legalMove(move, board)){
-                    ambiguousPieces = getPieces(board, move, getColor());
+                    ambiguousPieces = getPieces(board, move, getColor());//can be pawn: one pawn one bishop
                     if(ambiguousPieces.size() > 1){
                         move.erase(0,1);
                         for(auto& piece : ambiguousPieces){
@@ -92,7 +92,7 @@ public:
                                 legalMoves.emplace_back(std::make_pair(std::string(1, getSymbol())+std::string(1,(char)getX()+96)+move, piece));
                             }
                             else{
-                                legalMoves.emplace_back(std::make_pair(std::string(1, getSymbol())+std::string(1, getY())+std::string(1, (char)(getY()+48))+move, piece));
+                                legalMoves.emplace_back(std::make_pair(std::string(1, getSymbol())+std::to_string(getY())+move, piece));
                             }
                         }
                     }
@@ -177,7 +177,7 @@ class Pawn: public Piece{
     public:
         Pawn(char color, int symbol, int x, int y, int value) : Piece(color, 'P', x, y, 1){}
 
-    bool legalMove(std::string move, std::vector<RowType> Board) override {
+    bool legalMove(std::string move, const std::vector<RowType>& Board) override {
         int moveSize = move.length() - 2;
         bool isTaking = move.find('x') != std::string::npos;
         
@@ -218,7 +218,7 @@ class Rook: public Piece{
     public:
     Rook(char color, int symbol, int x, int y, int value) : Piece(color, 'R', x, y, 5){}
 
-    bool legalMove(std::string move, std::vector<RowType> Board) override{
+    bool legalMove(std::string move, const std::vector<RowType>& Board) override{
         if(move.length() == 4){
             if(getX() != move[1]-96 || getY() != move[1]-'0') return false;
         } return checkRook(move, Board);
@@ -229,7 +229,7 @@ class Bishop: public Piece{
     public:
     Bishop(char color, int symbol, int x, int y, int value) : Piece(color, 'B', x, y, 3){}
 
-    bool legalMove(std::string move, std::vector<RowType> Board) override{
+    bool legalMove(std::string move, const std::vector<RowType>& Board) override{
         return checkBishop(move, Board);
     }
 };
@@ -237,7 +237,7 @@ class Bishop: public Piece{
 class Queen:public Piece{
     public:
     Queen(char color, int symbol, int x, int y, int value) : Piece(color, 'Q', x, y, 8){}
-    bool legalMove(std::string move, std::vector<RowType> Board) override{
+    bool legalMove(std::string move, const std::vector<RowType>& Board) override{
         return(checkRook(move,Board) || checkBishop(move,Board));
     }
 };
@@ -245,7 +245,8 @@ class Queen:public Piece{
 class Knight:public Piece{
     public:
     Knight(char color, int symbol, int x, int y, int value) : Piece(color, 'N', x, y, 3){}
-    bool legalMove(std::string move, std::vector<RowType> Board) override{
+    
+    bool legalMove(std::string move, const std::vector<RowType>& Board) override{
         if(getX() == (move[move.length()-2]-96) && getY() == (move[move.length()-1]- '0')) return false;
         if(move.length() == 4){
             if(getX() != move[1]-96 || getY() != move[1]-'0') return false;
@@ -280,6 +281,28 @@ class King:public Piece{
     public:
     King(char color, int symbol, int x, int y, int value) : Piece(color, 'K', x, y, 0){}
 
+    std::vector<std::pair<int, int>> kingAttackingBox(const std::vector<RowType>& Board, int color) {
+        std::vector<std::pair<int, int>> coords;
+        std::shared_ptr<Piece> piece;
+    
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                piece = Board[i][j];
+                if (piece->getSymbol() == 'K' && piece->getColor() != color) {
+                    for (int n = i - 1; n <= i + 1; n++) {
+                        for (int m = j - 1; m <= j + 1; m++) {
+                            if (n == i && m == j) continue;
+                            if (n < 0 || m < 0 || n >= 8 || m >= 8) continue;
+                            coords.push_back(std::make_pair(m+1,8-n));
+                        }
+                    }
+                }
+            }
+        }
+        return coords;
+    }
+
+
     bool inCheck(std::string move, const std::vector<RowType>& Board) {//returns true if not in check... a bit confusing
         int pieceColor;
         char pieceSymbol;
@@ -294,6 +317,7 @@ class King:public Piece{
                            return false;
                         }
                     }
+
                     if(pieceSymbol != 'P' && piece->legalMove(std::to_string(pieceSymbol)+move, Board)) {
                         return false;
                     }
@@ -304,13 +328,24 @@ class King:public Piece{
     return true;
     }
 
-    bool legalMove(std::string move, std::vector<RowType> Board) override{
+    bool legalMove(std::string move, const std::vector<RowType>& Board) override{//change to const & later
         int moveX = (move[move.length()-2])- 96;
         int moveY = (move[move.length()-1])-'0';
+        int oppositeColor = (getColor() == White) ? Black : White;
+        std::pair<int, int> coord = std::make_pair(moveX, moveY);
+
+        for(auto& i : kingAttackingBox(Board, oppositeColor)){
+            if(i == coord){
+                return false;
+            }
+        }
+
         std::shared_ptr<Piece> movingPiece = Board[8-moveY][moveX-1];
         if(getX() == moveX && getY() == moveY){//checking if moving to same square
             return false;
         }
+        //check if king moving into opposite king attack space
+        
         if(std::abs(moveX - getX()) <= 1 && std::abs(moveY - getY()) <= 1){
             if(movingPiece->getSymbol() == '.') return(inCheck(move, Board));
             else if(movingPiece->getSymbol() != '.' && movingPiece->getColor() != getColor()) return(inCheck(move, Board));

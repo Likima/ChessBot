@@ -2,12 +2,10 @@
 #define CHESSALGORITHM_H
 
 #include "piececlass.h"
-
-
+#include "boardclass.h"
 
 void moveChoice(ChessBoard &board, int color) {
     color == White ? std::cout<<"White's move"<<std::endl : std::cout<<"Black's move"<<std::endl;
-    ChessBoard tempboard = board;
     RowType movablePieces, possiblePiece;
     std::vector<piecePair> legalMoves;
     std::random_device rd;
@@ -15,7 +13,7 @@ void moveChoice(ChessBoard &board, int color) {
     std::mt19937 eng(rd());
     piecePair move;
 
-    std::pair<std::shared_ptr<Piece>, std::string> bestMove = std::make_pair(nullptr, "");
+    //std::pair<std::shared_ptr<Piece>, std::string> bestMove = std::make_pair(nullptr, "");
 
     std::vector<int> kingPos = board.findKing(color);
     std::shared_ptr<Piece> piecePtr;
@@ -25,17 +23,20 @@ void moveChoice(ChessBoard &board, int color) {
     piecePtr = board[kingPos[1]][kingPos[0]];
     kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
 
+    if(kingPtr == nullptr){
+        std::cout<<"kingPtr is null"<<std::endl;
+        return;
+    }
+
     if(kingPtr->canCastle("O-O", board.getBoard())){
-        legalMoves[legalMoves.size()-1].first = "O-O";
-        legalMoves[legalMoves.size()-1].second = kingPtr;
+        legalMoves.emplace_back(std::make_pair("O-O", kingPtr));
     }
     if(kingPtr->canCastle("O-O-O",board.getBoard())){
-        legalMoves[legalMoves.size()-1].first = "O-O-O";
-        legalMoves[legalMoves.size()-1].second = kingPtr;
+        legalMoves.emplace_back(std::make_pair("O-O-O", kingPtr));
     }
 
     for (const auto& row : board.getBoard()) {
-        for (auto& piece : row) {
+        for (const auto& piece : row) {
             if (piece->getSymbol() != '.' && piece->getColor() == color) {
                 if (!piece->getLegal(board.getBoard()).empty()){
 
@@ -44,7 +45,6 @@ void moveChoice(ChessBoard &board, int color) {
             }
         }
     }
-    std::cout<<"check 2.5 "<<movablePieces.size()<<std::endl;
 
     for(auto& piece : movablePieces){
         for(auto& moves : piece->getLegal(board.getBoard())){
@@ -75,7 +75,7 @@ void moveChoice(ChessBoard &board, int color) {
             Promote(board, move.second, true);
         }
     }
-    if(move.second->getFirstMove()){
+    if(move.second->getFirstMove()){//may cause problems. not sure
         move.second->setFirstMove();
     }
     board.setMoves(move.first);

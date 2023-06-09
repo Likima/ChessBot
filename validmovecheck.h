@@ -1,5 +1,5 @@
 #ifndef VALIDMOVECHECK_H
-#define VALIDMOVECHECK
+#define VALIDMOVECHECK_H
 
 #include "piececlass.h"
 #include "boardclass.h"
@@ -28,7 +28,9 @@ bool moveIsValid(std::string move, ChessBoard &board, int moveNumber, std::share
         std::cout<<"You cannot castle"<<std::endl;
         return false;
     }
-    else possiblePiece = getPieces(board.getBoard(), move, moveNumber);
+    else possiblePiece = getPieces(board.getBoard(), move, moveNumber%2);
+    std::cout<<move<<std::endl;
+    std::cout<<possiblePiece.size()<<std::endl;
 
     if (possiblePiece.size() > 1 && move.size() == 4)
     {
@@ -97,7 +99,7 @@ bool mated(ChessBoard &board, int color)
             {
                 for (const auto &move : piece->getLegal(board.getBoard()))
                 {
-                    if (movingToCheck(board, move.first, color, piece) && !piece->legalMove(move.first, board.getBoard()))
+                    if (movingToCheck(board, move.first, color, piece) || !piece->legalMove(move.first, board.getBoard()))
                     {
                         continue;
                     }
@@ -137,7 +139,6 @@ bool movingToCheck(ChessBoard& board, std::string move, int color, std::shared_p
     std::shared_ptr<King> kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
 
     std::string kingPosString = "K"+std::string(1, static_cast<char>(kingPos[0] + 97)) + std::to_string(8 - kingPos[1]);
-
     if(kingPtr->inCheck(kingPosString, board.getBoard())){
         board.setPiece(prevX-1, prevY, passedPiece, prevPiece);
         return false;
