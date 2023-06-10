@@ -81,21 +81,22 @@ bool moveIsValid(std::string move, ChessBoard &board, int moveNumber, std::share
     board.setMoves(move);
     return true;
 }
-bool mated(ChessBoard &board, int color)
+bool mated(ChessBoard &board, int color, std::shared_ptr<King> kingPtr)
 {
     std::vector<int> kingPos = board.findKing(color);
     std::shared_ptr<Piece> piecePtr = board.getBoard()[kingPos[1]][kingPos[0]];
-    std::shared_ptr<King> kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
+    //std::shared_ptr<King> kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
     int prevX, prevY;
 
-    if (!kingPtr->getLegal(board.getBoard()).empty()) return false; 
-    
+    if (kingPtr->getLegal(board.getBoard()).empty())
+        return false; // King has no legal moves, indicating checkmate
+
     const auto &b = board.getBoard();
     for (const auto &row : b)
     {
         for (const auto &piece : row)
         {
-            if (piece && piece->getColor() == color)
+            if (piece && piece->getColor() == kingPtr->getColor())
             {
                 for (const auto &move : piece->getLegal(board.getBoard()))
                 {
@@ -114,10 +115,10 @@ bool mated(ChessBoard &board, int color)
                     kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
                     if (!kingPtr->inCheck(move.first, board.getBoard()))
                     {
-                        board.setPiece(prevX-1, prevY, piece);
+                        board.setPiece(prevX - 1, prevY, piece);
                         return false; // King is not in checkmate
                     }
-                    board.setPiece(prevX-1, prevY, piece);
+                    board.setPiece(prevX - 1, prevY, piece);
                 }
             }
         }
@@ -125,6 +126,7 @@ bool mated(ChessBoard &board, int color)
 
     return true; // King is in checkmate
 }
+
 
 bool movingToCheck(ChessBoard& board, std::string move, int color, std::shared_ptr<Piece> passedPiece)
 {

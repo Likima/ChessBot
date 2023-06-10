@@ -89,9 +89,12 @@ public:
     }
 
     void playedMovePrint(){
+        int x = 1;
         std::cout << "Played moves: " << std::endl;
         for(auto& move : moves){
-            std::cout << move << " ";
+            x % 2 == 0 ? std::cout << "\033[0;35m" << move << " \033[0m" :
+                std::cout << "\033[0;36m" << move << " \033[0m";
+            x++;
         }
         std::cout << std::endl;
     }

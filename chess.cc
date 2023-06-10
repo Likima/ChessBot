@@ -96,14 +96,16 @@ int main()
         }
 
         if (!kingPtr->inCheck(kingPosString, board.getBoard())){
+            std::cout<<std::endl;
             printBoard(board);
             
-            if(mated(board, moveNumber % 2))
+            if(mated(board, moveNumber % 2, kingPtr))
             {
                 std::cout << "Checkmate!" << std::endl;
                 moveNumber%2 == 0 ? std::cout << "White Wins!" << std::endl : std::cout << "Black Wins!" << std::endl;
                 break;
             }
+            std::cout<<std::endl; printBoard(board);
             
         }
         if (BotMove == moveNumber % 2)
