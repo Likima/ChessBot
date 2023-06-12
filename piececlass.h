@@ -11,6 +11,7 @@
 #include <memory>
 #include <utility>
 #include <random>
+#include <climits>
 
 class Piece;
 class ChessBoard;
@@ -68,7 +69,7 @@ public:
     }
 
     std::vector<piecePair> getLegal(std::vector<RowType> board){
-        //std::vector<std::string> legalMoves
+        /*provides all the legal moves for a given piece*/
         std::vector<piecePair> legalMoves;
         const std::vector<char> coords = {'a','b','c','d','e','f','g','h'};
         RowType ambiguousPieces;
@@ -84,7 +85,7 @@ public:
                 move = (getSymbol() == 'P') ? move : getSymbol() + move;
 
                 if(legalMove(move, board)){
-                    ambiguousPieces = getPieces(board, move, getColor());//can be pawn: one pawn one bishop
+                    ambiguousPieces = getPieces(board, move, getColor());
                     if(ambiguousPieces.size() > 1){
                         move.erase(0,1);
                         for(auto& piece : ambiguousPieces){
@@ -118,13 +119,13 @@ public:
 
         if(getX() == movingX && getY() == movingY){return false;}
 
-        else if(getX() == (movingX)){//if the rook is travelling vertically
+        else if(getX() == (movingX)){//vertical
             for(int i = smallerY+1; i<biggerY; i++){
                 if(Board[8-i][getX()-1]->getSymbol() != '.') return false;
             }
         }
 
-        else if(getY() == (movingY)){//if the rook is travelling horizontally
+        else if(getY() == (movingY)){//horizontal
             for(int i = smallerX+1; i<biggerX; i++){
                 if(Board[8-getY()][i-1]->getSymbol() != '.') return false;
             }
@@ -193,7 +194,7 @@ class Pawn: public Piece{
 
         else if(isTaking && currentY - targetY == 1 * multi && currentX == move[0] - 96){
 
-            if(currentX+1 == targetX && getX() != 8 && Board[8 + multi - currentY][currentX]->getSymbol() != '.'){//if this not true defaults to the other one
+            if(currentX+1 == targetX && getX() != 8 && Board[8 + multi - currentY][currentX]->getSymbol() != '.'){
                 return Board[8 + multi - currentY][currentX]->getColor() != getColor();
             }
 
@@ -261,7 +262,7 @@ class Knight:public Piece{
                 if(movingSquare->getSymbol() == '.'){
                     return true;
                 }
-                return(((movingSquare)->getSymbol() != '.') && (movingSquare)->getColor() != getColor());//checking if moving to same color
+                return(((movingSquare)->getSymbol() != '.') && (movingSquare)->getColor() != getColor());
             }
         }
         else if(getY()+2 == moveY || getY()-2 == moveY){
@@ -269,7 +270,7 @@ class Knight:public Piece{
                 if(movingSquare->getSymbol() == '.'){
                     return true;
                 }
-                return(movingSquare->getSymbol() != '.' && movingSquare->getColor() != getColor());//checking if moving to same color
+                return(movingSquare->getSymbol() != '.' && movingSquare->getColor() != getColor());
             }
         }
         return false;
@@ -281,10 +282,10 @@ class King:public Piece{
     public:
     King(char color, int symbol, int x, int y, int value) : Piece(color, 'K', x, y, 0){}
 
-    std::vector<std::pair<int, int>> kingAttackingBox(const std::vector<RowType>& Board, int color) {
+    std::vector<std::pair<int, int>> kingAttackingBox(const std::vector<RowType>& Board, int color){
+        /*Short function returning the surrounding coordinates of the king*/
         std::vector<std::pair<int, int>> coords;
         std::shared_ptr<Piece> piece;
-    
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 piece = Board[i][j];
@@ -300,17 +301,12 @@ class King:public Piece{
                 }
             }
         }
-        //for(auto& coord : coords){
-        //    std::cout<<coord.first<<" "<<coord.second<<" ";
-        //}
-
-
-        //std::cout<<std::endl;
         return coords;
     }
 
 
-    bool inCheck(std::string move, const std::vector<RowType>& Board) {//returns true if not in check... a bit confusing
+    bool inCheck(std::string move, const std::vector<RowType>& Board) {
+        /*returns false if the king is in check*/
         int pieceColor;
         char pieceSymbol;
         for (const auto& row : Board) {
@@ -320,24 +316,17 @@ class King:public Piece{
 
                 if (pieceColor != getColor() && pieceSymbol != '.') {
                     if (pieceSymbol == 'P') {
-                        if (piece->legalMove(std::string(1,(char)(piece->getX() + 96)) + "x" + move, Board)) {
-                           return false;
-                        }
+                        if (piece->legalMove(std::string(1,(char)(piece->getX() + 96)) + "x" + move, Board)) return false;
                     }
 
-                    else if(pieceSymbol != 'P' && piece->legalMove(std::to_string(pieceSymbol)+move, Board)) {
-                        piece->printInfo();
-                        return false;
-                    }
+                    else if(pieceSymbol != 'P' && piece->legalMove(std::to_string(pieceSymbol)+move, Board)) return false;
                 }
             }
         }
-    
-
     return true;
     }
 
-    bool legalMove(std::string move, const std::vector<RowType>& Board) override{//change to const & later
+    bool legalMove(std::string move, const std::vector<RowType>& Board) override{
         int moveX = (move[move.length()-2])- 96;
         int moveY = (move[move.length()-1])-'0';
         int oppositeColor = (getColor() == White) ? Black : White;
@@ -351,9 +340,8 @@ class King:public Piece{
         }
 
         std::shared_ptr<Piece> movingPiece = Board[8-moveY][moveX-1];
-        if(getX() == moveX && getY() == moveY){//checking if moving to same square
-            return false;
-        }
+        if(getX() == moveX && getY() == moveY) return false;
+        
         
         if(std::abs(moveX - getX()) <= 1 && std::abs(moveY - getY()) <= 1){
             if(movingPiece->getSymbol() == '.') return(inCheck(move, Board));
@@ -363,7 +351,7 @@ class King:public Piece{
     }
 
     bool canCastle(std::string move, std::vector<RowType> Board) {
-        if (getFirstMove() == false) {return false;}
+        if (getFirstMove() == false) return false;
         
         int rank = (getColor() == White) ? 7 : 0;
 

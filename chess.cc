@@ -24,7 +24,7 @@ void doMove(const std::string &move, ChessBoard &board, int moveNumber, std::sha
 }
 
 RowType getPieces(std::vector<RowType> board, std::string move, int color)
-{//error with getPieces
+{
     RowType possiblePiece;
 
     for (const auto &row : board)
@@ -99,10 +99,7 @@ int main()
             break;
         }
 
-        if (!kingPtr->inCheck(kingPosString, board.getBoard())){
-            std::cout<<std::endl;
-            //printBoard(board);
-            
+        if (!kingPtr->inCheck(kingPosString, board.getBoard())){       
             if(mated(board, moveNumber % 2, kingPtr))
             {
                 printvector(kingPtr->getLegal(board.getBoard()));
@@ -110,9 +107,6 @@ int main()
                 moveNumber%2 == 0 ? std::cout << "White Wins!" << std::endl : std::cout << "Black Wins!" << std::endl;
                 break;
             }
-            //std::cout<<std::endl; printBoard(board);
-            //std::cout<<mated(board, moveNumber%2, kingPtr)<<std::endl;
-            
         }
         if (BotMove == moveNumber % 2)
         {
@@ -149,7 +143,7 @@ int main()
 
         if (move[0] == '?' && move.length() == 4 && board.findPiece(move))
         {
-            printvector(board.findPiece(move)->getLegal(board.getBoard())); //gives error idk why
+            printvector(board.findPiece(move)->getLegal(board.getBoard()));
             if (board.findPiece(move)->getLegal(board.getBoard()).empty())
                 std::cout << "No Legal Moves " << std::endl;
             continue;
@@ -163,7 +157,7 @@ int main()
         if (move[0] == '!' && move.length() == 4 && board.findPiece(move))
         {
             board[8-(board.findPiece(move)->getY())][board.findPiece(move)->getX()-1] = std::make_shared<Piece>('.');
-            //board.setPiece((board.findPiece(move)->getX() - 1), (board.findPiece(move)->getY()), std::make_shared<Piece>('.'));
+            board.setPiece((board.findPiece(move)->getX() - 1), (board.findPiece(move)->getY()), std::make_shared<Piece>('.'));
             continue;
         }
         if(move[0] == '!'){

@@ -88,6 +88,19 @@ public:
         std::cout << "Black: " << blackMaterial << std::endl;
     }
 
+    std::pair<int,int> getMaterial(){
+        int whiteMaterial = 0;
+        int blackMaterial = 0;
+        for(auto& row : board){
+            for(auto& piece : row){
+                if(piece->getColor() == 1 || piece->getColor() == 0)
+                piece->getColor() == White ? whiteMaterial += piece->getValue() : blackMaterial += piece->getValue();
+            }
+        }
+        return(std::make_pair(whiteMaterial, blackMaterial));
+    }
+
+
     void playedMovePrint(){
         int x = 1;
         std::cout << "Played moves: " << std::endl;

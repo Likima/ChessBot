@@ -88,7 +88,6 @@ bool mated(ChessBoard &board, int color, std::shared_ptr<King> kingPtr)
     std::shared_ptr<Piece> piecePtr;
     std::shared_ptr<King> kingPtrTwo;
     int prevX, prevY;
-    //std::cout<<kingPtr->getLegal(board.getBoard()).empty()<<std::endl;
     for(auto &piece : kingPtr->getLegal(board.getBoard())){
         std::cout<<piece.first<<std::endl;
         if(!movingToCheck(board, piece.first, color, kingPtr)){
