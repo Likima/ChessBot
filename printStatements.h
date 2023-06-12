@@ -4,14 +4,14 @@
 #include "boardclass.h"
 
 
-void printvector(std::vector<piecePair> vec){
+void printvector(const std::vector<piecePair> vec){
     for(int x = 0; x<vec.size(); x++){
         std::cout<<vec[x].first<<", ";
     }
     std::cout<<std::endl;
 }
 
-void printvector(std::vector<std::string> vec)
+void printvector(const std::vector<std::string> vec)
 {
     for (int x = 0; x < vec.size(); x++)
     {
@@ -37,7 +37,7 @@ void printBoard(const ChessBoard &board)
     }
 }
 
-void printX(ChessBoard& board){
+void printX(const ChessBoard& board){
     const auto &b = board.getBoard();
     for (const auto &row : b)
     {
@@ -57,7 +57,7 @@ void printX(ChessBoard& board){
     }
 }
 
-void printY(ChessBoard& board){
+void printY(const ChessBoard& board){
     const auto &b = board.getBoard();
     for (const auto &row : b)
     {

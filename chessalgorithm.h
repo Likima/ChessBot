@@ -17,6 +17,8 @@ int alphaBeta(ChessBoard& board, int depth, int alpha, int beta, bool maximizing
     std::shared_ptr<Piece> prevPiece;
     int prevX, prevY;
     if (depth == 0) return evaluatePos(board);
+    printBoard(board);
+    std::cout<<std::endl;
 
     for (const auto& row : board.getBoard()) {
         for (const auto& piece : row) {

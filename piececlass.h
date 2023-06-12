@@ -135,12 +135,12 @@ public:
     }
 
     bool checkBishop(std::string move, std::vector<RowType> Board) {
-        if (getX() == (move[move.length() - 2] - 96) && getY() == (move[move.length() - 1] - '0')) {return false;}
+        if (getX() == (move[move.length() - 2] - 96) && getY() == (move[move.length() - 1] - '0')) return false;
 
         const int distX = abs(getX() - (move[move.length() - 2] - 96));
         const int distY = abs(getY() - (move[move.length() - 1] - '0'));
 
-        if (distX != distY) {return false;}
+        if (distX != distY) return false;
 
         const int incX = (move[move.length() - 2] - 96 > getX()) ? 1 : -1;
         const int incY = (move[move.length() - 1] - '0' > getY()) ? 1 : -1;

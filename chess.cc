@@ -5,7 +5,8 @@
 #include "specialmoves.h"
 #include "validmovecheck.h"
 
-bool pawnMove(std::string move)
+bool pawnMove(const std::string move)
+/*function detecting if a given move is a pawn*/
 {
     if (move.length() == 2)
         return true;
@@ -15,7 +16,7 @@ bool pawnMove(std::string move)
     return false;
 }
 
-void doMove(const std::string &move, ChessBoard &board, int moveNumber, std::shared_ptr<Piece> passedPiece)
+void doMove(const std::string &move, ChessBoard &board, const int moveNumber, const std::shared_ptr<Piece> passedPiece)
 {
     int moveSize = move.length();
     char horizontalCoord = move[moveSize-2] - 97;
@@ -23,7 +24,7 @@ void doMove(const std::string &move, ChessBoard &board, int moveNumber, std::sha
     board.setPiece(horizontalCoord, verticalCoord, passedPiece);
 }
 
-RowType getPieces(std::vector<RowType> board, std::string move, int color)
+RowType getPieces(std::vector<RowType> board, const std::string move, const int color)
 {
     RowType possiblePiece;
 

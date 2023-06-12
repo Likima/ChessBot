@@ -4,7 +4,7 @@
 #include "piececlass.h"
 #include "boardclass.h"
 
-bool moveIsValid(std::string move, ChessBoard &board, int moveNumber, std::shared_ptr<King> kingPtr)
+bool moveIsValid(const std::string move, ChessBoard &board, int moveNumber, const std::shared_ptr<King> kingPtr)
 {
     int prevX, prevY;
     RowType possiblePiece;
@@ -81,7 +81,7 @@ bool moveIsValid(std::string move, ChessBoard &board, int moveNumber, std::share
     board.setMoves(move);
     return true;
 }
-bool mated(ChessBoard &board, int color, std::shared_ptr<King> kingPtr)
+bool mated(ChessBoard &board, const int color, const std::shared_ptr<King> kingPtr)
 {
     std::shared_ptr<Piece> prevPiece;
     std::vector<int> kingPos;
@@ -120,7 +120,7 @@ bool mated(ChessBoard &board, int color, std::shared_ptr<King> kingPtr)
 }
 
 
-bool movingToCheck(ChessBoard& board, std::string move, int color, std::shared_ptr<Piece> passedPiece)
+bool movingToCheck(ChessBoard& board, const std::string move, const int color, const std::shared_ptr<Piece> passedPiece)
 {
     int prevX = passedPiece->getX();
     int prevY = passedPiece->getY();
