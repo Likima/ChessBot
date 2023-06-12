@@ -121,13 +121,13 @@ int main()
             continue;
         }
 
-        else{
-            std::cout<<moveNumber<<std::endl;
-            moveChoice(board, moveNumber % 2);
-            moveNumber++;
-            printBoard(board);
-            continue;
-        }
+        //else{
+        //    std::cout<<moveNumber<<std::endl;
+        //    moveChoice(board, moveNumber % 2);
+        //    moveNumber++;
+        //    printBoard(board);
+        //    continue;
+        //}
 
         moveNumber % 2 == 1 ? std::cout << "White's move" 
                 : std::cout << "\033[0;01;02"
