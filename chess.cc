@@ -111,6 +111,7 @@ int main()
                 break;
             }
             //std::cout<<std::endl; printBoard(board);
+            //std::cout<<mated(board, moveNumber%2, kingPtr)<<std::endl;
             
         }
         if (BotMove == moveNumber % 2)

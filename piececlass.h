@@ -326,6 +326,7 @@ class King:public Piece{
                     }
 
                     else if(pieceSymbol != 'P' && piece->legalMove(std::to_string(pieceSymbol)+move, Board)) {
+                        piece->printInfo();
                         return false;
                     }
                 }

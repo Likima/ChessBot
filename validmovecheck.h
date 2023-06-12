@@ -89,9 +89,14 @@ bool mated(ChessBoard &board, int color, std::shared_ptr<King> kingPtr)
     std::shared_ptr<King> kingPtrTwo;
     int prevX, prevY;
     //std::cout<<kingPtr->getLegal(board.getBoard()).empty()<<std::endl;
+    for(auto &piece : kingPtr->getLegal(board.getBoard())){
+        std::cout<<piece.first<<std::endl;
+        if(!movingToCheck(board, piece.first, color, kingPtr)){
+            return false;
+        }
+    }
 
-    if (!kingPtr->getLegal(board.getBoard()).empty()) return false; // King is not in checkmate
-
+    std::cout<<"here"<<std::endl;
     const auto &b = board.getBoard();
     for (const auto &row : b)
     {
@@ -107,21 +112,6 @@ bool mated(ChessBoard &board, int color, std::shared_ptr<King> kingPtr)
                     } else {
                         return false;
                     }
-
-                    prevX = piece->getX();
-                    prevY = piece->getY();
-                    prevPiece = board.findPiece(move.first);
-                    doMove(move.first, board, color, piece);
-
-                    kingPos = board.findKing(color);
-                    piecePtr = board[kingPos[1]][kingPos[0]];
-                    kingPtrTwo = std::dynamic_pointer_cast<King>(piecePtr);
-                    if (!kingPtrTwo->inCheck(move.first, board.getBoard()))
-                    {
-                        board.setPiece(prevX - 1, prevY, piece, prevPiece);
-                        return false; // King is not in checkmate
-                    }
-                    board.setPiece(prevX - 1, prevY, piece, prevPiece);
                 }
             }
         }
@@ -141,7 +131,7 @@ bool movingToCheck(ChessBoard& board, std::string move, int color, std::shared_p
     doMove(move, board, color, passedPiece);
 
     std::vector<int> kingPos = board.findKing(color);
-    std::shared_ptr<Piece> piecePtr = board.getBoard()[kingPos[1]][kingPos[0]];
+    std::shared_ptr<Piece> piecePtr = board[kingPos[1]][kingPos[0]];
     std::shared_ptr<King> kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
 
     std::string kingPosString = "K"+std::string(1, static_cast<char>(kingPos[0] + 97)) + std::to_string(8 - kingPos[1]);
