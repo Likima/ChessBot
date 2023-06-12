@@ -6,7 +6,7 @@
 
 void printvector(std::vector<piecePair> vec){
     for(int x = 0; x<vec.size(); x++){
-        std::cout<<vec[x].first<<" "<<std::endl;
+        std::cout<<vec[x].first<<", ";
     }
     std::cout<<std::endl;
 }

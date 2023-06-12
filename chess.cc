@@ -86,6 +86,10 @@ int main()
     while (true)
     {
         kingPos = board.findKing(moveNumber % 2);
+        if(kingPos[0] == -1){
+            std::cout<<"King was Taken? "<<std::endl;
+            return -1;
+        }
         piecePtr = board.getBoard()[kingPos[1]][kingPos[0]];
         kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
         kingPosString = "K" + std::string(1, static_cast<char>(kingPos[0] + 97)) + std::to_string(8 - kingPos[1]);
@@ -97,15 +101,16 @@ int main()
 
         if (!kingPtr->inCheck(kingPosString, board.getBoard())){
             std::cout<<std::endl;
-            printBoard(board);
+            //printBoard(board);
             
             if(mated(board, moveNumber % 2, kingPtr))
             {
+                printvector(kingPtr->getLegal(board.getBoard()));
                 std::cout << "Checkmate!" << std::endl;
                 moveNumber%2 == 0 ? std::cout << "White Wins!" << std::endl : std::cout << "Black Wins!" << std::endl;
                 break;
             }
-            std::cout<<std::endl; printBoard(board);
+            //std::cout<<std::endl; printBoard(board);
             
         }
         if (BotMove == moveNumber % 2)

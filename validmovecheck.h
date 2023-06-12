@@ -83,13 +83,14 @@ bool moveIsValid(std::string move, ChessBoard &board, int moveNumber, std::share
 }
 bool mated(ChessBoard &board, int color, std::shared_ptr<King> kingPtr)
 {
-    std::vector<int> kingPos = board.findKing(color);
-    std::shared_ptr<Piece> piecePtr = board.getBoard()[kingPos[1]][kingPos[0]];
+    std::shared_ptr<Piece> prevPiece;
+    std::vector<int> kingPos;
+    std::shared_ptr<Piece> piecePtr;
     //std::shared_ptr<King> kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
     int prevX, prevY;
+    //std::cout<<kingPtr->getLegal(board.getBoard()).empty()<<std::endl;
 
-    if (kingPtr->getLegal(board.getBoard()).empty())
-        return false; // King has no legal moves, indicating checkmate
+    if (!kingPtr->getLegal(board.getBoard()).empty()) return false; // King is not in checkmate
 
     const auto &b = board.getBoard();
     for (const auto &row : b)
@@ -100,14 +101,14 @@ bool mated(ChessBoard &board, int color, std::shared_ptr<King> kingPtr)
             {
                 for (const auto &move : piece->getLegal(board.getBoard()))
                 {
-                    if (movingToCheck(board, move.first, color, piece) && !piece->legalMove(move.first, board.getBoard()))
+                    if (movingToCheck(board, move.first, color, piece))
                     {
                         continue;
                     }
 
                     prevX = piece->getX();
                     prevY = piece->getY();
-                    //prevPiece = board[move.first[move.first.size()-1]]
+                    prevPiece = board.findPiece(move.first);
                     doMove(move.first, board, color, piece);
 
                     kingPos = board.findKing(color);
@@ -115,10 +116,10 @@ bool mated(ChessBoard &board, int color, std::shared_ptr<King> kingPtr)
                     kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
                     if (!kingPtr->inCheck(move.first, board.getBoard()))
                     {
-                        board.setPiece(prevX - 1, prevY, piece);
+                        board.setPiece(prevX - 1, prevY, piece, prevPiece);
                         return false; // King is not in checkmate
                     }
-                    board.setPiece(prevX - 1, prevY, piece);
+                    board.setPiece(prevX - 1, prevY, piece, prevPiece);
                 }
             }
         }

@@ -79,7 +79,7 @@ public:
                 move = std::string(1,let)+std::to_string(x);
                 if(getSymbol() == 'P' && abs(int(let-96)-getX()) == 1 && abs(getY()-x)==1
                 && legalMove((std::string(1, (char)(getX()+96))+"x"+move), board)){
-                    legalMoves.emplace_back(std::make_pair(std::string(1, (char)(getX()+96))+"x"+move, board[8-x][let-97]));
+                    legalMoves.emplace_back(std::make_pair(std::string(1, (char)(getX()+96))+"x"+move, board[8-getY()][getX()-1]));
                 }
                 move = (getSymbol() == 'P') ? move : getSymbol() + move;
 
@@ -89,10 +89,10 @@ public:
                         move.erase(0,1);
                         for(auto& piece : ambiguousPieces){
                             if(piece->getY() == getY()){
-                                legalMoves.emplace_back(std::make_pair(std::string(1, getSymbol())+std::string(1,(char)getX()+96)+move, piece));
+                                legalMoves.emplace_back(std::make_pair(std::string(1, getSymbol())+std::string(1,(char)piece->getX()+96)+move, piece));
                             }
                             else{
-                                legalMoves.emplace_back(std::make_pair(std::string(1, getSymbol())+std::to_string(getY())+move, piece));
+                                legalMoves.emplace_back(std::make_pair(std::string(1, getSymbol())+std::to_string(piece->getY())+move, piece));
                             }
                         }
                     }
@@ -288,17 +288,24 @@ class King:public Piece{
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 piece = Board[i][j];
-                if (piece->getSymbol() == 'K' && piece->getColor() != color) {
+                if (piece->getSymbol() == 'K' && piece->getColor() == color) {
                     for (int n = i - 1; n <= i + 1; n++) {
                         for (int m = j - 1; m <= j + 1; m++) {
                             if (n == i && m == j) continue;
                             if (n < 0 || m < 0 || n >= 8 || m >= 8) continue;
+                        
                             coords.push_back(std::make_pair(m+1,8-n));
                         }
                     }
                 }
             }
         }
+        //for(auto& coord : coords){
+        //    std::cout<<coord.first<<" "<<coord.second<<" ";
+        //}
+
+
+        //std::cout<<std::endl;
         return coords;
     }
 
@@ -318,12 +325,13 @@ class King:public Piece{
                         }
                     }
 
-                    if(pieceSymbol != 'P' && piece->legalMove(std::to_string(pieceSymbol)+move, Board)) {
+                    else if(pieceSymbol != 'P' && piece->legalMove(std::to_string(pieceSymbol)+move, Board)) {
                         return false;
                     }
                 }
             }
         }
+    
 
     return true;
     }
@@ -333,8 +341,9 @@ class King:public Piece{
         int moveY = (move[move.length()-1])-'0';
         int oppositeColor = (getColor() == White) ? Black : White;
         std::pair<int, int> coord = std::make_pair(moveX, moveY);
+        std::vector<std::pair<int, int>> oppositeKingBox = kingAttackingBox(Board, oppositeColor);
 
-        for(auto& i : kingAttackingBox(Board, oppositeColor)){
+        for(auto& i : oppositeKingBox){
             if(i == coord){
                 return false;
             }
@@ -344,7 +353,6 @@ class King:public Piece{
         if(getX() == moveX && getY() == moveY){//checking if moving to same square
             return false;
         }
-        //check if king moving into opposite king attack space
         
         if(std::abs(moveX - getX()) <= 1 && std::abs(moveY - getY()) <= 1){
             if(movingPiece->getSymbol() == '.') return(inCheck(move, Board));

@@ -21,13 +21,13 @@ void moveChoice(ChessBoard &board, int color) {
     std::string kingPosString = "K" + std::string(1, static_cast<char>(kingPos[0] + 97)) + std::to_string(8 - kingPos[1]);
 
     piecePtr = board[kingPos[1]][kingPos[0]];
+
     kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
 
     if(kingPtr == nullptr){
         std::cout<<"kingPtr is null"<<std::endl;
         return;
     }
-
     if(kingPtr->canCastle("O-O", board.getBoard())){
         legalMoves.emplace_back(std::make_pair("O-O", kingPtr));
     }
@@ -38,18 +38,11 @@ void moveChoice(ChessBoard &board, int color) {
     for (const auto& row : board.getBoard()) {
         for (const auto& piece : row) {
             if (piece->getSymbol() != '.' && piece->getColor() == color) {
-                if (!piece->getLegal(board.getBoard()).empty()){
-
-                    movablePieces.emplace_back(piece);
+                for(auto& moves : piece->getLegal(board.getBoard())){
+                    if(!movingToCheck(board, moves.first, color, piece)){
+                        legalMoves.emplace_back(std::make_pair(moves.first, moves.second));
+                    }
                 }
-            }
-        }
-    }
-
-    for(auto& piece : movablePieces){
-        for(auto& moves : piece->getLegal(board.getBoard())){
-            if(!movingToCheck(board, moves.first, color, piece)){
-                legalMoves.emplace_back(std::make_pair(moves.first, piece));
             }
         }
     }
@@ -57,8 +50,6 @@ void moveChoice(ChessBoard &board, int color) {
     std::uniform_int_distribution<int> distr(1, legalMoves.size());
     int randomNumber = distr(eng);
     move = legalMoves[randomNumber-1];
-
-    std::cout<<"check 3"<<std::endl;
 
     if(move.first == "O-O" || move.first == "O-O-O"){
         castle(move.first, board, color);
@@ -69,6 +60,7 @@ void moveChoice(ChessBoard &board, int color) {
     }
     
     std::cout<<move.first<<std::endl;
+    move.second->printInfo();
 
     doMove(move.first, board, color, move.second);
 

@@ -138,6 +138,7 @@ public:
                 }
             }
         }
+        if(kingPosition.empty()) return {-1,-1};
         return kingPosition;
     }
 
