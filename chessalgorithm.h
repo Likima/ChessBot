@@ -16,7 +16,11 @@ int alphaBeta(ChessBoard& board, int depth, int alpha, int beta, bool maximizing
     std::vector<piecePair> legalMoves;
     std::shared_ptr<Piece> prevPiece;
     int prevX, prevY;
-    if (depth == 0) return evaluatePos(board);
+
+    if (board.findKing(maximizingPlayer ? 1 : 0) == std::vector<int>{-1,-1}) return INT_MIN;
+    //if (mated(board, maximizingPlayer ? 1 : 0)) return INT_MIN;
+    if (depth == 0) return alpha;
+
     printBoard(board);
     std::cout<<std::endl;
 
