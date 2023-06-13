@@ -140,6 +140,29 @@ public:
         return true;
     }
 
+    std::string kingString(int color){
+        std::string kingString = "K";
+        for(auto& row : board){
+            for(auto& piece : row){
+                if(piece->getSymbol() == 'K' && piece->getColor() == color){
+                    kingString += std::string(1, char(96+piece->getX())) + std::to_string(piece->getY());
+                }
+            }
+        }
+        return kingString;
+    }
+
+    std::shared_ptr<King> getKing(int color){
+        for(auto& row : board){
+            for(auto& piece : row){
+                if(piece->getSymbol() == 'K' && piece->getColor() == color){
+                    return std::dynamic_pointer_cast<King>(piece);
+                }
+            }
+        }
+        return std::shared_ptr<King>(nullptr);
+    }
+
     std::vector<int> findKing(int color) {
         std::vector<int> kingPosition;
         for (auto i = 0; i < board.size(); i++) {

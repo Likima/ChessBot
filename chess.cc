@@ -86,6 +86,8 @@ int main()
         return 0;
     }
 
+    ChessAlgorithm bot(BotMove);
+
     while (true)
     {
         kingPos = board.findKing(moveNumber % 2);
@@ -114,9 +116,9 @@ int main()
                 break;
             }
         }
-        if (BotMove == moveNumber % 2)
+        if (bot.getColor() == moveNumber % 2)
         {
-            moveChoice(board, moveNumber % 2);
+            bot.moveChoice(board, moveNumber % 2);
             moveNumber++;
             printBoard(board);
             continue;
