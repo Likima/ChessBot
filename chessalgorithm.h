@@ -32,26 +32,20 @@ class ChessAlgorithm{
 
         if (board.findKing(color) == std::vector<int>{-1,-1}) return INT_MIN;
         if (depth == 0) {
-            std::cout<<"Here! "<<std::endl;
             return evaluatePos(board);
         }
-
-        printBoard(board);
-        std::cout<<std::endl;
 
         for (const auto& row : board.getBoard()) {
             for (const auto& piece : row) {
                 if (piece->getSymbol() != '.' && piece->getColor() == color) {
                     for(auto& moves : piece->getLegal(board.getBoard())){
-                        piece->setPrevXY(piece->getX(), piece->getY());
                         if(!movingToCheck(board, moves.first, color, piece)){
                             legalMoves.emplace_back(moves);
                         }
                     }
                 }
             }
-        }
-        
+        }        
 
         if(legalMoves.empty()){
             if(board.getKing(color)->inCheck(board.kingString(color), board.getBoard())) return maximizingPlayer ? INT_MIN : INT_MAX;
@@ -72,16 +66,11 @@ class ChessAlgorithm{
                 int eval = alphaBeta(board, depth - 1, alpha, beta, false);
                 if(eval>maxEval){
                     maxEval = std::max(maxEval, eval);
+                    if(depth == INITIAL_DEPTH) bestMove = move;
                 }
-                if(depth == INITIAL_DEPTH){
-                    std::cout<<move.first<<" "<<eval<<std::endl;
-                    move.second->printInfo();
-                    bestMove = move;
-                }
-                alpha = std::max(alpha, eval);
-                printBoard(board);
 
-                board.setPiece(move.second->getPos().first-1, move.second->getPos().second, move.second, prevPiece);
+                alpha = std::max(alpha, eval);
+                board.setPiece(prevX-1, prevY, move.second, prevPiece);
 
                 if (beta <= alpha)
                     break;
@@ -95,21 +84,20 @@ class ChessAlgorithm{
             {
                 if(movingToCheck(board, move.first, color, move.second)) continue;
                 prevPiece = board.findPiece(move.first);
-                prevX = board.findPiece(move.first)->getX();
-                prevY = board.findPiece(move.first)->getY();
+                prevX = move.second->getX();
+                prevY = move.second->getY();
                 doMove(move.first, board, color, move.second);
             
                 int eval = alphaBeta(board, depth - 1, alpha, beta, true);
                 if(eval<minEval){
                     minEval = std::min(minEval, eval);
+                    if(depth == INITIAL_DEPTH) bestMove = move;
                 }                    
-                if(depth == INITIAL_DEPTH){
-                    std::cout<<move.first<<" "<<eval<<std::endl;
-                    move.second->printInfo();
-                    bestMove = move;
-                }
+
                 beta = std::min(beta, eval);
-                board.setPiece(move.second->getPos().first-1, move.second->getPos().second, move.second, prevPiece);
+
+                board.setPiece(prevX-1, prevY, move.second, prevPiece);
+                //board.setPiece(move.second->getPos().first-1, move.second->getPos().second, move.second, prevPiece);
 
                 if (beta <= alpha)
                     break;
@@ -164,6 +152,7 @@ class ChessAlgorithm{
         int randomNumber = distr(eng);
         move = legalMoves[randomNumber-1];
         std::cout<<alphaBeta(board, INITIAL_DEPTH, INT_MIN, INT_MAX, color == White)<<std::endl;
+        move = bestMove;
 
         if(move.first == "O-O" || move.first == "O-O-O"){
             castle(move.first, board, color);

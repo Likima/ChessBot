@@ -173,8 +173,9 @@ private:
     int x;
     int y;
     int value;
-    char symbol;
-    int prevX, prevY;
+    char symbol = '.';
+    int prevX = -1;
+    int prevY = -1;
     bool firstMove = true;
 };
 

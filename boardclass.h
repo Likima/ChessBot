@@ -74,6 +74,7 @@ public:
         board[8-y][x] = std::move(piece); // move the piece to the new position
     }
 
+
     void materialPrint(){
         int whiteMaterial = 0;
         int blackMaterial = 0;
