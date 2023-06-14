@@ -22,6 +22,7 @@ using piecePair = std::pair<std::string, std::shared_ptr<Piece>>;
 
 int Black = 0;
 int White = 1;
+int INITIAL_DEPTH = 3;
 std::vector<char> coords = {'a','b','c','d','e','f','g','h'};
 
 void doMove(const std::string&, ChessBoard&, int, std::shared_ptr<Piece>);
@@ -62,6 +63,7 @@ public:
     int getY() const {return y;}
     int getFirstMove() const{return firstMove;}
     int getValue() const{return value;}
+    std::pair<int, int> getPos() const{return std::make_pair(prevX,prevY);}
 
     void printInfo(){
         std::cout<<"x: "<<x<<", "<<"y: "<<y<<", "
@@ -164,6 +166,7 @@ public:
     void setSymbol(char symbol) {this->symbol = symbol;}
     void setX(int x){this->x = x;}
     void setY(int y){this->y = y;}
+    void setPrevXY(int x, int y){this->prevX = x; this->prevY = y;}
 
 private:
     int color;
@@ -171,6 +174,7 @@ private:
     int y;
     int value;
     char symbol;
+    int prevX, prevY;
     bool firstMove = true;
 };
 

@@ -68,7 +68,7 @@ public:
         if(prevPiece == nullptr){
             prevPiece = std::make_shared<Piece>(-1, '.', piece->getX(), piece->getY());
         }
-        board[8-(piece->getY())][(piece->getX())-1] = prevPiece; // set old position to empty
+        board[8-(piece->getY())][(piece->getX())-1] = std::move(prevPiece); // set old position to empty
         piece->setX(x+1); // set new position for the piece
         piece->setY(y);
         board[8-y][x] = std::move(piece); // move the piece to the new position
