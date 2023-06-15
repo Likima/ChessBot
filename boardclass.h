@@ -8,9 +8,7 @@ class ChessBoard {
 public:
     ChessBoard() {
         const int SIZE = 8;
-        RowType SECOND_RANK;
-        RowType SEVENTH_RANK;
-        RowType EIGHTH_RANK;
+        RowType SECOND_RANK, SEVENTH_RANK, EIGHTH_RANK;
 
         RowType FIRST_RANK{
             std::make_shared<Rook>(Black, 'R',1,8,5),
@@ -70,7 +68,7 @@ public:
         if(prevPiece == nullptr){
             prevPiece = std::make_shared<Piece>(-1, '.', piece->getX(), piece->getY());
         }
-        board[8-(piece->getY())][(piece->getX())-1] = prevPiece; // set old position to empty
+        board[8-(piece->getY())][(piece->getX())-1] = std::move(prevPiece); // set old position to empty
         piece->setX(x+1); // set new position for the piece
         piece->setY(y);
         board[8-y][x] = std::move(piece); // move the piece to the new position
@@ -90,10 +88,26 @@ public:
         std::cout << "Black: " << blackMaterial << std::endl;
     }
 
+    std::pair<int,int> getMaterial(){
+        int whiteMaterial = 0;
+        int blackMaterial = 0;
+        for(auto& row : board){
+            for(auto& piece : row){
+                if(piece->getColor() == 1 || piece->getColor() == 0)
+                piece->getColor() == White ? whiteMaterial += piece->getValue() : blackMaterial += piece->getValue();
+            }
+        }
+        return(std::make_pair(whiteMaterial, blackMaterial));
+    }
+
+
     void playedMovePrint(){
+        int x = 1;
         std::cout << "Played moves: " << std::endl;
         for(auto& move : moves){
-            std::cout << move << " ";
+            x % 2 == 0 ? std::cout << "\033[0;35m" << move << " \033[0m" :
+                std::cout << "\033[0;36m" << move << " \033[0m";
+            x++;
         }
         std::cout << std::endl;
     }
@@ -114,11 +128,45 @@ public:
     std::shared_ptr<Piece> findPiece(int x, int y){
         return board[8-y][x-1];
     }
+    
+    bool checkStalemate(){
+        for(auto& row : board){
+            for(auto& piece : row){
+                if(piece->getSymbol() == 'R' || piece->getSymbol() == 'P' || piece->getSymbol() == 'Q' || piece->getSymbol() == 'N'){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    std::string kingString(int color){
+        std::string kingString = "K";
+        for(auto& row : board){
+            for(auto& piece : row){
+                if(piece->getSymbol() == 'K' && piece->getColor() == color){
+                    kingString += std::string(1, char(96+piece->getX())) + std::to_string(piece->getY());
+                }
+            }
+        }
+        return kingString;
+    }
+
+    std::shared_ptr<King> getKing(int color){
+        for(auto& row : board){
+            for(auto& piece : row){
+                if(piece->getSymbol() == 'K' && piece->getColor() == color){
+                    return std::dynamic_pointer_cast<King>(piece);
+                }
+            }
+        }
+        return std::shared_ptr<King>(nullptr);
+    }
 
     std::vector<int> findKing(int color) {
         std::vector<int> kingPosition;
-        for (int i = 0; i < board.size(); ++i) {
-            for (int j = 0; j < board.size(); ++j) {
+        for (auto i = 0; i < board.size(); i++) {
+            for (auto j = 0; j < board.size(); j++) {
                 if (board[i][j]->getSymbol() == 'K' && board[i][j]->getColor() == color) {
                     kingPosition.emplace_back(j);
                     kingPosition.emplace_back(i);
@@ -126,6 +174,7 @@ public:
                 }
             }
         }
+        if(kingPosition.empty()) return {-1,-1};
         return kingPosition;
     }
 

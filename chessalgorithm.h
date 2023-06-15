@@ -4,99 +4,187 @@
 #include "piececlass.h"
 #include "boardclass.h"
 
+class ChessAlgorithm{
+    public:
+        ChessAlgorithm(int color) : color(color){};
 
-void moveChoice(ChessBoard &board, int color) {
-    ChessBoard tempboard = board;
-    RowType movablePieces;
-    RowType possiblePiece;
-    bool ambiguous = false;
-    std::vector<std::string> legalMoves;
-    std::random_device rd;
-    std::shared_ptr<Piece> movingPiece;
-    std::mt19937 eng(rd());
-    std::string move;
+    int getColor() const {return color;}
 
-    for (const auto& row : board.getBoard()) {
-        for (auto& piece : row) {
-            if (piece->getSymbol() != '.' && piece->getColor() == color) {
-                if (!piece->getLegal(board.getBoard()).empty()){
-                    movablePieces.emplace_back(piece);
-                }
-            }
-        }
-    }
-    for(auto& piece : movablePieces){
-        for(auto& moves : piece->getLegal(board.getBoard())){
-            if(!movingToCheck(board, moves, color, piece)){
-                legalMoves.emplace_back(moves);
-            }
-        }
+    int evaluatePos(ChessBoard& board){
+        std::pair<int,int> materialPair = board.getMaterial();
+        int whiteMaterial = materialPair.first;
+        int blackMaterial = materialPair.second;
+        analyzedPositions++;
+        return whiteMaterial-blackMaterial;
     }
 
-    std::uniform_int_distribution<int> distr(1, legalMoves.size());
-    int randomNumber = distr(eng);
-    move = legalMoves[randomNumber-1];
+    piecePair getBestMove(){
+        return bestMove;
+    }
 
-    possiblePiece = getPieces(board, move, color);
-
-
-    if (possiblePiece.size() > 1)
+    int alphaBeta(ChessBoard& board, int depth, int alpha, int beta, bool maximizingPlayer)
     {
-        std::cout<<"Ambiguous Move"<<std::endl;
-        for(auto &row : board.getBoard()){
-            for(auto &piece : row){
-                if(piece->getSymbol() == possiblePiece[0]->getSymbol() && piece->getColor() == possiblePiece[0]->getColor()){
-                    if(piece->getX() == possiblePiece[0]->getX() && piece->getY() == possiblePiece[0]->getY()){
-                        continue;
-                    }
-                    if(piece->legalMove(move, board.getBoard())){
-                        if(piece->getX() == possiblePiece[0]->getX()){
-                            move.insert(1, std::to_string(possiblePiece[0]->getX()+96));
-                            break;
+        int color = maximizingPlayer ? White : Black;
+        std::vector<std::pair<std::pair<int, int>, std::shared_ptr<Piece>>> prevCoords;
+        std::vector<piecePair> legalMoves;
+        std::shared_ptr<Piece> prevPiece;
+        int prevX, prevY;
+
+        if (board.findKing(color) == std::vector<int>{-1,-1}) return INT_MIN;
+        if (depth == 0) {
+            return evaluatePos(board);
+        }
+
+        for (const auto& row : board.getBoard()) {
+            for (const auto& piece : row) {
+                if (piece->getSymbol() != '.' && piece->getColor() == color) {
+                    for(auto& moves : piece->getLegal(board.getBoard())){
+                        if(!movingToCheck(board, moves.first, color, piece)){
+                            legalMoves.emplace_back(moves);
                         }
-                        else if(piece->getY() == possiblePiece[0]->getY()){
-                            move.insert(1, std::to_string(possiblePiece[0]->getY()));
-                            break;
+                    }
+                }
+            }
+        }        
+
+        if(legalMoves.empty()){
+            if(board.getKing(color)->inCheck(board.kingString(color), board.getBoard())) return maximizingPlayer ? INT_MIN : INT_MAX;
+            else return 0;
+        }
+
+        if (maximizingPlayer)
+        {
+            int maxEval = INT_MIN;
+            for (auto& move : legalMoves)
+            {
+                if(movingToCheck(board, move.first, color, move.second)) continue;
+                prevPiece = board.findPiece(move.first);
+                prevX = move.second->getX();
+                prevY = move.second->getY();
+                doMove(move.first, board, color, move.second);
+
+                int eval = alphaBeta(board, depth - 1, alpha, beta, false);
+                if(eval>maxEval){
+                    maxEval = std::max(maxEval, eval);
+                    if(depth == INITIAL_DEPTH) bestMove = move;
+                }
+
+                alpha = std::max(alpha, eval);
+                board.setPiece(prevX-1, prevY, move.second, prevPiece);
+
+                if (beta <= alpha)
+                    break;
+            }
+            return maxEval;
+        }
+        else
+        {
+            int minEval = INT_MAX;
+            for (auto& move : legalMoves)
+            {
+                if(movingToCheck(board, move.first, color, move.second)) continue;
+                prevPiece = board.findPiece(move.first);
+                prevX = move.second->getX();
+                prevY = move.second->getY();
+                doMove(move.first, board, color, move.second);
+            
+                int eval = alphaBeta(board, depth - 1, alpha, beta, true);
+                if(eval<minEval){
+                    minEval = std::min(minEval, eval);
+                    if(depth == INITIAL_DEPTH) bestMove = move;
+                }                    
+
+                beta = std::min(beta, eval);
+
+                board.setPiece(prevX-1, prevY, move.second, prevPiece);
+                //board.setPiece(move.second->getPos().first-1, move.second->getPos().second, move.second, prevPiece);
+
+                if (beta <= alpha)
+                    break;
+            }
+            return minEval;
+        }
+    }   
+
+    void moveChoice(ChessBoard &board, int color) {
+        color == White ? std::cout<<"White's move"<<std::endl : std::cout<<"Black's move"<<std::endl;
+        RowType possiblePiece;
+        std::vector<piecePair> legalMoves;
+        std::random_device rd;
+        std::mt19937 eng(rd());
+        piecePair move;
+
+        std::vector<int> kingPos = board.findKing(color);
+        std::shared_ptr<Piece> piecePtr;
+        std::shared_ptr<King> kingPtr;
+        std::string kingPosString = "K" + std::string(1, static_cast<char>(kingPos[0] + 97)) + std::to_string(8 - kingPos[1]);
+
+        piecePtr = board[kingPos[1]][kingPos[0]];
+
+        kingPtr = std::dynamic_pointer_cast<King>(piecePtr);
+
+        if(kingPtr == nullptr){
+            std::cout<<"kingPtr is null"<<std::endl;
+            return;
+        }
+
+        if(kingPtr->canCastle("O-O", board.getBoard())){
+            legalMoves.emplace_back(std::make_pair("O-O", kingPtr));
+        }
+
+        if(kingPtr->canCastle("O-O-O",board.getBoard())){
+            legalMoves.emplace_back(std::make_pair("O-O-O", kingPtr));
+        }
+
+        for (const auto& row : board.getBoard()) {
+            for (const auto& piece : row) {
+                if (piece->getSymbol() != '.' && piece->getColor() == color) {
+                    for(auto& moves : piece->getLegal(board.getBoard())){
+                        if(!movingToCheck(board, moves.first, color, piece)){
+                            legalMoves.emplace_back(std::make_pair(moves.first, moves.second));
                         }
                     }
                 }
             }
         }
-        for (int x = possiblePiece.size() - 1; x > -1; x--)
-        {
-            if (isdigit(move[1]))
-            {
-                if (possiblePiece[x]->getY() == move[1])
-                    move.insert(1, std::to_string(possiblePiece[x]->getX()+96));
-                    continue;
-                possiblePiece.erase(possiblePiece.begin() + x);
-            }
-            else
-            {
-                if (std::to_string(possiblePiece[x]->getX()) == std::string(1, move[1] - 96))
-                    move.insert(1, std::to_string(possiblePiece[x]->getX()+96));
-                    continue;
-                possiblePiece.erase(possiblePiece.begin() + x);
+
+        std::uniform_int_distribution<int> distr(1, legalMoves.size());
+        int randomNumber = distr(eng);
+        move = legalMoves[randomNumber-1];
+        std::cout<<alphaBeta(board, INITIAL_DEPTH, INT_MIN, INT_MAX, color == White)<<std::endl;
+        move = bestMove;
+
+        if(move.first == "O-O" || move.first == "O-O-O"){
+            castle(move.first, board, color);
+            move.second->setFirstMove();
+            board.setMoves(move.first);
+            board.playedMovePrint();
+            return;
+        }
+
+        std::cout<<move.first<<std::endl;
+        move.second->printInfo();
+        std::cout<<"Analyzed Positions: "<<analyzedPositions<<std::endl; 
+        std::cout<<"BEST MOVE: "<<bestMove.first<<std::endl;  
+
+        doMove(move.first, board, color, move.second);
+
+        if(move.second->getSymbol() == 'P'){
+            if(move.second->getY() == 1 || move.second->getY() == 8){
+                move.first = move.first+"=Q";
+                Promote(board, move.second, color == White);
             }
         }
-    }
-    std::cout<<move<<std::endl;
-
-    if(possiblePiece.size() == 2) std::cout<<"Ambiguous Move ERROR"<<std::endl;
-    if(possiblePiece[0]->getSymbol() == 'P'){
-        if(possiblePiece[0]->getX() == 1 || possiblePiece[0]->getX() == 8){
-            move = move+"=Q";
-            Promote(board, possiblePiece[0], true);
-        }
-    }
+        if(move.second->getFirstMove()) move.second->setFirstMove();
+        board.setMoves(move.first);
+        board.playedMovePrint();
+    }   
 
 
-    doMove(move, board, color, possiblePiece[0]);
-    if(possiblePiece[0]->getFirstMove()){
-        possiblePiece[0]->setFirstMove();
-    }
-    board.setMoves(possiblePiece[0]);
-    board.playedMovePrint();
-}
+    private:
+        int color;
+        int analyzedPositions = 0;
+        piecePair bestMove;
+};
 
 #endif
