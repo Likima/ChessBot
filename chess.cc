@@ -19,6 +19,12 @@ bool pawnMove(const std::string move)
 
 void doMove(const std::string &move, ChessBoard &board, const int moveNumber, const std::shared_ptr<Piece> passedPiece)
 {
+    if(board.findPiece(move)->getSymbol() == 'P'){
+        if(board.findPiece(move)->getY() == 8 || board.findPiece(move)->getY() == 1){
+            Promote(board, board.findPiece(move), true);
+        }
+    }
+
     int moveSize = move.length();
     char horizontalCoord = move[moveSize - 2] - 97;
     int verticalCoord = (move[moveSize - 1] - '0');
@@ -87,6 +93,7 @@ int main()
     }
 
     ChessAlgorithm bot(BotMove);
+    ChessAlgorithm secondBot(BotMove == 1 ? 0 : 1);
 
     while (true)
     {
@@ -118,19 +125,19 @@ int main()
         }
         if (bot.getColor() == moveNumber % 2)
         {
-            bot.moveChoice(board, moveNumber % 2);
+            bot.moveChoice(board, moveNumber % 2, moveNumber);
             moveNumber++;
             printBoard(board);
             continue;
         }
 
-        // else{
-        //     std::cout<<moveNumber<<std::endl;
-        //     moveChoice(board, moveNumber % 2);
-        //     moveNumber++;
-        //     printBoard(board);
-        //     continue;
-        // }
+        //else{
+        //    std::cout<<moveNumber<<std::endl;
+        //    secondBot.moveChoice(board, moveNumber % 2, moveNumber);
+        //    moveNumber++;
+        //    printBoard(board);
+        //    continue;
+        //}
 
         moveNumber % 2 == 1 ? std::cout << "White's move"
                             : std::cout << "\033[0;01;02"

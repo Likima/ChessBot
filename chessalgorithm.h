@@ -9,13 +9,59 @@ class ChessAlgorithm{
         ChessAlgorithm(int color) : color(color){};
 
     int getColor() const {return color;}
+    
+    int evaluateOpening(ChessBoard &board){
+        int retEval = 0;
+        for(auto& row : board.getBoard()){
+            for(auto& piece : row){
+                if(piece->getSymbol() == 'P'){
+                    if(piece->getX() == 4 || piece->getX() == 5){
+                        if(piece->getY() != 2 && piece->getY() != 7){
+                            piece->getColor() == White ? retEval+=20 : retEval-=20;
+                            //retEval+=20;
+                        }
+                    }
+                    //retEval-=((piece->getColor() == White ? 1 : -1)*piece->getY());
+                }
+            }
+        }
+        return retEval;
+    }
+
+    //int evaluateEndgame(ChessBoard& board){
+    //    int totalEval = 0;
+    //    for(auto& row : board.getBoard()){
+    //        for(auto & piece : row){
+    //            if(board.getKing(White)->inCheck()){
+//
+    //            }
+    //        }
+    //    }
+    //}
 
     int evaluatePos(ChessBoard& board){
+        int miscEval = 0;
+        int positionalEval;
         std::pair<int,int> materialPair = board.getMaterial();
         int whiteMaterial = materialPair.first;
         int blackMaterial = materialPair.second;
         analyzedPositions++;
-        return whiteMaterial-blackMaterial;
+        if(moveNum < 12){
+            miscEval+=evaluateOpening(board);
+        }
+        //if(board.isEndgame(board)) miscEval+=evaluateEndgame();
+        for(auto& row : board.getBoard()){
+            for(auto& piece : row){
+                if(piece->getColor() == White){
+                    positionalEval += piece->positionalAdvantage();
+                }
+                else if(piece->getColor() == Black){
+                    positionalEval -= piece->positionalAdvantage();
+                }
+            }
+        }
+            
+        return whiteMaterial-blackMaterial+positionalEval+miscEval;
     }
 
     piecePair getBestMove(){
@@ -106,7 +152,8 @@ class ChessAlgorithm{
         }
     }   
 
-    void moveChoice(ChessBoard &board, int color) {
+    void moveChoice(ChessBoard &board, int color, int moveNumber) {
+        moveNum = moveNumber/2;
         color == White ? std::cout<<"White's move"<<std::endl : std::cout<<"Black's move"<<std::endl;
         RowType possiblePiece;
         std::vector<piecePair> legalMoves;
@@ -183,6 +230,7 @@ class ChessAlgorithm{
 
     private:
         int color;
+        int moveNum;
         int analyzedPositions = 0;
         piecePair bestMove;
 };
