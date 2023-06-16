@@ -25,19 +25,41 @@ class ChessAlgorithm{
                 }
             }
         }
+        
         return retEval;
     }
 
-    //int evaluateEndgame(ChessBoard& board){
-    //    int totalEval = 0;
-    //    for(auto& row : board.getBoard()){
-    //        for(auto & piece : row){
-    //            if(board.getKing(White)->inCheck()){
-//
-    //            }
-    //        }
-    //    }
-    //}
+    int evaluateEndgame(ChessBoard& board){
+        int totalEval = 0;
+        for(auto& row : board.getBoard()){
+            for(auto & piece : row){
+                if(board.getKing(White)->inCheck(board.kingString(White), board.getBoard())){
+                    if(piece->getColor() == White){
+                        totalEval+=piece->positionalAdvantage();
+                    }
+                    else{
+                        totalEval-=piece->positionalAdvantage();
+                    }
+                }
+                else if(board.getKing(Black)->inCheck(board.kingString(Black), board.getBoard())){
+                    if(piece->getColor() == Black){
+                        totalEval+=piece->positionalAdvantage();
+                    }
+                    else{
+                        totalEval-=piece->positionalAdvantage();
+                    }
+                }
+                if(piece->getSymbol() == 'N' && piece->getFirstMove()){
+                    color == White ? totalEval+=10 : totalEval-=10;
+                }
+                if(piece->getSymbol() == 'B' && piece->getFirstMove()){
+                    color == White ? totalEval+=10 : totalEval-=10;
+                }
+
+            }
+        }
+        return totalEval;
+    }
 
     int evaluatePos(ChessBoard& board){
         int miscEval = 0;
@@ -76,7 +98,8 @@ class ChessAlgorithm{
         std::shared_ptr<Piece> prevPiece;
         int prevX, prevY;
 
-        if (board.findKing(color) == std::vector<int>{-1,-1}) return INT_MIN;
+        if (board.findKing(color) == std::vector<int>{-1,-1}) return maximizingPlayer ? INT_MAX : INT_MIN;
+        else if(mated(board, color, board.getKing(color))) return maximizingPlayer ? INT_MAX : INT_MIN;
         if (depth == 0) {
             return evaluatePos(board);
         }
@@ -91,7 +114,13 @@ class ChessAlgorithm{
                     }
                 }
             }
-        }        
+        }
+        if(board.getKing(color)->canCastle("O-O", board.getBoard())){
+            legalMoves.emplace_back(std::make_pair("O-O", board.getKing(color)));
+        }
+        if(board.getKing(color)->canCastle("O-O-O", board.getBoard())){
+            legalMoves.emplace_back(std::make_pair("O-O-O", board.getKing(color)));
+        }
 
         if(legalMoves.empty()){
             if(board.getKing(color)->inCheck(board.kingString(color), board.getBoard())) return maximizingPlayer ? INT_MIN : INT_MAX;

@@ -37,7 +37,7 @@ void longCastle(ChessBoard&, int, bool);
 void castle(std::string, ChessBoard&, int);
 bool movingToCheck(ChessBoard&, std::string, int, std::shared_ptr<Piece>);
 bool moveIsValid(std::string, ChessBoard&, int, std::shared_ptr<King>);
-bool mated(ChessBoard&, int);
+bool mated(ChessBoard&, int, std::shared_ptr<King>);
 RowType getPieces(std::vector<RowType>, std::string, int);
 
 class Piece {
@@ -89,6 +89,7 @@ public:
 
                 if(legalMove(move, board)){
                     ambiguousPieces = getPieces(board, move, getColor());
+                    
                     if(ambiguousPieces.size() > 1){
                         move.erase(0,1);
                         for(auto& piece : ambiguousPieces){
@@ -182,7 +183,7 @@ private:
 
 class Pawn: public Piece{
     public:
-        Pawn(char color, int symbol, int x, int y, int value) : Piece(color, 'P', x, y, 10){}
+        Pawn(char color, int symbol, int x, int y, int value) : Piece(color, 'P', x, y, 100){}
 
     int positionalAdvantage() override {
         const int multi = getColor() == White ? 1 : -1;
@@ -228,7 +229,7 @@ class Pawn: public Piece{
 
 class Rook: public Piece{
     public:
-    Rook(char color, int symbol, int x, int y, int value) : Piece(color, 'R', x, y, 50){}
+    Rook(char color, int symbol, int x, int y, int value) : Piece(color, 'R', x, y, 500){}
 
     int positionalAdvantage() override{
         if(getY() == (getColor() == White ? 2 : 7)){
@@ -252,7 +253,7 @@ class Rook: public Piece{
 
 class Bishop: public Piece{
     public:
-    Bishop(char color, int symbol, int x, int y, int value) : Piece(color, 'B', x, y, 30){}
+    Bishop(char color, int symbol, int x, int y, int value) : Piece(color, 'B', x, y, 300){}
 
     int positionalAdvantage() override{
         int center_x1 = 3;  // x-coordinate of the first possible center
@@ -273,7 +274,6 @@ class Bishop: public Piece{
         int distance4 = std::max(std::abs(getX() - center_x4), std::abs(getY() - center_y4));
 
         int closeness_score = 8 - std::min(std::min(distance1, distance2), std::min(distance3, distance4));
-        // The closer to any center, the higher the score
 
         return closeness_score;
     }
@@ -308,7 +308,7 @@ class Queen:public Piece{
 
         return closeness_score;
     }
-    Queen(char color, int symbol, int x, int y, int value) : Piece(color, 'Q', x, y, 80){}
+    Queen(char color, int symbol, int x, int y, int value) : Piece(color, 'Q', x, y, 800){}
     bool legalMove(std::string move, const std::vector<RowType>& Board) override{
         return(checkRook(move,Board) || checkBishop(move,Board));
     }
@@ -316,7 +316,7 @@ class Queen:public Piece{
 
 class Knight:public Piece{
     public:
-    Knight(char color, int symbol, int x, int y, int value) : Piece(color, 'N', x, y, 30){}
+    Knight(char color, int symbol, int x, int y, int value) : Piece(color, 'N', x, y, 300){}
 
     int positionalAdvantage() override{
         int center_x1 = 3;  // x-coordinate of the first possible center

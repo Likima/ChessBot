@@ -43,6 +43,11 @@ RowType getPieces(std::vector<RowType> board, const std::string move, const int 
             {
                 if (!pawnMove(move) && piece->getSymbol() == toupper(move[0]) && piece->getSymbol() != 'P' && piece->legalMove(move, board))
                 {
+                    //for(auto& moves : piece->getLegal(board)){
+                    //    if(moves.first == move){
+                    //        possiblePiece.emplace_back(piece);
+                    //    }
+                    //}
                     possiblePiece.emplace_back(piece);
                 }
                 else if (piece->getSymbol() == 'P' && pawnMove(move) && piece->legalMove(move, board))
@@ -62,6 +67,8 @@ int main()
     ChessBoard board;
     int prevX, prevY, BotMove;
     char BotSide;
+    std::string load;
+    std::string FenString;
     std::string kingPosString, move;
     std::vector<std::string> playedMoves;
     std::vector<int> kingPos;
@@ -73,6 +80,18 @@ int main()
 
     printBoard(board);
 
+    while(true){
+        std::cout<<"Load? [L]\nPlay? [P]"<<std::endl;
+        std::cin>>load;
+        if(load == "P") break;
+        else if(load == "L"){
+            std::cout<<"Paste FEN String: "<<std::endl;
+            std::cin>>FenString; 
+            
+        }
+        else std::cout<<"Invalid Input"<<std::endl;
+    }
+    
     std::cout << "What Side Are You Playing? [B/W] ";
     if (std::cin >> BotSide)
     {
@@ -181,6 +200,7 @@ int main()
             std::cout << "Not a valid piece " << std::endl;
             continue;
         }
+
 
         if (!moveIsValid(move, board, moveNumber, kingPtr))
             continue;
