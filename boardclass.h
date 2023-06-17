@@ -188,6 +188,45 @@ public:
         return board[index];
     }
 
+    std::uint64_t getRandom64()
+    {
+        static std::random_device rd;
+        static std::mt19937_64 gen(rd());
+        std::uniform_int_distribution<std::uint64_t> dis;
+        return dis(gen);
+    }
+
+    // Initialize the Zobrist hash keys for each piece and square
+    std::vector<std::vector<std::uint64_t>> initZobristKeys()
+    {
+        std::vector<std::vector<std::uint64_t>> keys(8, std::vector<std::uint64_t>(8*12));
+
+        for (int i = 0; i < 8; ++i) {
+            for (int j = 0; j < 8 * 12; ++j) {
+                keys[i][j] = getRandom64();
+            }
+        }
+
+        return keys;
+    }
+
+    // Compute the Zobrist hash value for the given chessboard
+    std::uint64_t computeZobristHash(const std::vector<std::vector<std::uint64_t>>& zobristKeys)
+    {
+        std::uint64_t hash = 0;
+
+        for (int i = 0; i < 8; ++i) {
+            for (int j = 0; j < 8; ++j) {
+                std::shared_ptr<Piece> piece = board[i][j];
+                if (piece->getSymbol() != '\0') {
+                    int index = (piece->getColor() * 6 + (piece->getSymbol() - 'A')) * 8 + i * 8 + j;
+                    hash ^= zobristKeys[i][index];
+                }
+            }
+        }
+
+        return hash;
+    }
 
 private:
     std::vector<RowType> board;

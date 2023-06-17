@@ -70,6 +70,9 @@ class ChessAlgorithm{
 
     int alphaBeta(ChessBoard& board, int depth, int alpha, int beta, bool maximizingPlayer)
     {
+        if(mated(board, maximizingPlayer ? White : Black)){
+            return maximizingPlayer ? INT_MAX : INT_MIN;
+        }
         int color = maximizingPlayer ? White : Black;
         std::vector<std::pair<std::pair<int, int>, std::shared_ptr<Piece>>> prevCoords;
         std::vector<piecePair> legalMoves;
@@ -149,7 +152,6 @@ class ChessAlgorithm{
                 beta = std::min(beta, eval);
 
                 board.setPiece(prevX-1, prevY, move.second, prevPiece);
-                //board.setPiece(move.second->getPos().first-1, move.second->getPos().second, move.second, prevPiece);
 
                 if (beta <= alpha)
                     break;

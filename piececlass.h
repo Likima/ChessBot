@@ -12,6 +12,8 @@
 #include <utility>
 #include <random>
 #include <climits>
+#include <cstdint>
+#include <fstream>
 
 class Piece;
 class ChessBoard;
