@@ -73,7 +73,7 @@ int main()
 
     printBoard(board);
 
-    std::cout << "What Side Are You Playing? [B/W] ";
+    std::cout << "\nWhat Side Are You Playing? [B/W] ";
     if (std::cin >> BotSide)
     {
         if (BotSide == 'B')
@@ -131,13 +131,13 @@ int main()
             continue;
         }
 
-        //else{
-        //    std::cout<<moveNumber<<std::endl;
-        //    secondBot.moveChoice(board, moveNumber % 2, moveNumber);
-        //    moveNumber++;
-        //    printBoard(board);
-        //    continue;
-        //}
+        else{
+            std::cout<<moveNumber<<std::endl;
+            secondBot.moveChoice(board, moveNumber % 2, moveNumber);
+            moveNumber++;
+            printBoard(board);
+            continue;
+        }
 
         moveNumber % 2 == 1 ? std::cout << "White's move"
                             : std::cout << "\033[0;01;02"

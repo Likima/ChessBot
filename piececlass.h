@@ -22,7 +22,7 @@ using piecePair = std::pair<std::string, std::shared_ptr<Piece>>;
 
 int Black = 0;
 int White = 1;
-int INITIAL_DEPTH = 4;
+int INITIAL_DEPTH = 5;
 std::vector<char> coords = {'a','b','c','d','e','f','g','h'};
 
 void doMove(const std::string&, ChessBoard&, int, std::shared_ptr<Piece>);

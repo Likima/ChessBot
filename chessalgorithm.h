@@ -112,7 +112,10 @@ class ChessAlgorithm{
                 int eval = alphaBeta(board, depth - 1, alpha, beta, false);
                 if(eval>maxEval){
                     maxEval = std::max(maxEval, eval);
-                    if(depth == INITIAL_DEPTH) bestMove = move;
+                    if(depth == INITIAL_DEPTH){
+                        bestMove = move;
+                        bestLine.emplace_back(move);
+                    }
                 }
 
                 alpha = std::max(alpha, eval);
@@ -137,7 +140,10 @@ class ChessAlgorithm{
                 int eval = alphaBeta(board, depth - 1, alpha, beta, true);
                 if(eval<minEval){
                     minEval = std::min(minEval, eval);
-                    if(depth == INITIAL_DEPTH) bestMove = move;
+                    if(depth == INITIAL_DEPTH){
+                        bestMove = move;
+                        bestLine.emplace_back(move);
+                    }
                 }                    
 
                 beta = std::min(beta, eval);
@@ -233,6 +239,7 @@ class ChessAlgorithm{
         int moveNum;
         int analyzedPositions = 0;
         piecePair bestMove;
+        std::vector<piecePair> bestLine;
 };
 
 #endif
