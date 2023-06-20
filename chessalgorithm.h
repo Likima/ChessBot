@@ -9,6 +9,7 @@ class ChessAlgorithm{
         ChessAlgorithm(int color) : color(color){};
 
     int getColor() const {return color;}
+    void setDepth(int depth){this->INITIAL_DEPTH = depth;}
     
     int evaluateOpening(ChessBoard &board){
         int retEval = 0;
@@ -49,7 +50,7 @@ class ChessAlgorithm{
         if(moveNum < 12){
             miscEval+=evaluateOpening(board);
         }
-        //if(board.isEndgame(board)) miscEval+=evaluateEndgame();
+        if(board.isEndgame()) INITIAL_DEPTH = 8;
         for(auto& row : board.getBoard()){
             for(auto& piece : row){
                 if(piece->getColor() == White){
@@ -70,10 +71,13 @@ class ChessAlgorithm{
 
     int alphaBeta(ChessBoard& board, int depth, int alpha, int beta, bool maximizingPlayer)
     {
-        if(mated(board, maximizingPlayer ? White : Black)){
+        int color = maximizingPlayer ? White : Black;
+
+        if(mated(board, color, board.getKing(color))){
             return maximizingPlayer ? INT_MAX : INT_MIN;
         }
-        int color = maximizingPlayer ? White : Black;
+
+        
         std::vector<std::pair<std::pair<int, int>, std::shared_ptr<Piece>>> prevCoords;
         std::vector<piecePair> legalMoves;
         std::shared_ptr<Piece> prevPiece;
@@ -220,7 +224,10 @@ class ChessAlgorithm{
         std::cout<<move.first<<std::endl;
         move.second->printInfo();
         std::cout<<"Analyzed Positions: "<<analyzedPositions<<std::endl; 
-        std::cout<<"BEST MOVE: "<<bestMove.first<<std::endl;  
+        std::cout<<"BEST MOVE: "<<bestMove.first<<std::endl;
+        for(auto& move : bestLine){
+            std::cout<<move.first<<", ";
+        }
 
         doMove(move.first, board, color, move.second);
 
@@ -237,6 +244,7 @@ class ChessAlgorithm{
 
 
     private:
+        int INITIAL_DEPTH = 4;
         int color;
         int moveNum;
         int analyzedPositions = 0;
