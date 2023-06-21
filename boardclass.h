@@ -20,7 +20,7 @@ public:
             std::make_shared<Rook>(Black, 'R',8,8,500)};
         
         for(int x = 1; x<SIZE+1; x++){
-            SECOND_RANK.emplace_back(std::make_shared<Pawn>(Black, 'P',x,7,10));
+            SECOND_RANK.emplace_back(std::make_shared<Pawn>(Black, 'P',x,7,100));
         }
         
         board.emplace_back(std::move(FIRST_RANK));
@@ -99,7 +99,7 @@ public:
         return(std::make_pair(whiteMaterial, blackMaterial));
     }
 
-    bool isEndgame(){return (getMaterial().first == 190 || getMaterial().second == 190);}
+    bool isEndgame(){return (getMaterial().first == 1900 || getMaterial().second == 1900);}
 
 
     void playedMovePrint(){
@@ -181,6 +181,29 @@ public:
 
     RowType& operator[](int index) {
         return board[index];
+    }
+
+    void revertCastle(int color, std::string move){
+        if(move == "O-O"){
+            if(color == White){
+                setPiece(5, 1, findPiece(8, 1));
+                setPiece(8, 1, findPiece(6, 1));
+            }
+            else{
+                setPiece(5, 8, findPiece(8, 8));
+                setPiece(8, 8, findPiece(6, 8));
+            }
+        }
+        else if(move == "O-O-O"){
+            if(color == White){
+                setPiece(5, 1, findPiece(1, 1));
+                setPiece(1, 1, findPiece(4, 1));
+            }
+            else{
+                setPiece(5, 8, findPiece(1, 8));
+                setPiece(1, 8, findPiece(4, 8));
+            }
+        }
     }
 
     const RowType& operator[](int index) const {

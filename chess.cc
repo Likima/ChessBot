@@ -19,12 +19,16 @@ bool pawnMove(const std::string move)
 
 void doMove(const std::string &move, ChessBoard &board, const int moveNumber, const std::shared_ptr<Piece> passedPiece)
 {
-    if(board.findPiece(move)->getSymbol() == 'P'){
+
+    if(move == "O-O" || move == "O-O-O"){
+        castle(move, board, moveNumber%2);
+        return;
+    }
+    else if(board.findPiece(move)->getSymbol() == 'P'){
         if(board.findPiece(move)->getY() == 8 || board.findPiece(move)->getY() == 1){
             Promote(board, board.findPiece(move), true);
         }
     }
-
     int moveSize = move.length();
     char horizontalCoord = move[moveSize - 2] - 97;
     int verticalCoord = (move[moveSize - 1] - '0');
@@ -170,6 +174,9 @@ int main()
 
         std::cout << "Enter move: ";
         std::cin >> move;
+        if(!pawnMove(move) && !std::isupper(move[0])){
+            move[0] = std::toupper(move[0]);
+        }
         if (move == "display")
         {
             printBoard(board);
