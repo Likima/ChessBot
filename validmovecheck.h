@@ -36,20 +36,20 @@ bool moveIsValid(const std::string move, ChessBoard &board, int moveNumber, cons
     {
         for (int x = possiblePiece.size() - 1; x > -1; x--)
         {
+            if(possiblePiece.size() == 1) break;
             if (isdigit(move[1]))
             {
-                if (possiblePiece[x]->getY() == move[1])
-                    return true;
-                possiblePiece.erase(possiblePiece.begin() + x);
+                if (possiblePiece[x]->getY() == move[1]) continue;
+                else possiblePiece.erase(possiblePiece.begin() + x);
             }
             else
             {
-                if (std::to_string(possiblePiece[x]->getX()) == std::string(1, move[1] - 96))
-                    return true;
-                possiblePiece.erase(possiblePiece.begin() + x);
+                if (std::to_string(possiblePiece[x]->getX()) == std::string(1, move[1] - 96)) continue;
+                else possiblePiece.erase(possiblePiece.begin() + x);
             }
         }
     }
+    std::cout<<possiblePiece.size()<<std::endl;
     if (possiblePiece.empty() || possiblePiece.size() > 1)
     {
         for(auto& piece : possiblePiece){
