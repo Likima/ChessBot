@@ -78,11 +78,11 @@ int main()
     std::vector<int> kingPos;
     std::shared_ptr<Piece> piecePtr;
     std::shared_ptr<King> kingPtr;
-    std::vector<std::vector<std::uint64_t>> zobristKeys = board.initZobristKeys();
-    std::uint64_t hash = board.computeZobristHash(zobristKeys);
+    //std::vector<std::vector<std::uint64_t>> zobristKeys = board.initZobristKeys();
+    //std::uint64_t hash = board.computeZobristHash(zobristKeys);
 
     // Print the hash value
-    std::cout << "Zobrist Hash: " << hash << std::endl;
+    //std::cout << "Zobrist Hash: " << hash << std::endl;
 
     std::vector<std::string> legalMoves;
     auto &b = board.getBoard();
