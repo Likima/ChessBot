@@ -298,7 +298,7 @@ class ChessAlgorithm{
         int analyzedPositions = 0;
         piecePair bestMove;
         std::vector<piecePair> bestLine;
-        std::vector<piecePair> bestLine;
+        //std::vector<piecePair> bestLine;
 };
 
 #endif
