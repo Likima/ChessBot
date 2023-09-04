@@ -78,11 +78,6 @@ int main()
     std::vector<int> kingPos;
     std::shared_ptr<Piece> piecePtr;
     std::shared_ptr<King> kingPtr;
-    //std::vector<std::vector<std::uint64_t>> zobristKeys = board.initZobristKeys();
-    //std::uint64_t hash = board.computeZobristHash(zobristKeys);
-
-    // Print the hash value
-    //std::cout << "Zobrist Hash: " << hash << std::endl;
 
     std::vector<std::string> legalMoves;
     auto &b = board.getBoard();
@@ -159,13 +154,13 @@ int main()
             continue;
         }
 
-        else{
-            std::cout<<moveNumber<<std::endl;
-            secondBot.moveChoice(board, moveNumber % 2, moveNumber);
-            moveNumber++;
-            printBoard(board);
-            continue;
-        }
+        //else{
+        //    std::cout<<moveNumber<<std::endl;
+        //    secondBot.moveChoice(board, moveNumber % 2, moveNumber);
+        //    moveNumber++;
+        //    printBoard(board);
+        //    continue;
+        //}
 
         moveNumber % 2 == 1 ? std::cout << "White's move"
                             : std::cout << "\033[0;01;02"

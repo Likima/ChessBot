@@ -12,8 +12,6 @@
 #include <utility>
 #include <random>
 #include <climits>
-#include <cstdint>
-#include <fstream>
 
 class Piece;
 class ChessBoard;
@@ -24,7 +22,7 @@ using piecePair = std::pair<std::string, std::shared_ptr<Piece>>;
 
 int Black = 0;
 int White = 1;
-int INITIAL_DEPTH = 4;
+int INITIAL_DEPTH = 5;
 std::vector<char> coords = {'a','b','c','d','e','f','g','h'};
 
 void doMove(const std::string&, ChessBoard&, int, std::shared_ptr<Piece>);
@@ -53,9 +51,7 @@ public:
     Piece(char symbol) : symbol(symbol), color(-1){}
     Piece(int color, char symbol, int x, int y) : color(color), symbol(symbol), x(x), y(y){}
     Piece(int color, char symbol) : symbol(symbol), color(color){}
-    Piece(int color, char symbol, int x, int y, int value) : color(color), symbol(symbol), x(x), y(y), value(value){
-        this->netPos = x+(y-1)*8;
-    }
+    Piece(int color, char symbol, int x, int y, int value) : color(color), symbol(symbol), x(x), y(y), value(value){}
 
     virtual bool legalMove(std::string move, const std::vector<RowType>& Board){return false;}
     virtual void movePiece(std::string move){};
@@ -68,7 +64,6 @@ public:
     int getY() const {return y;}
     int getFirstMove() const{return firstMove;}
     int getValue() const{return value;}
-    int getNetPos() const{return netPos;}
     std::pair<int, int> getPos() const{return std::make_pair(prevX,prevY);}
 
     void printInfo(){
@@ -174,13 +169,11 @@ public:
     void setX(int x){this->x = x;}
     void setY(int y){this->y = y;}
     void setPrevXY(int x, int y){this->prevX = x; this->prevY = y;}
-    void setNet(int x, int y){this->netPos = x+((y-1)*8);}
 
 private:
     int color;
     int x;
     int y;
-    int netPos;
     int value;
     char symbol = '.';
     int prevX = -1;
