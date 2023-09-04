@@ -22,9 +22,12 @@ void printvector(const std::vector<std::string> vec)
 
 void printBoard(const ChessBoard &board)
 {
+    int rowNum = 8;
+    
     const auto &b = board.getBoard();
     for (const auto &row : b)
     {
+        std::cout << "\033[1;32m" << rowNum << " \033[0m";
         for (const auto &piece : row)
         {
             if (piece->getColor() == Black)
@@ -32,9 +35,15 @@ void printBoard(const ChessBoard &board)
             else
                 std::cout << "\033[0;36m" << piece->getSymbol() << " \033[0m";
         }
+        rowNum--;
         
         std::cout << std::endl;
     }
+    std::cout<<"  ";
+    for(const auto& col : coords){
+        std::cout << "\033[1;32m" << col << " \033[0m";
+    }
+    std::cout<<std::endl;
 }
 
 void printX(const ChessBoard& board){
