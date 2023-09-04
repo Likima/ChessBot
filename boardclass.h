@@ -3,7 +3,6 @@
 
 #include "piececlass.h"
 
-
 class ChessBoard {
 public:
     ChessBoard() {
@@ -11,17 +10,17 @@ public:
         RowType SECOND_RANK, SEVENTH_RANK, EIGHTH_RANK;
 
         RowType FIRST_RANK{
-            std::make_shared<Rook>(Black, 'R',1,8,50),
-            std::make_shared<Knight>(Black, 'N',2,8,30),
-            std::make_shared<Bishop>(Black, 'B',3,8,30),
-            std::make_shared<Queen>(Black, 'Q',4,8,80),
+            std::make_shared<Rook>(Black, 'R',1,8,500),
+            std::make_shared<Knight>(Black, 'N',2,8,300),
+            std::make_shared<Bishop>(Black, 'B',3,8,300),
+            std::make_shared<Queen>(Black, 'Q',4,8,800),
             std::make_shared<King>(Black, 'K',5,8,0),
-            std::make_shared<Bishop>(Black, 'B',6,8,30),
-            std::make_shared<Knight>(Black, 'N',7,8,30),
-            std::make_shared<Rook>(Black, 'R',8,8,50)};
+            std::make_shared<Bishop>(Black, 'B',6,8,300),
+            std::make_shared<Knight>(Black, 'N',7,8,300),
+            std::make_shared<Rook>(Black, 'R',8,8,500)};
         
         for(int x = 1; x<SIZE+1; x++){
-            SECOND_RANK.emplace_back(std::make_shared<Pawn>(Black, 'P',x,7,10));
+            SECOND_RANK.emplace_back(std::make_shared<Pawn>(Black, 'P',x,7,100));
         }
         
         board.emplace_back(std::move(FIRST_RANK));
@@ -36,19 +35,19 @@ public:
         }
 
         for(int x = 1; x<SIZE+1; x++){
-            SEVENTH_RANK.emplace_back(std::make_shared<Pawn>(White, 'P',x,2,10));
+            SEVENTH_RANK.emplace_back(std::make_shared<Pawn>(White, 'P',x,2,100));
         }
 
         board.emplace_back(SEVENTH_RANK);
 
-        EIGHTH_RANK.emplace_back(std::make_shared<Rook>(White, 'R',1,1,50));
-        EIGHTH_RANK.emplace_back(std::make_shared<Knight>(White, 'N',2,1,30));
-        EIGHTH_RANK.emplace_back(std::make_shared<Bishop>(White, 'B',3,1,30));
-        EIGHTH_RANK.emplace_back(std::make_shared<Queen>(White, 'Q',4,1,80));
+        EIGHTH_RANK.emplace_back(std::make_shared<Rook>(White, 'R',1,1,500));
+        EIGHTH_RANK.emplace_back(std::make_shared<Knight>(White, 'N',2,1,300));
+        EIGHTH_RANK.emplace_back(std::make_shared<Bishop>(White, 'B',3,1,300));
+        EIGHTH_RANK.emplace_back(std::make_shared<Queen>(White, 'Q',4,1,800));
         EIGHTH_RANK.emplace_back(std::make_shared<King>(White, 'K',5,1,0));
-        EIGHTH_RANK.emplace_back(std::make_shared<Bishop>(White, 'B',6,1,30)); 
-        EIGHTH_RANK.emplace_back(std::make_shared<Knight>(White, 'N',7,1,30));
-        EIGHTH_RANK.emplace_back(std::make_shared<Rook>(White, 'R',8,1,50));  
+        EIGHTH_RANK.emplace_back(std::make_shared<Bishop>(White, 'B',6,1,300)); 
+        EIGHTH_RANK.emplace_back(std::make_shared<Knight>(White, 'N',7,1,300));
+        EIGHTH_RANK.emplace_back(std::make_shared<Rook>(White, 'R',8,1,500));  
 
         board.emplace_back(EIGHTH_RANK);
     }
@@ -100,7 +99,7 @@ public:
         return(std::make_pair(whiteMaterial, blackMaterial));
     }
 
-    bool isEndgame(){return (getMaterial().first == 190 || getMaterial().second == 190);}
+    bool isEndgame(){return (getMaterial().first == 1900 || getMaterial().second == 1900);}
 
 
     void playedMovePrint(){
@@ -184,49 +183,46 @@ public:
         return board[index];
     }
 
+    void revertCastle(int color, std::string move){
+        if(move == "O-O"){
+            if(color == White){
+                setPiece(5, 1, findPiece(8, 1));
+                setPiece(8, 1, findPiece(6, 1));
+            }
+            else{
+                setPiece(5, 8, findPiece(8, 8));
+                setPiece(8, 8, findPiece(6, 8));
+            }
+        }
+        else if(move == "O-O-O"){
+            if(color == White){
+                setPiece(5, 1, findPiece(1, 1));
+                setPiece(1, 1, findPiece(4, 1));
+            }
+            else{
+                setPiece(5, 8, findPiece(1, 8));
+                setPiece(1, 8, findPiece(4, 8));
+            }
+        }
+    }
+
     const RowType& operator[](int index) const {
         return board[index];
     }
 
-    std::uint64_t getRandom64()
-    {
-        static std::random_device rd;
-        static std::mt19937_64 gen(rd());
-        std::uniform_int_distribution<std::uint64_t> dis;
-        return dis(gen);
-    }
+    //void analyzeFen(std::string FenString){
+    //    std::vector<RowType> toBoard;
+    //    RowType row;
+    //    for(auto& pieces : FenString){
+    //        if(isdigit(pieces)){
+    //            for(int x = 0; x<(pieces-'0'); x++){
+    //                row.emplace_back(std::make_shared<Piece>('.'));
+    //            }
+    //        }
+    //        else
+    //    }
+    //}
 
-    // Initialize the Zobrist hash keys for each piece and square
-    std::vector<std::vector<std::uint64_t>> initZobristKeys()
-    {
-        std::vector<std::vector<std::uint64_t>> keys(8, std::vector<std::uint64_t>(8*12));
-
-        for (int i = 0; i < 8; ++i) {
-            for (int j = 0; j < 8 * 12; ++j) {
-                keys[i][j] = getRandom64();
-            }
-        }
-
-        return keys;
-    }
-
-    // Compute the Zobrist hash value for the given chessboard
-    std::uint64_t computeZobristHash(const std::vector<std::vector<std::uint64_t>>& zobristKeys)
-    {
-        std::uint64_t hash = 0;
-
-        for (int i = 0; i < 8; ++i) {
-            for (int j = 0; j < 8; ++j) {
-                std::shared_ptr<Piece> piece = board[i][j];
-                if (piece->getSymbol() != '\0') {
-                    int index = (piece->getColor() * 6 + (piece->getSymbol() - 'A')) * 8 + i * 8 + j;
-                    hash ^= zobristKeys[i][index];
-                }
-            }
-        }
-
-        return hash;
-    }
 
 private:
     std::vector<RowType> board;

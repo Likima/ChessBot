@@ -22,23 +22,50 @@ class ChessAlgorithm{
                             //retEval+=20;
                         }
                     }
+                    if(piece->getSymbol() == 'Q'){
+                        if(!piece->getFirstMove()){
+                            piece->getColor() == White ? retEval-=50 : retEval+=50;
+                        }
+                    }
                     //retEval-=((piece->getColor() == White ? 1 : -1)*piece->getY());
                 }
             }
         }
+        
         return retEval;
     }
 
-    //int evaluateEndgame(ChessBoard& board){
-    //    int totalEval = 0;
-    //    for(auto& row : board.getBoard()){
-    //        for(auto & piece : row){
-    //            if(board.getKing(White)->inCheck()){
-//
-    //            }
-    //        }
-    //    }
-    //}
+    int evaluateEndgame(ChessBoard& board){
+        int totalEval = 0;
+        for(auto& row : board.getBoard()){
+            for(auto & piece : row){
+                if(board.getKing(White)->inCheck(board.kingString(White), board.getBoard())){
+                    if(piece->getColor() == White){
+                        totalEval+=piece->positionalAdvantage(board.getBoard());
+                    }
+                    else{
+                        totalEval-=piece->positionalAdvantage(board.getBoard());
+                    }
+                }
+                else if(board.getKing(Black)->inCheck(board.kingString(Black), board.getBoard())){
+                    if(piece->getColor() == Black){
+                        totalEval+=piece->positionalAdvantage(board.getBoard());
+                    }
+                    else{
+                        totalEval-=piece->positionalAdvantage(board.getBoard());
+                    }
+                }
+                if(piece->getSymbol() == 'N' && piece->getFirstMove()){
+                    color == White ? totalEval+=10 : totalEval-=10;
+                }
+                if(piece->getSymbol() == 'B' && piece->getFirstMove()){
+                    color == White ? totalEval+=10 : totalEval-=10;
+                }
+
+            }
+        }
+        return totalEval;
+    }
 
     int evaluatePos(ChessBoard& board){
         int miscEval = 0;
@@ -54,15 +81,15 @@ class ChessAlgorithm{
         for(auto& row : board.getBoard()){
             for(auto& piece : row){
                 if(piece->getColor() == White){
-                    positionalEval += piece->positionalAdvantage();
+                    positionalEval += piece->positionalAdvantage(board.getBoard());
                 }
                 else if(piece->getColor() == Black){
-                    positionalEval -= piece->positionalAdvantage();
+                    positionalEval -= piece->positionalAdvantage(board.getBoard());
                 }
             }
         }
             
-        return whiteMaterial-blackMaterial+positionalEval+miscEval;
+        return whiteMaterial-blackMaterial+(positionalEval+miscEval)/2;
     }
 
     piecePair getBestMove(){
@@ -83,7 +110,8 @@ class ChessAlgorithm{
         std::shared_ptr<Piece> prevPiece;
         int prevX, prevY;
 
-        if (board.findKing(color) == std::vector<int>{-1,-1}) return INT_MIN;
+        if (board.findKing(color) == std::vector<int>{-1,-1}) return maximizingPlayer ? INT_MAX : INT_MIN;
+        else if(mated(board, color, board.getKing(color))) return maximizingPlayer ? INT_MAX : INT_MIN;
         if (depth == 0) {
             return evaluatePos(board);
         }
@@ -98,7 +126,13 @@ class ChessAlgorithm{
                     }
                 }
             }
-        }        
+        }
+        //if(board.getKing(color)->canCastle("O-O", board.getBoard())){
+        //    legalMoves.emplace_back(std::make_pair("O-O", board.getKing(color)));
+        //}
+        //if(board.getKing(color)->canCastle("O-O-O", board.getBoard())){
+        //    legalMoves.emplace_back(std::make_pair("O-O-O", board.getKing(color)));
+        //}
 
         if(legalMoves.empty()){
             if(board.getKing(color)->inCheck(board.kingString(color), board.getBoard())) return maximizingPlayer ? INT_MIN : INT_MAX;
@@ -119,18 +153,17 @@ class ChessAlgorithm{
                 int eval = alphaBeta(board, depth - 1, alpha, beta, false);
                 if(eval>maxEval){
                     maxEval = std::max(maxEval, eval);
-                    if(depth == INITIAL_DEPTH){
-                        bestMove = move;
-                        bestLine.emplace_back(move);
-                    }
+                    if(depth == INITIAL_DEPTH) bestMove = move;
                 }
+                else board.setPiece(prevX-1, prevY, move.second, prevPiece);
 
-                alpha = std::max(alpha, eval);
-                board.setPiece(prevX-1, prevY, move.second, prevPiece);
-
-                if (beta <= alpha)
+                if (beta <= alpha){
                     break;
+                }
+                alpha = std::max(alpha, eval);
+
             }
+            //bestLine.emplace_back(bestMove);
             return maxEval;
         }
         else
@@ -147,19 +180,25 @@ class ChessAlgorithm{
                 int eval = alphaBeta(board, depth - 1, alpha, beta, true);
                 if(eval<minEval){
                     minEval = std::min(minEval, eval);
-                    if(depth == INITIAL_DEPTH){
+                    if(depth == DEPTH){
                         bestMove = move;
-                        bestLine.emplace_back(move);
                     }
                 }                    
 
+                if(move.first == "O-O" || move.first == "O-O-O"){
+                    board.revertCastle(color, move.first);
+                }
+                else board.setPiece(prevX-1, prevY, move.second, prevPiece);
+                //board.setPiece(move.second->getPos().first-1, move.second->getPos().second, move.second, prevPiece);
+
+                if (beta <= alpha){
+                    break;
+                }
+                
                 beta = std::min(beta, eval);
 
-                board.setPiece(prevX-1, prevY, move.second, prevPiece);
-
-                if (beta <= alpha)
-                    break;
             }
+            //bestLine.emplace_back(bestMove);
             return minEval;
         }
     }   
@@ -210,8 +249,16 @@ class ChessAlgorithm{
         std::uniform_int_distribution<int> distr(1, legalMoves.size());
         int randomNumber = distr(eng);
         move = legalMoves[randomNumber-1];
-        std::cout<<alphaBeta(board, INITIAL_DEPTH, INT_MIN, INT_MAX, color == White)<<std::endl;
+        if(board.isEndgame()) DEPTH = 7;
+        if(moveNum > 20) DEPTH = 4;
+        std::cout<<"Depth: "<<DEPTH<<std::endl;
+
+        std::cout<<"ALPHABETA: "<<alphaBeta(board, DEPTH, INT_MIN, INT_MAX, color == White)<<std::endl;
         move = bestMove;
+        std::cout<<"Best Line: ";
+        for(auto& x : bestLine){
+            std::cout<<x.first<<", ";
+        }
 
         if(move.first == "O-O" || move.first == "O-O-O"){
             castle(move.first, board, color);
@@ -246,9 +293,11 @@ class ChessAlgorithm{
     private:
         int INITIAL_DEPTH = 4;
         int color;
+        int DEPTH = 3;
         int moveNum;
         int analyzedPositions = 0;
         piecePair bestMove;
+        std::vector<piecePair> bestLine;
         std::vector<piecePair> bestLine;
 };
 

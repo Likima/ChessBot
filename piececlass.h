@@ -24,6 +24,7 @@ using piecePair = std::pair<std::string, std::shared_ptr<Piece>>;
 
 int Black = 0;
 int White = 1;
+int INITIAL_DEPTH = 4;
 std::vector<char> coords = {'a','b','c','d','e','f','g','h'};
 
 void doMove(const std::string&, ChessBoard&, int, std::shared_ptr<Piece>);
@@ -61,7 +62,7 @@ public:
     virtual ~Piece() {}
     
     int getColor() const {return color;}
-    virtual int positionalAdvantage(){return 0;}
+    virtual int positionalAdvantage(std::vector<RowType> Board){return 0;}
     char getSymbol() const {return symbol;}
     int getX() const {return x;}
     int getY() const {return y;}
@@ -93,6 +94,7 @@ public:
 
                 if(legalMove(move, board)){
                     ambiguousPieces = getPieces(board, move, getColor());
+                    
                     if(ambiguousPieces.size() > 1){
                         move.erase(0,1);
                         for(auto& piece : ambiguousPieces){
@@ -188,9 +190,9 @@ private:
 
 class Pawn: public Piece{
     public:
-        Pawn(char color, int symbol, int x, int y, int value) : Piece(color, 'P', x, y, 10){}
+        Pawn(char color, int symbol, int x, int y, int value) : Piece(color, 'P', x, y, 100){}
 
-    int positionalAdvantage() override {
+    int positionalAdvantage(std::vector<RowType> board) override {
         const int multi = getColor() == White ? 1 : -1;
         return (getY() - 1) * multi;
     }
@@ -220,9 +222,9 @@ class Pawn: public Piece{
             }
         }
 
-        else if (currentX == targetX && currentY - targetY == 1 * multi && Board[8 + multi - currentY][currentX - 1]->getSymbol() == '.') {
+        else if (!isTaking && currentX == targetX && currentY - targetY == 1 * multi && Board[8 + multi - currentY][currentX - 1]->getSymbol() == '.') {
             return true;
-        } else if (getFirstMove() && currentX == targetX && currentY - targetY == 2 * multi && Board[8 + multi - currentY][currentX - 1]->getSymbol() == '.' && Board[8 + (2*multi) - currentY][currentX - 1]->getSymbol() == '.') {
+        } else if (!isTaking && getFirstMove() && currentX == targetX && currentY - targetY == 2 * multi && Board[8 + multi - currentY][currentX - 1]->getSymbol() == '.' && Board[8 + (2*multi) - currentY][currentX - 1]->getSymbol() == '.') {
             return true;
         }
         return false;
@@ -234,33 +236,33 @@ class Pawn: public Piece{
 
 class Rook: public Piece{
     public:
-    Rook(char color, int symbol, int x, int y, int value) : Piece(color, 'R', x, y, 50){}
+    Rook(char color, int symbol, int x, int y, int value) : Piece(color, 'R', x, y, 500){}
 
-    int positionalAdvantage() override{
+    int positionalAdvantage(std::vector<RowType> board) override{
+        int accumulatedAdvantage = 0;
         if(getY() == (getColor() == White ? 2 : 7)){
-            return 4;
+            accumulatedAdvantage+=4;
         }
         else if(getX() == 1 || getX() == 8){
-            return -4;
+            accumulatedAdvantage-=4;
         }
         else if(getY() == (getColor() == White ? 1 : 8)){
-            return 2;
+            accumulatedAdvantage+=2;
         }
-        return 0;
+        getColor() == White ? accumulatedAdvantage+=getLegal(board).size() : accumulatedAdvantage-=getLegal(board).size();
+        return accumulatedAdvantage;
     }
 
     bool legalMove(std::string move, const std::vector<RowType>& Board) override{
-        if(move.length() == 4){
-            if(getX() != move[1]-96 || getY() != move[1]-'0') return false;
-        } return checkRook(move, Board);
+        return checkRook(move, Board);
     }
 };
 
 class Bishop: public Piece{
     public:
-    Bishop(char color, int symbol, int x, int y, int value) : Piece(color, 'B', x, y, 30){}
+    Bishop(char color, int symbol, int x, int y, int value) : Piece(color, 'B', x, y, 300){}
 
-    int positionalAdvantage() override{
+    int positionalAdvantage(std::vector<RowType> board) override{
         int center_x1 = 3;  // x-coordinate of the first possible center
         int center_y1 = 3;  // y-coordinate of the first possible center
 
@@ -279,9 +281,8 @@ class Bishop: public Piece{
         int distance4 = std::max(std::abs(getX() - center_x4), std::abs(getY() - center_y4));
 
         int closeness_score = 8 - std::min(std::min(distance1, distance2), std::min(distance3, distance4));
-        // The closer to any center, the higher the score
 
-        return closeness_score;
+        return closeness_score+getLegal(board).size();
     }
 
     bool legalMove(std::string move, const std::vector<RowType>& Board) override{
@@ -292,7 +293,7 @@ class Bishop: public Piece{
 class Queen:public Piece{
     public:
 
-    int positionalAdvantage() override{
+    int positionalAdvantage(std::vector<RowType> board) override{
         int center_x1 = 3;  // x-coordinate of the first possible center
         int center_y1 = 3;  // y-coordinate of the first possible center
 
@@ -311,10 +312,10 @@ class Queen:public Piece{
         int distance4 = std::max(std::abs(getX() - center_x4), std::abs(getY() - center_y4));
 
         int closeness_score = 8 - std::min(std::min(distance1, distance2), std::min(distance3, distance4));
-
-        return closeness_score;
+        getColor() == White ? closeness_score+=getLegal(board).size() : closeness_score-=getLegal(board).size();
+        return closeness_score/2;
     }
-    Queen(char color, int symbol, int x, int y, int value) : Piece(color, 'Q', x, y, 80){}
+    Queen(char color, int symbol, int x, int y, int value) : Piece(color, 'Q', x, y, 800){}
     bool legalMove(std::string move, const std::vector<RowType>& Board) override{
         return(checkRook(move,Board) || checkBishop(move,Board));
     }
@@ -322,9 +323,9 @@ class Queen:public Piece{
 
 class Knight:public Piece{
     public:
-    Knight(char color, int symbol, int x, int y, int value) : Piece(color, 'N', x, y, 30){}
+    Knight(char color, int symbol, int x, int y, int value) : Piece(color, 'N', x, y, 300){}
 
-    int positionalAdvantage() override{
+    int positionalAdvantage(std::vector<RowType> board) override{
         int center_x1 = 3;  // x-coordinate of the first possible center
         int center_y1 = 3;  // y-coordinate of the first possible center
 
@@ -350,9 +351,7 @@ class Knight:public Piece{
     
     bool legalMove(std::string move, const std::vector<RowType>& Board) override{
         if(getX() == (move[move.length()-2]-96) && getY() == (move[move.length()-1]- '0')) return false;
-        if(move.length() == 4){
-            if(getX() != move[1]-96 || getY() != move[1]-'0') return false;
-        }
+
         int moveX = move[move.length()-2]-96;
         int moveY = move[move.length()-1]-'0';
 
@@ -383,7 +382,7 @@ class King:public Piece{
     public:
     King(char color, int symbol, int x, int y, int value) : Piece(color, 'K', x, y, 0){}
 
-    int positionalAdvantage() override{
+    int positionalAdvantage(std::vector<RowType> board) override{
         int multi = getColor() == 1 ? 1 : -1;
         int left_edge = 0;    // x-coordinate of the left edge
         int right_edge = 7;   // x-coordinate of the right edge

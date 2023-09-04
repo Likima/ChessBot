@@ -1,1 +1,1 @@
-g++ chess.cc -o chess && ./chess
+g++ -O3 chess.cc -o chess && ./chess

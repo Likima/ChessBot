@@ -19,12 +19,16 @@ bool pawnMove(const std::string move)
 
 void doMove(const std::string &move, ChessBoard &board, const int moveNumber, const std::shared_ptr<Piece> passedPiece)
 {
-    if(board.findPiece(move)->getSymbol() == 'P'){
+
+    if(move == "O-O" || move == "O-O-O"){
+        castle(move, board, moveNumber%2);
+        return;
+    }
+    else if(board.findPiece(move)->getSymbol() == 'P'){
         if(board.findPiece(move)->getY() == 8 || board.findPiece(move)->getY() == 1){
             Promote(board, board.findPiece(move), true);
         }
     }
-
     int moveSize = move.length();
     char horizontalCoord = move[moveSize - 2] - 97;
     int verticalCoord = (move[moveSize - 1] - '0');
@@ -43,6 +47,11 @@ RowType getPieces(std::vector<RowType> board, const std::string move, const int 
             {
                 if (!pawnMove(move) && piece->getSymbol() == toupper(move[0]) && piece->getSymbol() != 'P' && piece->legalMove(move, board))
                 {
+                    //for(auto& moves : piece->getLegal(board)){
+                    //    if(moves.first == move){
+                    //        possiblePiece.emplace_back(piece);
+                    //    }
+                    //}
                     possiblePiece.emplace_back(piece);
                 }
                 else if (piece->getSymbol() == 'P' && pawnMove(move) && piece->legalMove(move, board))
@@ -62,6 +71,8 @@ int main()
     ChessBoard board;
     int prevX, prevY, BotMove;
     char BotSide;
+    std::string load;
+    std::string FenString;
     std::string kingPosString, move;
     std::vector<std::string> playedMoves;
     std::vector<int> kingPos;
@@ -78,7 +89,19 @@ int main()
 
     printBoard(board);
 
-    std::cout << "\nWhat Side Are You Playing? [B/W] ";
+    while(true){
+        std::cout<<"Load? [L]\nPlay? [P]"<<std::endl;
+        std::cin>>load;
+        if(load == "P") break;
+        else if(load == "L"){
+            std::cout<<"Paste FEN String: "<<std::endl;
+            std::cin>>FenString; 
+            
+        }
+        else std::cout<<"Invalid Input"<<std::endl;
+    }
+    
+    std::cout << "What Side Are You Playing? [B/W] ";
     if (std::cin >> BotSide)
     {
         if (BotSide == 'B')
@@ -156,6 +179,9 @@ int main()
 
         std::cout << "Enter move: ";
         std::cin >> move;
+        if(!pawnMove(move) && !std::isupper(move[0])){
+            move[0] = std::toupper(move[0]);
+        }
         if (move == "display")
         {
             printBoard(board);
@@ -186,6 +212,7 @@ int main()
             std::cout << "Not a valid piece " << std::endl;
             continue;
         }
+
 
         if (!moveIsValid(move, board, moveNumber, kingPtr))
             continue;
