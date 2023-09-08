@@ -47,11 +47,7 @@ RowType getPieces(std::vector<RowType> board, const std::string move, const int 
             {
                 if (!pawnMove(move) && piece->getSymbol() == toupper(move[0]) && piece->getSymbol() != 'P' && piece->legalMove(move, board))
                 {
-                    //for(auto& moves : piece->getLegal(board)){
-                    //    if(moves.first == move){
-                    //        possiblePiece.emplace_back(piece);
-                    //    }
-                    //}
+
                     possiblePiece.emplace_back(piece);
                 }
                 else if (piece->getSymbol() == 'P' && pawnMove(move) && piece->legalMove(move, board))
@@ -154,7 +150,7 @@ int main()
             continue;
         }
 
-        //else{
+        //else{ //enable for bot vs bot
         //    std::cout<<moveNumber<<std::endl;
         //    secondBot.moveChoice(board, moveNumber % 2, moveNumber);
         //    moveNumber++;

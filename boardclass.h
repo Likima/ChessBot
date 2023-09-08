@@ -210,20 +210,6 @@ public:
         return board[index];
     }
 
-    //void analyzeFen(std::string FenString){
-    //    std::vector<RowType> toBoard;
-    //    RowType row;
-    //    for(auto& pieces : FenString){
-    //        if(isdigit(pieces)){
-    //            for(int x = 0; x<(pieces-'0'); x++){
-    //                row.emplace_back(std::make_shared<Piece>('.'));
-    //            }
-    //        }
-    //        else
-    //    }
-    //}
-
-
 private:
     std::vector<RowType> board;
     std::vector<std::string> moves;
