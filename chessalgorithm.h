@@ -259,9 +259,8 @@ class ChessAlgorithm{
 
 
     private:
-        int color;
+        int color, moveNum;
         int DEPTH = 3;
-        int moveNum;
         int analyzedPositions = 0;
         piecePair bestMove;
         std::vector<piecePair> bestLine;
